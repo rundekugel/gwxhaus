@@ -23,6 +23,6 @@ The ESP32 is connected via another ESP32, ESP8266 or RaspberryPi to the WWW. Via
 
 Optional, password protected, it's possible to change the settings and manually control the actors.
 
-If any sensor values are out of range, there can be messages sent via email, telegram, SMS, telephone (voip), or other channels.
+If any sensor values are out of range, or power fails, there can be messages sent via email, telegram, SMS, telephone (voip), or other channels.
 
 Weather forecast data from Deutscher Wetterdienst https://dwd.api.bund.dev/ can be used to protect windows against storm or hail.
