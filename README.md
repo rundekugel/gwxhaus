@@ -18,6 +18,7 @@ There can be a lot of settings depending on sensor values and time.
 ### Actors
 - Motors to open/close the windows
 - Valves to control water
+- Relais to control heating
 
 The ESP32 is connected via another ESP32, ESP8266 or RaspberryPi to the WWW. Via mqtt the sensor data and actor positions are stored in a database and can be viewd in charts.
 
