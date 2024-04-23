@@ -1,7 +1,8 @@
-# gwx-control
-## Simple motor controller
+# gwx-control-motor-oc
+## Enhanced motor controller
 
-Created to control a 3 phase motor to open/close windows of a greenhouse
+Created to control a 3 phase motor to open/close windows of a greenhouse. 
+Created with Eagle Version 7.7
 
 Features:
 - switch off motor, if direction changes

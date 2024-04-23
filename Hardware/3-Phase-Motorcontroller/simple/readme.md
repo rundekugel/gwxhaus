@@ -1,7 +1,8 @@
-# gwx-control
+# gwx-control-motor
 ## Simple motor controller
 
 Created to control a 3 phase motor to open/close windows of a greenhouse
+Created with Eagle Version 7.7
 
 Features:
 - switch off motor, if window arrived at end position 
@@ -13,6 +14,6 @@ Input:
 - switches for end positions
 
 Output:
-- +/- for optocoupler of power motor switcher. can control DC, AC 1 or 3 phase motors
+- +/- for optocoupler of power motor switcher. Can control DC and AC, 1 to 3 phase motors.
 - +/- for direction switch relais
 
