@@ -6,7 +6,7 @@ Created with Eagle Version 7.7
 
 Features:
 - switch off motor, if window arrived at end position 
-- stop for about 3 seconds, if direction changes to prevent too high current destroying power switches
+- stop for about 3 seconds, if direction changes, to prevent too high current, which could destroy power switches.
 
 Input: 
 - motor on/off
