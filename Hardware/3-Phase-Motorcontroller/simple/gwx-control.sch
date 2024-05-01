@@ -17944,7 +17944,7 @@ Source: http://www.mouser.com/ds/2/392/products_18-2245.pdf</description>
 <part name="X1" library="con-phoenix-254" deviceset="MPT2" device=""/>
 <part name="J1" library="con-amp" deviceset="MTA07-100" device=""/>
 <part name="X2" library="con-phoenix-254" deviceset="MPT2" device=""/>
-<part name="D1" library="diode" deviceset="1N4148" device="DO35-10"/>
+<part name="D1" library="diode" deviceset="1N4148" device="DO35-10" value="1N4148"/>
 <part name="R1" library="resistor" deviceset="R-EU_" device="R0603" value="4k7"/>
 <part name="R2" library="resistor" deviceset="R-EU_" device="R0603" value="4k7"/>
 <part name="R3" library="resistor" deviceset="R-EU_" device="R0603" value="na"/>
@@ -17976,6 +17976,7 @@ Source: http://www.mouser.com/ds/2/392/products_18-2245.pdf</description>
 <part name="GND8" library="supply1" deviceset="GND" device=""/>
 <part name="T2" library="transistor" deviceset="*-PNP-" device="SOT23-BEC" technology="BC856B" value="BC850"/>
 <part name="R10" library="resistor" deviceset="R-EU_" device="R0603" value="10k"/>
+<part name="D2" library="diode" deviceset="BAT54C" device=""/>
 </parts>
 <sheets>
 <sheet>
@@ -18001,7 +18002,10 @@ Source: http://www.mouser.com/ds/2/392/products_18-2245.pdf</description>
 <instance part="J1" gate="G$1" x="-12.7" y="58.42" rot="R90"/>
 <instance part="X2" gate="-1" x="86.36" y="22.86"/>
 <instance part="X2" gate="-2" x="86.36" y="27.94"/>
-<instance part="D1" gate="G$1" x="68.58" y="27.94"/>
+<instance part="D1" gate="G$1" x="48.26" y="27.94" smashed="yes">
+<attribute name="NAME" x="50.8" y="28.4226" size="1.778" layer="95"/>
+<attribute name="VALUE" x="35.56" y="28.1686" size="1.778" layer="96"/>
+</instance>
 <instance part="R1" gate="G$1" x="25.4" y="83.82" rot="R90"/>
 <instance part="R2" gate="G$1" x="15.24" y="83.82" rot="R90"/>
 <instance part="R3" gate="G$1" x="20.32" y="83.82" rot="R90"/>
@@ -18049,6 +18053,7 @@ Source: http://www.mouser.com/ds/2/392/products_18-2245.pdf</description>
 <attribute name="NAME" x="46.99" y="31.9786" size="1.778" layer="95"/>
 <attribute name="VALUE" x="41.91" y="32.258" size="1.778" layer="96"/>
 </instance>
+<instance part="D2" gate="G$1" x="60.96" y="25.4"/>
 </instances>
 <busses>
 </busses>
@@ -18079,11 +18084,11 @@ Source: http://www.mouser.com/ds/2/392/products_18-2245.pdf</description>
 <wire x1="7.62" y1="55.88" x2="7.62" y2="53.34" width="0.1524" layer="91"/>
 <wire x1="7.62" y1="53.34" x2="7.62" y2="22.86" width="0.1524" layer="91"/>
 <junction x="7.62" y="53.34"/>
-<pinref part="D1" gate="G$1" pin="A"/>
-<wire x1="63.5" y1="22.86" x2="7.62" y2="22.86" width="0.1524" layer="91"/>
-<wire x1="66.04" y1="27.94" x2="63.5" y2="27.94" width="0.1524" layer="91"/>
-<wire x1="63.5" y1="27.94" x2="63.5" y2="22.86" width="0.1524" layer="91"/>
+<wire x1="83.82" y1="22.86" x2="68.58" y2="22.86" width="0.1524" layer="91"/>
 <pinref part="R3" gate="G$1" pin="1"/>
+<wire x1="68.58" y1="22.86" x2="53.34" y2="22.86" width="0.1524" layer="91"/>
+<wire x1="53.34" y1="22.86" x2="43.18" y2="22.86" width="0.1524" layer="91"/>
+<wire x1="43.18" y1="22.86" x2="7.62" y2="22.86" width="0.1524" layer="91"/>
 <wire x1="20.32" y1="78.74" x2="20.32" y2="71.12" width="0.1524" layer="91"/>
 <junction x="20.32" y="71.12"/>
 <pinref part="J1" gate="G$1" pin="3"/>
@@ -18092,7 +18097,15 @@ Source: http://www.mouser.com/ds/2/392/products_18-2245.pdf</description>
 <junction x="7.62" y="55.88"/>
 <label x="78.74" y="22.86" size="1.778" layer="95"/>
 <pinref part="X2" gate="-1" pin="1"/>
-<wire x1="63.5" y1="22.86" x2="83.82" y2="22.86" width="0.1524" layer="91"/>
+<pinref part="D1" gate="G$1" pin="A"/>
+<wire x1="45.72" y1="27.94" x2="43.18" y2="27.94" width="0.1524" layer="91"/>
+<wire x1="43.18" y1="27.94" x2="43.18" y2="22.86" width="0.1524" layer="91"/>
+<pinref part="D2" gate="G$1" pin="A1"/>
+<wire x1="55.88" y1="25.4" x2="53.34" y2="25.4" width="0.1524" layer="91"/>
+<wire x1="53.34" y1="25.4" x2="53.34" y2="22.86" width="0.1524" layer="91"/>
+<pinref part="D2" gate="G$1" pin="A2"/>
+<wire x1="66.04" y1="25.4" x2="68.58" y2="25.4" width="0.1524" layer="91"/>
+<wire x1="68.58" y1="25.4" x2="68.58" y2="22.86" width="0.1524" layer="91"/>
 </segment>
 <segment>
 <pinref part="C5" gate="G$1" pin="1"/>
@@ -18179,9 +18192,13 @@ Source: http://www.mouser.com/ds/2/392/products_18-2245.pdf</description>
 <pinref part="P+1" gate="VCC" pin="VCC"/>
 <wire x1="81.28" y1="27.94" x2="81.28" y2="30.48" width="0.1524" layer="91"/>
 <pinref part="D1" gate="G$1" pin="C"/>
-<wire x1="71.12" y1="27.94" x2="81.28" y2="27.94" width="0.1524" layer="91"/>
+<wire x1="50.8" y1="27.94" x2="60.96" y2="27.94" width="0.1524" layer="91"/>
 <pinref part="X2" gate="-2" pin="1"/>
+<wire x1="60.96" y1="27.94" x2="81.28" y2="27.94" width="0.1524" layer="91"/>
 <wire x1="81.28" y1="27.94" x2="83.82" y2="27.94" width="0.1524" layer="91"/>
+<pinref part="D2" gate="G$1" pin="CC"/>
+<junction x="60.96" y="27.94"/>
+<junction x="81.28" y="27.94"/>
 </segment>
 <segment>
 <pinref part="R2" gate="G$1" pin="2"/>
