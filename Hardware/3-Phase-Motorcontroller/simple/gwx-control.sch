@@ -17950,7 +17950,7 @@ Source: http://www.mouser.com/ds/2/392/products_18-2245.pdf</description>
 <part name="R3" library="resistor" deviceset="R-EU_" device="R0603" value="na"/>
 <part name="P+4" library="supply1" deviceset="VCC" device=""/>
 <part name="R4" library="resistor" deviceset="R-EU_" device="R0603" value="10k"/>
-<part name="T1" library="transistor" deviceset="*-PNP-" device="SOT23-BEC" technology="BC856B"/>
+<part name="T1" library="transistor" deviceset="*-PNP-" device="SOT23-BEC" technology="BC856B" value="BC850"/>
 <part name="P+5" library="supply1" deviceset="VCC" device=""/>
 <part name="C2" library="rcl" deviceset="C-EU" device="C0603K" value="100n"/>
 <part name="IC2" library="74xx-eu" deviceset="74*123" device="D" technology="LS"/>
@@ -17961,8 +17961,8 @@ Source: http://www.mouser.com/ds/2/392/products_18-2245.pdf</description>
 <part name="C4" library="rcl" deviceset="CPOL-EU" device="E5-6"/>
 <part name="R5" library="rcl" deviceset="R-EU_" device="R0603" value="47k"/>
 <part name="R6" library="rcl" deviceset="R-EU_" device="R0603"/>
-<part name="C5" library="rcl" deviceset="C-EU" device="C0603K"/>
-<part name="C6" library="rcl" deviceset="C-EU" device="C0603K"/>
+<part name="C5" library="rcl" deviceset="C-EU" device="C0603K" value="100p"/>
+<part name="C6" library="rcl" deviceset="C-EU" device="C0603K" value="100p"/>
 <part name="P+7" library="supply1" deviceset="VCC" device=""/>
 <part name="R8" library="rcl" deviceset="R-EU_" device="R0603" value="47k"/>
 <part name="GND5" library="supply1" deviceset="GND" device=""/>
@@ -17974,7 +17974,7 @@ Source: http://www.mouser.com/ds/2/392/products_18-2245.pdf</description>
 <part name="GND7" library="supply1" deviceset="GND" device=""/>
 <part name="R9" library="rcl" deviceset="R-EU_" device="R0603" value="47k"/>
 <part name="GND8" library="supply1" deviceset="GND" device=""/>
-<part name="T3" library="transistor" deviceset="*-PNP-" device="SOT23-BEC" technology="BC856B"/>
+<part name="T2" library="transistor" deviceset="*-PNP-" device="SOT23-BEC" technology="BC856B" value="BC850"/>
 <part name="R10" library="resistor" deviceset="R-EU_" device="R0603" value="10k"/>
 </parts>
 <sheets>
@@ -18006,8 +18006,14 @@ Source: http://www.mouser.com/ds/2/392/products_18-2245.pdf</description>
 <instance part="R2" gate="G$1" x="15.24" y="83.82" rot="R90"/>
 <instance part="R3" gate="G$1" x="20.32" y="83.82" rot="R90"/>
 <instance part="P+4" gate="VCC" x="25.4" y="93.98"/>
-<instance part="R4" gate="G$1" x="45.72" y="40.64"/>
-<instance part="T1" gate="G$1" x="58.42" y="45.72"/>
+<instance part="R4" gate="G$1" x="45.72" y="40.64" smashed="yes">
+<attribute name="NAME" x="41.91" y="42.1386" size="1.778" layer="95"/>
+<attribute name="VALUE" x="46.99" y="42.418" size="1.778" layer="96"/>
+</instance>
+<instance part="T1" gate="G$1" x="58.42" y="45.72" smashed="yes">
+<attribute name="NAME" x="60.96" y="48.26" size="1.778" layer="95"/>
+<attribute name="VALUE" x="60.96" y="45.72" size="1.778" layer="96"/>
+</instance>
 <instance part="P+5" gate="VCC" x="60.96" y="55.88"/>
 <instance part="C2" gate="G$1" x="2.54" y="20.32"/>
 <instance part="IC2" gate="A" x="127" y="109.22"/>
@@ -18020,7 +18026,10 @@ Source: http://www.mouser.com/ds/2/392/products_18-2245.pdf</description>
 <instance part="R5" gate="G$1" x="25.4" y="109.22" rot="R90"/>
 <instance part="R6" gate="G$1" x="99.06" y="109.22" rot="MR270"/>
 <instance part="C5" gate="G$1" x="-12.7" y="116.84" rot="R90"/>
-<instance part="C6" gate="G$1" x="-12.7" y="101.6" rot="R90"/>
+<instance part="C6" gate="G$1" x="-12.7" y="101.6" smashed="yes" rot="R90">
+<attribute name="NAME" x="-13.081" y="103.124" size="1.778" layer="95" rot="R90"/>
+<attribute name="VALUE" x="-9.144" y="98.679" size="1.778" layer="96" rot="R180"/>
+</instance>
 <instance part="P+7" gate="VCC" x="25.4" y="127"/>
 <instance part="R8" gate="G$1" x="2.54" y="101.6" rot="R180"/>
 <instance part="GND5" gate="1" x="35.56" y="121.92"/>
@@ -18032,8 +18041,14 @@ Source: http://www.mouser.com/ds/2/392/products_18-2245.pdf</description>
 <instance part="GND7" gate="1" x="5.08" y="119.38"/>
 <instance part="R9" gate="G$1" x="15.24" y="111.76" rot="R270"/>
 <instance part="GND8" gate="1" x="15.24" y="104.14"/>
-<instance part="T3" gate="G$1" x="58.42" y="35.56"/>
-<instance part="R10" gate="G$1" x="45.72" y="35.56"/>
+<instance part="T2" gate="G$1" x="58.42" y="35.56" smashed="yes">
+<attribute name="NAME" x="60.96" y="33.02" size="1.778" layer="95"/>
+<attribute name="VALUE" x="60.96" y="35.56" size="1.778" layer="96"/>
+</instance>
+<instance part="R10" gate="G$1" x="45.72" y="35.56" smashed="yes">
+<attribute name="NAME" x="46.99" y="31.9786" size="1.778" layer="95"/>
+<attribute name="VALUE" x="41.91" y="32.258" size="1.778" layer="96"/>
+</instance>
 </instances>
 <busses>
 </busses>
@@ -18277,7 +18292,7 @@ Source: http://www.mouser.com/ds/2/392/products_18-2245.pdf</description>
 <wire x1="83.82" y1="60.96" x2="76.2" y2="60.96" width="0.1524" layer="91"/>
 <wire x1="76.2" y1="60.96" x2="76.2" y2="30.48" width="0.1524" layer="91"/>
 <label x="76.2" y="40.64" size="1.778" layer="95" rot="R90"/>
-<pinref part="T3" gate="G$1" pin="C"/>
+<pinref part="T2" gate="G$1" pin="C"/>
 <wire x1="60.96" y1="30.48" x2="76.2" y2="30.48" width="0.1524" layer="91"/>
 </segment>
 </net>
@@ -18363,13 +18378,13 @@ Source: http://www.mouser.com/ds/2/392/products_18-2245.pdf</description>
 <net name="N$12" class="0">
 <segment>
 <pinref part="T1" gate="G$1" pin="C"/>
-<pinref part="T3" gate="G$1" pin="E"/>
+<pinref part="T2" gate="G$1" pin="E"/>
 </segment>
 </net>
 <net name="N$10" class="0">
 <segment>
 <pinref part="R10" gate="G$1" pin="2"/>
-<pinref part="T3" gate="G$1" pin="B"/>
+<pinref part="T2" gate="G$1" pin="B"/>
 <wire x1="50.8" y1="35.56" x2="55.88" y2="35.56" width="0.1524" layer="91"/>
 </segment>
 </net>
@@ -18380,16 +18395,16 @@ Source: http://www.mouser.com/ds/2/392/products_18-2245.pdf</description>
 <label x="25.4" y="35.56" size="1.778" layer="95"/>
 </segment>
 <segment>
-<pinref part="IC2" gate="B" pin="!Q"/>
-<wire x1="66.04" y1="101.6" x2="78.74" y2="101.6" width="0.1524" layer="91"/>
-<label x="71.12" y="101.6" size="1.778" layer="95"/>
-</segment>
-</net>
-<net name="Q1" class="0">
-<segment>
 <pinref part="IC2" gate="B" pin="Q"/>
 <wire x1="66.04" y1="106.68" x2="78.74" y2="106.68" width="0.1524" layer="91"/>
 <label x="68.58" y="106.68" size="1.778" layer="95"/>
+</segment>
+</net>
+<net name="/Q" class="0">
+<segment>
+<pinref part="IC2" gate="B" pin="!Q"/>
+<wire x1="66.04" y1="101.6" x2="78.74" y2="101.6" width="0.1524" layer="91"/>
+<label x="68.58" y="101.6" size="1.778" layer="95"/>
 </segment>
 </net>
 </nets>
