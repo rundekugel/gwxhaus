@@ -829,21 +829,6 @@ diameter 2 mm, horizontal, grid 7.62 mm</description>
 <text x="-2.54" y="0" size="0.4064" layer="99" align="center">SpiceOrder 1</text>
 <text x="2.54" y="0" size="0.4064" layer="99" align="center">SpiceOrder 2</text>
 </symbol>
-<symbol name="SCHOTTKY-1">
-<wire x1="-1.27" y1="-1.27" x2="1.27" y2="0" width="0.254" layer="94"/>
-<wire x1="1.27" y1="0" x2="-1.27" y2="1.27" width="0.254" layer="94"/>
-<wire x1="1.905" y1="1.27" x2="1.27" y2="1.27" width="0.254" layer="94"/>
-<wire x1="1.27" y1="1.27" x2="1.27" y2="0" width="0.254" layer="94"/>
-<wire x1="-1.27" y1="1.27" x2="-1.27" y2="-1.27" width="0.254" layer="94"/>
-<wire x1="1.27" y1="0" x2="1.27" y2="-1.27" width="0.254" layer="94"/>
-<wire x1="1.905" y1="1.27" x2="1.905" y2="1.016" width="0.254" layer="94"/>
-<wire x1="1.27" y1="-1.27" x2="0.635" y2="-1.27" width="0.254" layer="94"/>
-<wire x1="0.635" y1="-1.016" x2="0.635" y2="-1.27" width="0.254" layer="94"/>
-<text x="-2.286" y="1.905" size="1.778" layer="95">&gt;NAME</text>
-<text x="-2.286" y="-3.429" size="1.778" layer="96">&gt;VALUE</text>
-<pin name="A" x="-2.54" y="0" visible="off" length="short" direction="pas"/>
-<pin name="C" x="2.54" y="0" visible="off" length="short" direction="pas" rot="R180"/>
-</symbol>
 <symbol name="SDD_AKKA">
 <wire x1="-3.81" y1="1.27" x2="-1.27" y2="0" width="0.254" layer="94"/>
 <wire x1="-1.27" y1="0" x2="-3.81" y2="-1.27" width="0.254" layer="94"/>
@@ -895,24 +880,6 @@ high speed (Philips)</description>
 <connects>
 <connect gate="G$1" pin="A" pad="A"/>
 <connect gate="G$1" pin="C" pad="C"/>
-</connects>
-<technologies>
-<technology name=""/>
-</technologies>
-</device>
-</devices>
-</deviceset>
-<deviceset name="BAS40" prefix="D">
-<description>&lt;b&gt;Silicon Schottky Diodes&lt;/b&gt;&lt;p&gt;
-General-purpose diode for high-speed switching</description>
-<gates>
-<gate name="1" symbol="SCHOTTKY-1" x="0" y="0"/>
-</gates>
-<devices>
-<device name="" package="SOT23">
-<connects>
-<connect gate="1" pin="A" pad="1"/>
-<connect gate="1" pin="C" pad="3"/>
 </connects>
 <technologies>
 <technology name=""/>
@@ -18001,13 +17968,14 @@ Source: http://www.mouser.com/ds/2/392/products_18-2245.pdf</description>
 <part name="GND5" library="supply1" deviceset="GND" device=""/>
 <part name="P+8" library="supply1" deviceset="VCC" device=""/>
 <part name="GND6" library="supply1" deviceset="GND" device=""/>
-<part name="D4" library="diode" deviceset="BAS40" device=""/>
 <part name="D3" library="diode" deviceset="BAT54C" device=""/>
 <part name="R7" library="rcl" deviceset="R-EU_" device="R0603" value="47k"/>
 <part name="GND4" library="supply1" deviceset="GND" device=""/>
 <part name="GND7" library="supply1" deviceset="GND" device=""/>
 <part name="R9" library="rcl" deviceset="R-EU_" device="R0603" value="47k"/>
 <part name="GND8" library="supply1" deviceset="GND" device=""/>
+<part name="T3" library="transistor" deviceset="*-PNP-" device="SOT23-BEC" technology="BC856B"/>
+<part name="R10" library="resistor" deviceset="R-EU_" device="R0603" value="10k"/>
 </parts>
 <sheets>
 <sheet>
@@ -18039,8 +18007,8 @@ Source: http://www.mouser.com/ds/2/392/products_18-2245.pdf</description>
 <instance part="R3" gate="G$1" x="20.32" y="83.82" rot="R90"/>
 <instance part="P+4" gate="VCC" x="25.4" y="93.98"/>
 <instance part="R4" gate="G$1" x="45.72" y="40.64"/>
-<instance part="T1" gate="G$1" x="58.42" y="40.64"/>
-<instance part="P+5" gate="VCC" x="60.96" y="50.8"/>
+<instance part="T1" gate="G$1" x="58.42" y="45.72"/>
+<instance part="P+5" gate="VCC" x="60.96" y="55.88"/>
 <instance part="C2" gate="G$1" x="2.54" y="20.32"/>
 <instance part="IC2" gate="A" x="127" y="109.22"/>
 <instance part="IC2" gate="B" x="53.34" y="109.22"/>
@@ -18058,13 +18026,14 @@ Source: http://www.mouser.com/ds/2/392/products_18-2245.pdf</description>
 <instance part="GND5" gate="1" x="35.56" y="121.92"/>
 <instance part="P+8" gate="VCC" x="99.06" y="121.92"/>
 <instance part="GND6" gate="1" x="109.22" y="114.3" rot="R270"/>
-<instance part="D4" gate="1" x="43.18" y="30.48"/>
 <instance part="D3" gate="G$1" x="-5.08" y="109.22" rot="R270"/>
 <instance part="R7" gate="G$1" x="0" y="121.92"/>
 <instance part="GND4" gate="1" x="7.62" y="99.06"/>
 <instance part="GND7" gate="1" x="5.08" y="119.38"/>
 <instance part="R9" gate="G$1" x="15.24" y="111.76" rot="R270"/>
 <instance part="GND8" gate="1" x="15.24" y="104.14"/>
+<instance part="T3" gate="G$1" x="58.42" y="35.56"/>
+<instance part="R10" gate="G$1" x="45.72" y="35.56"/>
 </instances>
 <busses>
 </busses>
@@ -18213,7 +18182,7 @@ Source: http://www.mouser.com/ds/2/392/products_18-2245.pdf</description>
 <segment>
 <pinref part="T1" gate="G$1" pin="E"/>
 <pinref part="P+5" gate="VCC" pin="VCC"/>
-<wire x1="60.96" y1="48.26" x2="60.96" y2="45.72" width="0.1524" layer="91"/>
+<wire x1="60.96" y1="53.34" x2="60.96" y2="50.8" width="0.1524" layer="91"/>
 </segment>
 <segment>
 <pinref part="P+6" gate="VCC" pin="VCC"/>
@@ -18306,10 +18275,10 @@ Source: http://www.mouser.com/ds/2/392/products_18-2245.pdf</description>
 <segment>
 <pinref part="X1" gate="-1" pin="1"/>
 <wire x1="83.82" y1="60.96" x2="76.2" y2="60.96" width="0.1524" layer="91"/>
-<wire x1="76.2" y1="60.96" x2="76.2" y2="35.56" width="0.1524" layer="91"/>
-<pinref part="T1" gate="G$1" pin="C"/>
-<wire x1="76.2" y1="35.56" x2="60.96" y2="35.56" width="0.1524" layer="91"/>
+<wire x1="76.2" y1="60.96" x2="76.2" y2="30.48" width="0.1524" layer="91"/>
 <label x="76.2" y="40.64" size="1.778" layer="95" rot="R90"/>
+<pinref part="T3" gate="G$1" pin="C"/>
+<wire x1="60.96" y1="30.48" x2="76.2" y2="30.48" width="0.1524" layer="91"/>
 </segment>
 </net>
 <net name="N$1" class="0">
@@ -18365,24 +18334,6 @@ Source: http://www.mouser.com/ds/2/392/products_18-2245.pdf</description>
 <junction x="15.24" y="116.84"/>
 </segment>
 </net>
-<net name="N$10" class="0">
-<segment>
-<pinref part="T1" gate="G$1" pin="B"/>
-<pinref part="R4" gate="G$1" pin="2"/>
-<wire x1="50.8" y1="40.64" x2="53.34" y2="40.64" width="0.1524" layer="91"/>
-<wire x1="53.34" y1="40.64" x2="55.88" y2="40.64" width="0.1524" layer="91"/>
-<wire x1="53.34" y1="30.48" x2="53.34" y2="40.64" width="0.1524" layer="91"/>
-<pinref part="D4" gate="1" pin="C"/>
-<wire x1="45.72" y1="30.48" x2="53.34" y2="30.48" width="0.1524" layer="91"/>
-</segment>
-</net>
-<net name="/Q" class="0">
-<segment>
-<pinref part="IC2" gate="B" pin="!Q"/>
-<wire x1="66.04" y1="101.6" x2="78.74" y2="101.6" width="0.1524" layer="91"/>
-<label x="71.12" y="101.6" size="1.778" layer="95"/>
-</segment>
-</net>
 <net name="N$3" class="0">
 <segment>
 <pinref part="C4" gate="G$1" pin="+"/>
@@ -18400,16 +18351,45 @@ Source: http://www.mouser.com/ds/2/392/products_18-2245.pdf</description>
 <wire x1="114.3" y1="106.68" x2="111.76" y2="106.68" width="0.1524" layer="91"/>
 </segment>
 </net>
-<net name="FORCE_OFF" class="0">
+<net name="N$11" class="0">
+<segment>
+<pinref part="T1" gate="G$1" pin="B"/>
+<pinref part="R4" gate="G$1" pin="2"/>
+<wire x1="50.8" y1="40.64" x2="53.34" y2="40.64" width="0.1524" layer="91"/>
+<wire x1="53.34" y1="40.64" x2="53.34" y2="45.72" width="0.1524" layer="91"/>
+<wire x1="53.34" y1="45.72" x2="55.88" y2="45.72" width="0.1524" layer="91"/>
+</segment>
+</net>
+<net name="N$12" class="0">
+<segment>
+<pinref part="T1" gate="G$1" pin="C"/>
+<pinref part="T3" gate="G$1" pin="E"/>
+</segment>
+</net>
+<net name="N$10" class="0">
+<segment>
+<pinref part="R10" gate="G$1" pin="2"/>
+<pinref part="T3" gate="G$1" pin="B"/>
+<wire x1="50.8" y1="35.56" x2="55.88" y2="35.56" width="0.1524" layer="91"/>
+</segment>
+</net>
+<net name="/MOTOR_OK" class="0">
+<segment>
+<pinref part="R10" gate="G$1" pin="1"/>
+<wire x1="40.64" y1="35.56" x2="25.4" y2="35.56" width="0.1524" layer="91"/>
+<label x="25.4" y="35.56" size="1.778" layer="95"/>
+</segment>
+<segment>
+<pinref part="IC2" gate="B" pin="!Q"/>
+<wire x1="66.04" y1="101.6" x2="78.74" y2="101.6" width="0.1524" layer="91"/>
+<label x="71.12" y="101.6" size="1.778" layer="95"/>
+</segment>
+</net>
+<net name="Q1" class="0">
 <segment>
 <pinref part="IC2" gate="B" pin="Q"/>
 <wire x1="66.04" y1="106.68" x2="78.74" y2="106.68" width="0.1524" layer="91"/>
 <label x="68.58" y="106.68" size="1.778" layer="95"/>
-</segment>
-<segment>
-<pinref part="D4" gate="1" pin="A"/>
-<wire x1="40.64" y1="30.48" x2="30.48" y2="30.48" width="0.1524" layer="91"/>
-<label x="22.86" y="30.48" size="1.778" layer="95"/>
 </segment>
 </net>
 </nets>
