@@ -6,7 +6,7 @@
 <setting alwaysvectorfont="no"/>
 <setting verticaltext="up"/>
 </settings>
-<grid distance="5" unitdist="mil" unit="mil" style="lines" multiple="1" display="no" altdistance="0.025" altunitdist="inch" altunit="inch"/>
+<grid distance="1" unitdist="mm" unit="mm" style="dots" multiple="1" display="no" altdistance="0.025" altunitdist="inch" altunit="inch"/>
 <layers>
 <layer number="1" name="Top" color="4" fill="1" visible="yes" active="yes"/>
 <layer number="16" name="Bottom" color="1" fill="1" visible="yes" active="yes"/>
@@ -59,9 +59,9 @@
 <board>
 <plain>
 <wire x1="0" y1="0" x2="54" y2="0" width="0" layer="20"/>
-<wire x1="54" y1="0" x2="54" y2="36" width="0" layer="20"/>
-<wire x1="54" y1="36" x2="0" y2="36" width="0" layer="20"/>
-<wire x1="0" y1="36" x2="0" y2="0" width="0" layer="20"/>
+<wire x1="54" y1="0" x2="54" y2="33" width="0" layer="20"/>
+<wire x1="54" y1="33" x2="0" y2="33" width="0" layer="20"/>
+<wire x1="0" y1="33" x2="0" y2="0" width="0" layer="20"/>
 <text x="3.04" y="19.558" size="1.778" layer="16" rot="MR0">eu</text>
 <text x="3.04" y="17.018" size="1.778" layer="16" rot="MR0">ed</text>
 <text x="0.5" y="11.508" size="1.778" layer="1">/M</text>
@@ -74,14 +74,14 @@
 <text x="39.497" y="15.24" size="1.27" layer="1">GwxHaus
 Control2.3</text>
 <text x="45.466" y="9.652" size="1.27" layer="1">M+</text>
-<text x="49.022" y="27.956" size="1.27" layer="1">Rel
+<text x="50.038" y="25.162" size="1.27" layer="1">Rel
 up</text>
-<text x="51.054" y="26.67" size="1.27" layer="1">-</text>
+<text x="52.197" y="25.146" size="1.27" layer="1">-</text>
 <text x="50.546" y="17.526" size="1.27" layer="1">+</text>
 <text x="49.276" y="2.54" size="1.27" layer="1">-</text>
-<hole x="4.3" y="33.3" drill="3"/>
+<hole x="4.3" y="30.3" drill="3"/>
 <hole x="4.5" y="2.6" drill="3"/>
-<hole x="48.5" y="33.3" drill="3"/>
+<hole x="48.5" y="30.3" drill="3"/>
 <hole x="48.4" y="2.1" drill="3"/>
 <wire x1="15.875" y1="22.987" x2="17.674790625" y2="22.987" width="0.254" layer="25"/>
 <wire x1="17.674790625" y1="22.987" x2="17.85439375" y2="22.91260625" width="0.254" layer="25" curve="-44.999502"/>
