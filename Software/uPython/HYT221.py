@@ -19,7 +19,8 @@ DHT10_Addr = 0x70
 # gpio: 0,4,5 ==> D3,D2,D1 on ESP-12e
 p5=Pin(5,Pin.PULL_UP,Pin.OPEN_DRAIN)
 p4=Pin(4,Pin.PULL_UP,Pin.OPEN_DRAIN)
-
+# i2c = None
+i2c=I2C(scl=p5, sda=p4, freq=int(1e3))
 
 def setOff():
     p4.off()
@@ -53,7 +54,7 @@ def softreset(i2c=i2c):
     
 def getHYT(i2c=i2c, verbosity=1):
     """from: AHHYTM_E2.3.6"""
-    setOn() # in case, it's switched off during pause
+    # setOn() # in case, it's switched off during pause
     utime.sleep(.15)
     i2c.readfrom_mem(0x28,0x1c,2)  # needed to initialize the next data measuring
     utime.sleep(.01)
@@ -73,9 +74,9 @@ def getHYT(i2c=i2c, verbosity=1):
 
 
 # init i2c interface
-i2c=I2C(scl=p5, sda=p4, freq=int(1e3))
+# i2c=I2C(scl=p5, sda=p4, freq=int(1e3))
 # i2c2=I2C(scl=p5, sda=p4, freq=int(1e3), timeout=int(10e3))
-setOn() 
+# setOn() 
 
 def scan(i2ce=i2c):
     devs = i2c.scan()
