@@ -12,6 +12,8 @@ import binascii
 import utime
 import struct
 
+__version__ = "0.9.1"
+
 HYT_Addr = 0x28
 DHT10_Addr = 0x70
 
@@ -84,6 +86,7 @@ def scan(i2ce=i2c):
     return devs
     
 if __name__ == "__main__":
+    print("HYT221 Version:"+__version__)
     scan()
     hyt = getHYT(i2c, verbosity=0)
     print("Status, Luftfeuchte, Temperatur: ",hyt.status, hyt.hygro, hyt.thermo)
