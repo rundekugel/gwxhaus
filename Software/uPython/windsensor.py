@@ -56,6 +56,11 @@ class Windsensor:
         self.circumference = self.diameter * PI
         self.filter = Filter(filtersize)
 
+    def __del__(self):
+        print("del"+str(self))
+        self.pin.irq(handler=None)
+        print("fin.")
+
     def pinhandler(self, pin):
         min_delta = 1e-3    # avoid divide by zero
         d = utime.ticks_ms()/1e3 - self.lasttime
