@@ -10,7 +10,7 @@ from machine import Pin
 import binascii
 import utime
 
-__version__ = "1.0.0"
+__version__ = "1.0.1"
 
 HYT_Addr = 0x28
 DHT10_Addr = 0x70
@@ -22,7 +22,7 @@ class Result:
     humidity = None
     temperature = None
     verbosity = 0
-    afterdot = 1
+    postdec = 1
     
     def __init__(self, s, h, t):
         self.status, self.humidity, self.temperature = s, h, t
@@ -64,7 +64,7 @@ class HYT221:
         return ("Status, Luftfeuchte, Temperatur: "
                 +str(s)+"/"+str(h)+"/"+str(t))
   
-    def getValues(self, afterdot=1):
+    def getValues(self, postdec=1):
         """from: AHHYTM_E2.3.6"""
         utime.sleep(.15)
         self.i2c.readfrom_mem(self.address, 0x1c, 2)  # needed to initialize the next data measuring
@@ -80,8 +80,8 @@ class HYT221:
         t = (r[2] << 6) | (r[3] >> 2)
         t *= (165/16383)
         t -= 40
-        h = round(h,afterdot)
-        t = round(t,afterdot)
+        h = round(h,postdec)
+        t = round(t,postdec)
         return Result(status, h, t)
 
     def scan(self):
