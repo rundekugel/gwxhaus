@@ -22,13 +22,13 @@ class Result:
     humidity = None
     temperature = None
     verbosity = 0
+    afterdot = 1
     
     def __init__(self, s, h, t):
         self.status, self.humidity, self.temperature = s, h, t
-    
+
     def __str__(self):
-        return ("Status, Luftfeuchte, Temperatur: "
-                +str(self.status)+"/"+str(self.humidity)+"/"+str(self.temperature))
+        return self.__unicode__()
 
     def __unicode__(self):
         return ("Status, Luftfeuchte, Temperatur: "
@@ -64,7 +64,7 @@ class HYT221:
         return ("Status, Luftfeuchte, Temperatur: "
                 +str(s)+"/"+str(h)+"/"+str(t))
   
-    def getValues(self):
+    def getValues(self, afterdot=1):
         """from: AHHYTM_E2.3.6"""
         utime.sleep(.15)
         self.i2c.readfrom_mem(self.address, 0x1c, 2)  # needed to initialize the next data measuring
@@ -80,6 +80,8 @@ class HYT221:
         t = (r[2] << 6) | (r[3] >> 2)
         t *= (165/16383)
         t -= 40
+        h = round(h,afterdot)
+        t = round(t,afterdot)
         return Result(status, h, t)
 
     def scan(self):
