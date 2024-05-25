@@ -1,8 +1,9 @@
 # communication module
-from machine import UART
+from machine import UART,RTC
 import time
 
 __version__ = "0.0.1c"
+
 
 class globs:
     verbosity = 2
@@ -56,8 +57,10 @@ def proc(msg=None):
             globs.ths = ""
             if globs.tx:
                 content += globs.tx.pop()+"\r\n"
-            content += "<hr>\r\n"
-            content += "ts:"+str(time.time())+"<hr>\r\n"
+            content += "---\r\n"
+            d = RTC().datetime()
+            content += (f"ts:{d[0]}-{d[1]:02}-{d[2]:02} {d[4]:02}:{d[5]:02}:{d[6]:02}\r\n"+\
+                        "---\r\n")
             globs.uart.write(content.encode())
 
             if globs.uart.any():

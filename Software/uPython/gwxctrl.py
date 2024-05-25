@@ -6,13 +6,14 @@ import HYT221
 import comu
 from machine import Pin
 
-__version__ = "0.1.0a"
+__version__ = "0.1.1a"
 
-PIN_WIND = Pin(35, Pin.IN, pull=Pin.PULL_UP)    # pin35 is also ADC1_7
+PIN_WIND = 35   # Pin(35, Pin.IN, pull=Pin.PULL_UP)    # pin35 is also ADC1_7
 PIN_SCL1 = 5
 PIN_SDA1 = 4
 PIN_SCL2 = 19
 PIN_SDA2 = 18
+PIN_LED1 = Pin(22, Pin.OUT)
 PIN_WATER1 = Pin(22, Pin.OUT)
 PIN_WATER2 = Pin(23, Pin.OUT)
 PIN_MOTOR1 = Pin(25, Pin.OUT)
@@ -32,6 +33,7 @@ class globs:
     last_motorstate = [b"0",b"0"]   # possible: "u","d","0" // up, down, off
     last_waterstate = [0,0]     # possible: 0,1
     port = 80
+    dorun = True
 
 def servCB(msg=None):
     if globs.verbosity:
@@ -43,7 +45,7 @@ def setMotor(num, direction):
         print("m:",num,direction)
     if not isinstance(num,int):
         num = int(str(num)[-1])
-    d = str(direction.strip())[-1].lower()
+    d = str(direction.strip()).replace("'","")[-1].lower()
     sw = {"0":[0,0],"d":[1,0],"u":[1,1],"o":[0,0]}  # pinoutput for: motor,direction
     sw2=sw.get(d,None)
     if not sw2 or num <1 or num >2:
@@ -55,6 +57,9 @@ def setMotor(num, direction):
     pd.value(sw2[1])     # direction 1=up
     pm.value(sw2[0])     # motor on/off
     globs.last_motorstate[num-1] = sw.encode()
+
+def toggleLed():
+    PIN_LED1.value(not PIN_LED1.value())
 
 def setWater(num, onOff):
     if globs.verbosity:
@@ -77,7 +82,7 @@ def getMotor(num):
 
 def init():
     print("GwxControl version:" + str(__version__))
-    globs.ws = windsensor.Windsensor(14)
+    globs.ws = windsensor.Windsensor(PIN_WIND)
     globs.hy1 = HYT221.HYT221(PIN_SCL1, PIN_SDA1)
     globs.hy2 = HYT221.HYT221(PIN_SCL2, PIN_SDA2)
     comu.globs.callbackRx = servCB
@@ -105,23 +110,30 @@ def parseMsg():
                 if globs.verbosity:
                     print(msg)
                 comu.addTx(msg)
-            if globs.last_motorstate[num] != direction:
-                setMotor(num, direction)
         if "wasser" in msg:
             num = msg.split(b"wasser", 1)[1].strip()
             num,direction = num.split(b"=", 1)
             setWasser(num, direction)
         if "testalarm" in msg:
             sendAlarm("test:"+str(msg))
+        if "fwupdate!!" in msg:
+            sendAlarm("stop für fw-update:"+str(msg))
+            # globs.dorun = False
+            for i in range(40):
+                toggleLed()
+                time.sleep(.5)
+            print("back.")
     except Exception as e:
         print("error in parseMsg:"+str(e))
 
 def sendAlarm(msg):
     if globs.verbosity:
         print("Alarm:",msg)
+    comu.addTx("Alarm:"+str(msg))
 
 def main():
-    while True:     # do forever
+    while True:     # globs.dorun:     # do forever
+        toggleLed()     # heartbeat
         try:
             speed = -1
             if globs.ws:
