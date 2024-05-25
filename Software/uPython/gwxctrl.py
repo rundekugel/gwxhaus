@@ -37,6 +37,7 @@ class globs:
     dorun = True
     cfg = None
     lasttime = 0
+    todos = [("15:00","nop")]
 
 def servCB(msg=None):
     if globs.verbosity:
@@ -61,7 +62,7 @@ def setMotor(num, direction):
     pm.value(sw2[0])     # motor on/off
     globs.last_motorstate[num-1] = sw.encode()
 
-def setWater(num, onOff):
+def setWater(num, onOff=None):
     if globs.verbosity:
         print("w:",num,onOff)
     if not isinstance(num,int):
@@ -83,9 +84,27 @@ def getMotor(num):
 def toggleLed():
     PIN_LED1.value(not PIN_LED1.value())
 
-def getTime():
+def getTime(offset_m=None):
+    "param: offset in minutes"
     d = RTC().datetime()
+    if offset_m:
+        if offset_m > 23*60:
+            offset_m = 23 * 60
+            print("Warnung! offset sehr gross:"+offset_m)
+        d[5]+=offset_m
+        while d[5]>59:
+            d[5]-=60
+            d[4] += 1   # next hour
+        if d[4] >23:
+            d[4] -= 24  # next day
     return  f"{d[4]:02}:{d[5]:02}:{d[6]:02}"
+
+def dictLower(d):
+    for k in list(d):
+        if isinstance(d[k], dict):
+            dictLower(d[k])
+        if k.lower() != k:
+            d[k.lower()] = d.pop(k)
 
 def readConfig(filename="gwxctrl.cfg"):
     cfg = None
@@ -99,8 +118,11 @@ def readConfig(filename="gwxctrl.cfg"):
         print(msg)
         comu.addTx(msg)
         return
+    dictLower(cfg)
     globs.cfg = cfg
     msg = "Einstellungen geladen"
+    if "verbosity" in cfg:
+        globs.verbosity = cfg["verbosity"]
     if globs.verbosity:
         msg += str(cfg)
     print(msg)
@@ -159,6 +181,56 @@ def sendAlarm(msg):
         print("Alarm:",msg)
     comu.addTx("Alarm:"+str(msg))
 
+def checkTemp(hausnum):
+    sensor = [globs.hy1, globs,hy2][hausnum-1]
+    s = getTH(sensor)
+    cfg = globs.cfg["haus"+str(hausnum)]
+    if s.temperature > cfg["tmax"]:
+        setMotor(hausnum,"u")
+    if s.humidity > cfg["hmax"]:
+        setMotor(hausnum,"u")
+    if s.temperature < cfg["tmin"]:
+        setMotor(hausnum,"d")
+    if s.humidity < cfg["hmin"]:
+        globs.todos.append((getTime(1), "wasser"+str(hausnum)+"=0"))
+        setWater(hausnum,1)
+
+def checkTimer():
+    """
+    go through all timer elements.
+
+    """
+    if not "timer" in globs.cfg:
+        return
+    ti = globs.cfg["timer"]
+    for t in ti:
+        z,zEnd = ti[t], None
+        on, off = "=1","=0"
+        t=t.replace("lueften","motor")
+        t=t.replace("fenster","motor")
+        if "motor" in t:
+            on, off = "=u", "=d"
+        if isinstance(z, (list,tuple)):
+            z,zEnd = z[:2]
+        z = z.replace("-","").strip()
+        if not z:
+            continue
+        if z < globs.lasttime:
+            continue
+        if z <= getTime():
+            globs.rx.append(t + on)
+        if zEnd:
+            if zEnd < globs.lasttime:
+                continue
+            if zEnd <= getTime():
+                globs.rx.append(t + off)
+
+def formTime(text):
+    h=text.split(":",1)
+    if len(h)<2:
+        text="0"+text
+    return text
+
 def main():
     while True:     # globs.dorun:     # do forever
         toggleLed()     # heartbeat
@@ -182,7 +254,18 @@ def main():
         else:
             time.sleep(.5)
 
-        for c in globs.cfg:
-            print(c)
+        checkTemp(1)
+        checkTemp(2)
+        checkTimer()
 
+        for todo in todos:
+            t=formTime(todo[0])
+            if t<globs.lasttime:
+                continue
+            if t<getTime():     # do it
+                todos.remove(todo)  # remove from queue
+                m=todo[1]
+                globs.rx.append(m)
+
+        globs.lasttime = getTime()  # last line !
 # eof
