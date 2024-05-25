@@ -1,12 +1,13 @@
 # gwxcontroller main core
 
 import time
-import network
+# import network
 import windsensor
 import HYT221 
-import simpleserv
+# import simpleserv
+import comu
 
-__version__ = "0.0.1b"
+__version__ = "0.0.1c"
 
 PIN_WIND = 14
 PIN_SCL1 = 5
@@ -25,6 +26,7 @@ class globs:
     rx = []
     last_motorstate = ["0","0"]   # possible: "u","d","0" // up, down, off
     last_waterstate = [0,0]     # possible: 0,1
+    port = 80
 
 def servCB(msg=None):
     if globs.verbosity:
@@ -44,9 +46,13 @@ def init():
     globs.ws = windsensor.Windsensor(14)
     globs.hy1 = HYT221.HYT221(PIN_SCL1, PIN_SDA1)
     globs.hy2 = HYT221.HYT221(PIN_SCL2, PIN_SDA2)
-    simpleserv.globs.callbackRx = servCB
-    globs.serv = simpleserv.init(80)
-    globs.uart = None
+    # simpleserv.globs.callbackRx = servCB
+    comu.globs.callbackRx = servCB
+    # globs.serv = simpleserv
+    # simpleserv.init(globs.port)
+    # simpleserv.wifiap()
+    globs.uart = comu
+    comu.init(2)
     print("init done.")
 
 def getTH(sensor):
@@ -80,18 +86,22 @@ def sendAlarm(msg):
 
 def main():
     while True:     # do forever
-        if globs.ws:
-            speed = round(globs.ws.getValue())
-        simpleserv.windspeed = speed
-        print("sp:"+str(speed)+"\r\n")
-        ths = "th1:" + getTH(globs.hy1)+"\r\n" + \
+        try:
+            speed = -1
+            if globs.ws:
+                speed = round(globs.ws.getValue())
+        except Exception as e:
+            print("eWs:"+str(e))
+        # comu.windspeed = speed
+        ths ="sp:"+str(speed)+"\r\n"
+        ths += "th1:" + getTH(globs.hy1)+"\r\n" + \
               "th2:" + getTH(globs.hy2)
-        simpleserv.ths = ths
+        comu.globs.ths = ths
         print(ths+"\r\n")
         motors = "Motoren: "+str(globs.last_motorstate)+"\r\n"
         fenster = "Fenster: ?\r\n"
-        simpleserv.tx.append(motors)
-        simpleserv.proc()
+        comu.globs.tx.append(motors)
+        comu.proc()
         if globs.rx:
             parseMsg()
         else:
