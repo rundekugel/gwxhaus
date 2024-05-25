@@ -4,7 +4,8 @@ import time
 import windsensor
 import HYT221 
 import comu
-from machine import Pin
+from machine import Pin, RTC
+import json
 
 __version__ = "0.1.1a"
 
@@ -25,7 +26,7 @@ PIN_MOTOR2D = Pin(14, Pin.OUT)
 
 class globs:
     verbosity = 2
-    cfgfile = "gwxc.cfg"
+    cfgfile = "gwxctrl.cfg"
     ws, hy1, hy2 = None, None, None
     serv = None
     uart = None
@@ -34,6 +35,8 @@ class globs:
     last_waterstate = [0,0]     # possible: 0,1
     port = 80
     dorun = True
+    cfg = None
+    lasttime = 0
 
 def servCB(msg=None):
     if globs.verbosity:
@@ -58,9 +61,6 @@ def setMotor(num, direction):
     pm.value(sw2[0])     # motor on/off
     globs.last_motorstate[num-1] = sw.encode()
 
-def toggleLed():
-    PIN_LED1.value(not PIN_LED1.value())
-
 def setWater(num, onOff):
     if globs.verbosity:
         print("w:",num,onOff)
@@ -80,6 +80,32 @@ def getMotor(num):
     status = ["0","d","?","u"][m|(d<<1)]
     return status
 
+def toggleLed():
+    PIN_LED1.value(not PIN_LED1.value())
+
+def getTime():
+    d = RTC().datetime()
+    return  f"{d[4]:02}:{d[5]:02}:{d[6]:02}"
+
+def readConfig(filename="gwxctrl.cfg"):
+    cfg = None
+    msg = "Lese Einstellungen von:"+filename
+    print(msg)
+    comu.addTx(msg)
+    with open(filename,"r") as f:
+        cfg = json.load(f)
+    if not cfg:
+        msg = "Fehler! konnte config nicht laden!"
+        print(msg)
+        comu.addTx(msg)
+        return
+    globs.cfg = cfg
+    msg = "Einstellungen geladen"
+    if globs.verbosity:
+        msg += str(cfg)
+    print(msg)
+    comu.addTx(msg)
+
 def init():
     print("GwxControl version:" + str(__version__))
     globs.ws = windsensor.Windsensor(PIN_WIND)
@@ -89,6 +115,8 @@ def init():
     globs.uart = comu
     comu.init(2)
     print("init done.")
+    readConfig(globs.cfgfile)
+    globs.lasttime = getTime()
 
 def getTH(sensor):
     try:
@@ -143,8 +171,8 @@ def main():
         ths ="sp:"+str(speed)+"\r\n"
         ths += "th1:" + getTH(globs.hy1)+"\r\n" + \
               "th2:" + getTH(globs.hy2)
-        comu.globs.ths = ths
-        print(ths+"\r\n")
+        comu.globs.ths = ths+"\r\n"
+        print(ths)
         motors = "Motoren: "+str(globs.last_motorstate)+"\r\n"
         fenster = "Fenster: ?\r\n"
         comu.globs.tx.append(motors)
@@ -153,5 +181,8 @@ def main():
             parseMsg()
         else:
             time.sleep(.5)
+
+        for c in globs.cfg:
+            print(c)
 
 # eof
