@@ -151,8 +151,10 @@ def init():
     readConfig(globs.cfgfile)
     globs.ws = windsensor.Windsensor(PIN_WIND)
     globs.ws.verbosity = globs.verbosity
-    globs.hy1 = HYT221.HYT221(PIN_SCL1, PIN_SDA1)
-    globs.hy2 = HYT221.HYT221(PIN_SCL2, PIN_SDA2)
+    addr1 = globs.cfg.get("sensoraddr1")
+    globs.hy1 = HYT221.HYT221(PIN_SCL1, PIN_SDA1, addr1)
+    addr2 = globs.cfg.get("sensoraddr2")
+    globs.hy2 = HYT221.HYT221(PIN_SCL2, PIN_SDA2, addr2)
     globs.hy1.verbosity = globs.verbosity
     globs.hy2.verbosity = globs.verbosity
     comu.globs.callbackRx = servCB
