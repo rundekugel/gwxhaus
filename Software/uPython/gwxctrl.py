@@ -182,6 +182,8 @@ def parseMsg():
     """execute all cmds in globs.rx"""
     try:
         msg = globs.rx.pop()
+        if isinstance(msg, str):
+            msg = msg.encode()
         if "motor" in msg:
             num = msg.split(b"motor", 1)[1].strip()
             num,direction = num.split(b"=", 1)
@@ -211,6 +213,8 @@ def parseMsg():
         if "fwmainstop!!" in msg:
             sendAlarm("stop für fw-update:"+str(msg))
             globs.dorun = False
+        if "todos?" in msg:
+            comu.addTx(str(globs.todos))
     except Exception as e:
         if globs.verbosity:
             print("error in parseMsg:"+str(e))
