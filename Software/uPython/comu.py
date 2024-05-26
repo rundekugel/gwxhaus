@@ -2,7 +2,7 @@
 from machine import UART,RTC
 import time
 
-__version__ = "0.0.1c"
+__version__ = "1.0.0"
 
 
 class globs:
@@ -23,7 +23,7 @@ def bytessplit(data, splitchar):
     return data[:i],data[i+1:]
 
 def addTx(data):
-    data = str(data).encode()
+    data = str(data)
     globs.tx.append(data)
 
 def irq_handler():
@@ -55,8 +55,8 @@ def init(portnum=None):
 def proc(msg=None):
             content = globs.ths
             globs.ths = ""
-            if globs.tx:
-                content += globs.tx.pop()+"\r\n"
+            while globs.tx:
+                content += str(globs.tx.pop())+"\r\n"
             content += "---\r\n"
             d = RTC().datetime()
             content += (f"ts:{d[0]}-{d[1]:02}-{d[2]:02} {d[4]:02}:{d[5]:02}:{d[6]:02}\r\n"+\
