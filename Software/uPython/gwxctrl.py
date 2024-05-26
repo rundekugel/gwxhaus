@@ -4,6 +4,7 @@ import time
 import windsensor
 import HYT221 
 import comu
+import machine
 from machine import Pin, RTC
 import json
 
@@ -236,7 +237,8 @@ def parseMsg():
             if len(tii)<8:
                 tii.append(0)
             RTC().init(tii)
-
+        if "reset!" in msg:
+            machine.reset()
     except Exception as e:
         if globs.verbosity:
             print("error in parseMsg:"+str(e))
