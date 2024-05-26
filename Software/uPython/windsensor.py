@@ -9,7 +9,7 @@ from machine import Pin
 import utime
 # from machine import Timer
 
-__version__ = "0.1.0"
+__version__ = "0.1.1"
 PI = 3.141592653589793
 WINDSENSOR_DIAMETER = 250e-3    # diameter in m
 
@@ -45,6 +45,8 @@ class Windsensor:
     circumference = None
     filter = None
     verbosity = 1
+    testremotecontrol = None
+    
 
     def __init__(self, pin, diameter=WINDSENSOR_DIAMETER, filtersize=2):
         """param: pinnumber for data input"""
@@ -80,8 +82,11 @@ class Windsensor:
 
     def getValue(self):
         """wind m/s"""
-        print(utime.time(), self.lasttime, self.lastdelta)
+        # print(utime.time(), self.lasttime, self.lastdelta)
         # after 1 second asume no wind
+        if self.testremotecontrol is not None:
+            print("Warnung: windsensor liefert nur testwerte!")
+            return self.testremotecontrol
         if utime.ticks_ms()/1e3 > self.lasttime + 1:
             self.speed = 0
         if self.verbosity >1:
