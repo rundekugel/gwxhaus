@@ -10,9 +10,9 @@ from machine import Pin
 import binascii
 import utime
 
-__version__ = "1.0.2"
+__version__ = "1.1.0"
 
-HYT_Addr = 0x28
+HYT_Addr = 0x28		# default address (7-bit) of HYT221 sensor
 DHT10_Addr = 0x70
 FREQ_DEFAULT = int(1e3)
 
@@ -49,7 +49,7 @@ class HYT221:
     verbosity = 0
     testremotecontrol = None
 
-    def __init__(self, pinSCK, pinSDA, address=HYT_Addr,
+    def __init__(self, pinSCK, pinSDA, address=None,
                  freq=FREQ_DEFAULT, verbosity=0):
         self.verbosity = verbosity
         if isinstance(pinSCK, int):
@@ -58,6 +58,8 @@ class HYT221:
             pinSDA = Pin(pinSDA, Pin.PULL_UP, Pin.OPEN_DRAIN)
         self.pinSCK = pinSCK
         self.pinSDA = pinSDA
+        if address is None:
+            address = HYT_Addr
         self.address = address
         self.i2c = I2C(scl=self.pinSCK, sda=self.pinSDA, freq=freq)
     
@@ -94,7 +96,16 @@ class HYT221:
         h = round(h,postdec)
         t = round(t,postdec)
         return Result(status, h, t)
-
+    
+    def setNewAddress(newAdress):
+        """This must be done within 10ms after power-on-reset."""
+        """untested"""
+        self.i2c.writeto(self.address, b"\xa0\x00\x00")
+        r = self.i2c.readfrom_mem(self.address, 0x1c, 2)
+        i2.writeto_mem(0x28, 0x1c, b"\x00"+chr(newAdress))
+        r = self.i2c.readfrom_mem(self.address, 0x1c, 2)
+        return r
+    
     def scan(self):
         devs = self.i2c.scan()
         if self.verbosity:
