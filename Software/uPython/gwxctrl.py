@@ -15,11 +15,11 @@ PIN_SDA1 = 4
 PIN_SCL2 = 19
 PIN_SDA2 = 18
 PIN_LED1 = Pin(22, Pin.OUT)
-PIN_WATER1 = Pin(22, Pin.OUT)
+PIN_WATER1 = Pin(27, Pin.OUT)
 PIN_WATER2 = Pin(23, Pin.OUT)
 PIN_MOTOR1 = Pin(25, Pin.OUT)
 PIN_MOTOR1D = Pin(26, Pin.OUT)
-PIN_MOTOR2 = Pin(27, Pin.OUT)
+PIN_MOTOR2 = Pin(12, Pin.OUT)
 PIN_MOTOR2D = Pin(14, Pin.OUT)
 # pins 32+33 are xtal32
 # 22,21: scl/sda
@@ -49,7 +49,7 @@ def setMotor(num, direction):
     if globs.verbosity:
         print("m:",num,direction)
     if not isinstance(num,int):
-        num = int(str(num)[-1])
+        num = int(str(num).replace("'","")[-1])
     d = str(direction.strip()).replace("'","")[-1].lower()
     sw = {"0":[0,0],"d":[1,0],"u":[1,1],"o":[0,0]}  # pinoutput for: motor,direction
     sw2=sw.get(d,None)
@@ -67,24 +67,30 @@ def setWater(num, onOff=None):
     if globs.verbosity:
         print("w:",num,onOff)
     if not isinstance(num,int):
-        num = int(str(num)[-1])
+        num = int(str(num).replace("'","")[-1])
     if not isinstance(onOff,int):
-        onOff = int(str(onOff)[-1])
+        onOff = int(str(onOff).replace("'","")[-1])
     p=[PIN_WATER1, PIN_WATER2][num-1]
     p.value(onOff)
     # globs.last_waterstate[num-1] = onOff
 
-def getMotor(num):
+def getMotor(num, lang=0):
     pd=[PIN_MOTOR1D, PIN_MOTOR2D][num-1]
     pm=[PIN_MOTOR1, PIN_MOTOR2][num-1]
     m = pm.value()
     d = pd.value()
-    status = ["0","d","?","u"][m|(d<<1)]
+    if lang == "de":
+        status = ["Aus", "Zu", "?", "Auf"][m | (d << 1)]
+    else:
+        status = ["0","d","?","u"][m|(d<<1)]
     return status
 
-def getWater(num):
+def getWater(num, lang=0):
     p=[PIN_WATER1, PIN_WATER2][num-1]
-    return p.value()
+    v=p.value()
+    if lang == "de":
+        return ["Zu", "Auf"][v]
+    return v
 
 def toggleLed():
     PIN_LED1.value(not PIN_LED1.value())
@@ -151,6 +157,10 @@ def init():
     if globs.verbosity:
         print("init done.")
     globs.lasttime = getTime()
+    test_activated = 0
+    if test_activated:
+        globs.hy1.testremotecontrol=(0,40,20)
+        globs.hy2.testremotecontrol=(0,42,22)
 
 def getTH(sensor):
     try:
@@ -160,7 +170,7 @@ def getTH(sensor):
         t,h = None, None
         if globs.verbosity:
             print("eTh:"+str(e))
-    return "Temperatur: "+str(t)+"°C\r\nLuftfeuchte: "+str(h)+"%"
+    return "Temperatur: "+str(t)+"°C, Luftfeuchte: "+str(h)+"%"
 
 def parseMsg():
     """execute all cmds in globs.rx"""
@@ -174,10 +184,15 @@ def parseMsg():
                 if globs.verbosity:
                     print(msg)
                 comu.addTx(msg)
+            else:
+                setMotor(num, direction)
         if "wasser" in msg:
             num = msg.split(b"wasser", 1)[1].strip()
             num,direction = num.split(b"=", 1)
-            setWasser(num, direction)
+            if direction == "?":
+                comu.addTx(f"Wasser1:{getWater(1)}, Wasser2:{getWater(2)}\r\n")
+            else:
+                setWater(num, direction)
         if "testalarm" in msg:
             sendAlarm("test:"+str(msg))
         if "fwupdate!!" in msg:
@@ -284,8 +299,8 @@ def main():
         comu.globs.ths = ths+"\r\n"
         if globs.verbosity:
             print(ths)
-        motors = "\r\nMotoren 1:"+getMotor(1)+", 2:"+getMotor(2)+"\r\n"
-        water = f"\r\nWasser 1:{getWater(1)}, 2:{getWater(2)}\r\n"
+        motors = "\r\nMotoren 1:"+getMotor(1, "de")+", 2:"+getMotor(2, "de")+"\r\n"
+        water = f"\r\nWasser 1:{getWater(1, "de")}, 2:{getWater(2, "de")}\r\n"
         fenster = "Fenster: ?\r\n"
         comu.globs.tx.append(motors)   
         comu.globs.tx.append(water)     
@@ -305,7 +320,7 @@ def main():
             if t<globs.lasttime:
                 continue
             if t<getTime():     # do it
-                todos.remove(todo)  # remove from queue
+                globs.todos.remove(todo)  # remove from queue
                 m=todo[1]
                 globs.rx.append(m)  # will be done in parseMsg()
                 continue
