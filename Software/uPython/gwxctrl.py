@@ -228,6 +228,15 @@ def parseMsg():
             comu.addTx(str(globs.cfg))
         if "verbosity" in msg:
             globs.verbosity = int(msg.split(b"=", 1)[1])
+        if "rtc=" in msg:
+            ti = msg.split(b"rtc=", 1)[1].split(b',')
+            tii=[]
+            for t in ti:
+                tii.append(int(t))
+            if len(tii)<8:
+                tii.append(0)
+            RTC().init(tii)
+
     except Exception as e:
         if globs.verbosity:
             print("error in parseMsg:"+str(e))
@@ -341,8 +350,8 @@ def main():
         comu.globs.ths = ths+"\r\n"
         if globs.verbosity:
             print(ths)
-        motors = "\r\nMotoren 1:"+getMotor(1, 'de')+", 2:"+getMotor(2, 'de')+"\r\n"
-        water = f"\r\nWasser 1:{getWater(1, 'de')}, 2:{getWater(2, 'de')}\r\n"
+        motors = "Motoren 1:"+getMotor(1, 'de')+", 2:"+getMotor(2, 'de')
+        water = f"\r\nWasser 1:{getWater(1, 'de')}, 2:{getWater(2, 'de')}"
         fenster = "Fenster: ?\r\n"  # todo. need 8 gpios first.
         comu.globs.tx.append(motors)   
         comu.globs.tx.append(water)     
