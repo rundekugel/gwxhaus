@@ -224,6 +224,8 @@ def parseMsg():
             comu.addTx(str(globs.__dict__))
         if "cfg?" in msg:
             comu.addTx(str(globs.cfg))
+        if "verbosity" in msg:
+            globs.verbosity = int(msg.split(b"=", 1)[1])
     except Exception as e:
         if globs.verbosity:
             print("error in parseMsg:"+str(e))
