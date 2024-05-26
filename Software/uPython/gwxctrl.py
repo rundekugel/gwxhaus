@@ -230,11 +230,13 @@ def checkTemp(hausnum):
         setMotor(hausnum,"u")
     if s.humidity > cfg["hmax"]:
         setMotor(hausnum,"u")
+        setWater(hausnum, 0)
     if s.temperature < cfg["tmin"]:
         setMotor(hausnum,"d")
     if s.humidity < cfg["hmin"]:
-        globs.todos.append((getTime(1), "wasser"+str(hausnum)+"=0"))
-        setWater(hausnum,1)
+        if getWater(hausnum) == 0:
+            setWater(hausnum,1)
+            globs.todos.append((getTime(1), "wasser"+str(hausnum)+"=0"))
     if s.temperature > cfg.get("talarm",99):
         sendAlarm(f"Temperatur in Haus{hausnum}:{s.temperature}°C")
 
