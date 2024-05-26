@@ -300,7 +300,7 @@ def checkWind():
         if speed > globs.cfg["wind"]["max"]:
             globs.sturm +=1
             if speed > globs.cfg["wind"]["max"] *2:
-                globs.sturm += globs.sturmdelay_on:
+                globs.sturm += globs.sturmdelay_on
             if globs.sturm > globs.sturmdelay_on:
                 if globs.verbosity:
                     print("Sturm. Alle Fenster werden geschlossen.")
