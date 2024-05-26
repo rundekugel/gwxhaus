@@ -47,12 +47,12 @@ def servCB(msg=None):
 
 def setMotor(num, direction):
     if globs.verbosity:
-        print("m:",num,direction)
-    if not isinstance(num,int):
-        num = int(str(num).replace("'","")[-1])
-    d = str(direction.strip()).replace("'","")[-1].lower()
-    sw = {"0":[0,0],"d":[1,0],"u":[1,1],"o":[0,0]}  # pinoutput for: motor,direction
-    sw2=sw.get(d,None)
+        print("m:", num, direction)
+    if not isinstance(num, int):
+        num = int(str(num).replace("'", "")[-1])
+    d = str(direction.strip()).replace("'", "")[-1].lower()
+    sw = {"0": [0, 0], "d": [1, 0], "u": [1, 1], "o": [0, 0]}  # pinoutput for: motor,direction
+    sw2=sw.get(d, None)
     if not sw2 or num <1 or num >2:
         print("Warning: wrong values:", num, direction)
         return
@@ -74,7 +74,7 @@ def setWater(num, onOff=None):
     p.value(onOff)
     # globs.last_waterstate[num-1] = onOff
 
-def getMotor(num, lang=0):
+def getMotor(num, lang=""):
     pd=[PIN_MOTOR1D, PIN_MOTOR2D][num-1]
     pm=[PIN_MOTOR1, PIN_MOTOR2][num-1]
     m = pm.value()
@@ -85,7 +85,7 @@ def getMotor(num, lang=0):
         status = ["0","d","?","u"][m|(d<<1)]
     return status
 
-def getWater(num, lang=0):
+def getWater(num, lang=""):
     p=[PIN_WATER1, PIN_WATER2][num-1]
     v=p.value()
     if lang == "de":
@@ -307,9 +307,9 @@ def main():
         comu.globs.ths = ths+"\r\n"
         if globs.verbosity:
             print(ths)
-        motors = "\r\nMotoren 1:"+getMotor(1, "de")+", 2:"+getMotor(2, "de")+"\r\n"
-        water = f"\r\nWasser 1:{getWater(1, "de")}, 2:{getWater(2, "de")}\r\n"
-        fenster = "Fenster: ?\r\n"
+        motors = "\r\nMotoren 1:"+getMotor(1, 'de')+", 2:"+getMotor(2, 'de')+"\r\n"
+        water = f"\r\nWasser 1:{getWater(1, 'de')}, 2:{getWater(2, 'de')}\r\n"
+        fenster = "Fenster: ?\r\n"  # todo. need 8 gpios first.
         comu.globs.tx.append(motors)   
         comu.globs.tx.append(water)     
         comu.proc()
