@@ -9,7 +9,7 @@ import json
 
 __version__ = "0.1.2"
 
-PIN_WIND = 35   # Pin(35, Pin.IN, pull=Pin.PULL_UP)    # pin35 is also ADC1_7
+PIN_WIND = 32   # Pin(35, Pin.IN, pull=Pin.PULL_UP)    # pin35 is also ADC1_7
 PIN_SCL1 = 5
 PIN_SDA1 = 4
 PIN_SCL2 = 19
@@ -39,6 +39,9 @@ class globs:
     lasttime = 0
     todos = [("15:00","nop")]
     loop_sleep = .5
+    sturm = 0
+    sturmdelay_on = 10
+    sturmdelay_off = 100
 
 def servCB(msg=None):
     if globs.verbosity:
@@ -51,6 +54,8 @@ def setMotor(num, direction):
     if not isinstance(num, int):
         num = int(str(num).replace("'", "")[-1])
     d = str(direction.strip()).replace("'", "")[-1].lower()
+    if d=="u" and globs.sturm:
+        return
     sw = {"0": [0, 0], "d": [1, 0], "u": [1, 1], "o": [0, 0]}  # pinoutput for: motor,direction
     sw2=sw.get(d, None)
     if not sw2 or num <1 or num >2:
@@ -215,6 +220,10 @@ def parseMsg():
             globs.dorun = False
         if "todos?" in msg:
             comu.addTx(str(globs.todos))
+        if "globs?" in msg:
+            comu.addTx(str(globs.__dict__))
+        if "cfg?" in msg:
+            comu.addTx(str(globs.cfg))
     except Exception as e:
         if globs.verbosity:
             print("error in parseMsg:"+str(e))
@@ -280,14 +289,31 @@ def checkTimer():
                 globs.rx.append(t + off)
 
 def checkWind():
+    """
+    if too much wind, wait a little, before storm-alarm.
+    if storm is over, wait some time, for really end of storm.
+    """
     speed = globs.ws.getValue()
     if not speed:
         return
-    if speed > cfg["wind"]["max"]:
-        if globs.verbosity:
-            print("Sturm. Alle Fenster werden geschlossen.")
-        setMotor(0,"d")
-        setMotor(1,"d")
+    try:
+        if speed > globs.cfg["wind"]["max"]:
+            globs.sturm +=1
+            if speed > globs.cfg["wind"]["max"] *2:
+                globs.sturm += globs.sturmdelay_on:
+            if globs.sturm > globs.sturmdelay_on:
+                if globs.verbosity:
+                    print("Sturm. Alle Fenster werden geschlossen.")
+                setMotor(1,"d")
+                setMotor(2,"d")
+        else:
+            if globs.sturm > globs.sturmdelay_off:
+                globs.sturm = globs.sturmdelay_off
+            if globs.sturm:
+                globs.sturm -= 1
+
+    except:
+        pass
 
 def formTime(text):
     h=text.split(":",1)
