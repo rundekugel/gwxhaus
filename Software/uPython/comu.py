@@ -2,7 +2,7 @@
 from machine import UART,RTC
 import time
 
-__version__ = "1.0.0"
+__version__ = "1.1.0"
 
 
 class globs:
@@ -28,7 +28,8 @@ def addTx(data):
 
 def irq_handler():
     rx = globs.uart.read()
-    globs.rx += rx  # .decode()
+    if rx:
+        globs.rx += rx  # .decode()
     if globs.verbosity>5:
         print("ih:"+str(rx))
         print("ih2:" + str(globs.rx))
@@ -63,7 +64,7 @@ def proc(msg=None):
                         "---\r\n")
             globs.uart.write(content.encode())
 
-            if globs.uart.any():
+            if globs.uart.any() or globs.rx:
                 irq_handler()
 
 # eof
