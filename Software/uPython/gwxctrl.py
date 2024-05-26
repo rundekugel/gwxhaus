@@ -157,11 +157,17 @@ def init():
     if globs.verbosity:
         print("init done.")
     globs.lasttime = getTime()
+    
+    PIN_WATER1.value(0)
+    PIN_WATER2.value(0)
+    PIN_MOTOR1.value(0)
+    PIN_MOTOR2.value(0)
+    
     test_activated = 0
     if test_activated:
         globs.hy1.testremotecontrol=(0,40,20)
         globs.hy2.testremotecontrol=(0,42,22)
-
+        
 def getTH(sensor):
     try:
         s=sensor.getValues(postdec=1)
@@ -190,7 +196,7 @@ def parseMsg():
             num = msg.split(b"wasser", 1)[1].strip()
             num,direction = num.split(b"=", 1)
             if direction == "?":
-                comu.addTx(f"Wasser1:{getWater(1)}, Wasser2:{getWater(2)}\r\n")
+                comu.addTx(f"Wasser1:{getWater(1)}, Wasser2:{getWater(2)}")
             else:
                 setWater(num, direction)
         if "testalarm" in msg:
