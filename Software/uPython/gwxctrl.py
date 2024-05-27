@@ -24,7 +24,9 @@ PIN_MOTOR1 = Pin(25, Pin.OUT)
 PIN_MOTOR1D = Pin(26, Pin.OUT)
 PIN_MOTOR2 = Pin(12, Pin.OUT)
 PIN_MOTOR2D = Pin(14, Pin.OUT)
-PIN_POWER_GOOD = Pin(3, Pin.IN, Pin.PULL_DOWN)
+# PIN_POWER_GOOD = Pin(13, Pin.IN, Pin.PULL_DOWN)
+ADC_BATT = machine.ADC(39)      # VN
+ADC_POWER = machine.ADC(36)     # VP
 # pins 32+33 are xtal32
 # 22,21: scl/sda esp8266?
 # esp32: scl/sda: 25/26 ; 18/19
@@ -165,6 +167,8 @@ def init():
     globs.hy2.verbosity = globs.verbosity
     comu.globs.callbackRx = servCB
     comu.globs.verbosity = globs.verbosity
+    ADC_BATT.atten(machine.ADC.ATTN_11DB)    # set to 3.3V range
+    ADC_POWER.atten(machine.ADC.ATTN_11DB)
     # globs.uart = comu
     comu.init(2)
     rc = machine.reset_cause()
@@ -182,7 +186,8 @@ def init():
         try:
             cfg = json.loads(cfg)
             globs.lasttime = cfg.get("t")
-            globs.deepsleep_ms = int(cfg.get("ds") * 1000)
+            if cfg.get("deepsleeprepeat"):
+                globs.deepsleep_ms = int(cfg.get("ds") * 1000)
             # todo: if voltage is back, clear deepsleep
             if 0:  # PIN_POWER_GOOD.value():
                 globs.deepsleep_ms = 0
@@ -303,6 +308,17 @@ def parseMsg():
             if globs.verbosity:
                 print(f"deepsleep {globs.deepsleep_ms} sec.")
             return
+        if b"bat?" in cmd:
+            m = f"Battery: {ADC_BATT.read_uv()/1e6} V."
+            comu.addTx(m)
+            if globs.verbosity:
+                print(m)
+        if b"power?" in cmd:
+            m = f"Power: {ADC_POWER.read_uv()/1e6} V."
+            comu.addTx(m)
+            if globs.verbosity:
+                print(m)
+
     except Exception as e:
         if globs.verbosity:
             print("error in parseMsg:"+str(e))
