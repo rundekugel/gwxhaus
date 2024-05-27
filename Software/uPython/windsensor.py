@@ -33,8 +33,8 @@ class Filter:
         self.lastval = (self.lastval *self.size + value)/(self.size+1)
         return self.lastval
 
-    def getValue(self):
-        return self.lastval
+    def getValue(self, rounded=1):
+        return round(self.lastval, rounded)
 
 class Windsensor:
     pin = None
