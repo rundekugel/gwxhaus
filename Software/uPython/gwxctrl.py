@@ -79,6 +79,7 @@ def setMotor(num, direction):
     # globs.last_motorstate[num-1] = sw.encode()
 
 def setWater(num, onOff=None):
+    num = int(num)
     if globs.verbosity:
         print("w:",num,onOff)
     if not isinstance(num,int):
@@ -90,6 +91,7 @@ def setWater(num, onOff=None):
     # globs.last_waterstate[num-1] = onOff
 
 def getMotor(num, lang=""):
+    num=int(num)
     pd=[PIN_MOTOR1D, PIN_MOTOR2D][num-1]
     pm=[PIN_MOTOR1, PIN_MOTOR2][num-1]
     m = pm.value()
@@ -178,7 +180,7 @@ def init():
     comu.addTx("resetcause:"+str(rc))
     if globs.verbosity:
         print("resetcause:"+str(rc))
-    if 4 == rc:
+    if machine.DEEPSLEEP_RESET == rc:
         if globs.verbosity:
             print("wake up from deepsleep...")
         # read values from nvr
@@ -247,8 +249,8 @@ def parseMsg():
         if globs.verbosity > 1:
             print("pM:", cmd, val)
         if b"motor" in cmd:
-            num = cmd.split(b"motor", 1)[1].strip()
-            direction = val[1]
+            num = cmd[-1:]
+            direction = val
             if direction == b"?":
                 msg = "Motor1:"+getMotor(1)+". Motor2:"+getMotor(2)
                 if globs.verbosity:
@@ -258,8 +260,8 @@ def parseMsg():
                 setMotor(num, direction)
             return
         if b"wasser" in cmd:
-            num = cmd.split(b"wasser", 1)[1].strip()
-            direction = val[1]
+            num = cmd[-1:]
+            direction = val
             if direction == "?":
                 comu.addTx(f"Wasser1:{getWater(1)}, Wasser2:{getWater(2)}")
             else:
@@ -494,6 +496,7 @@ def main():
         if globs.lightsleep_ms:
             comu.addTx(f"goto lightsleep for {globs.lightsleep_ms/1000}s.")
             comu.proc()
+            time.sleep(.1)
             machine.lightsleep(globs.lightsleep_ms)
             comu.addTx(f"Woke up from lightsleep.")
     print("stopped.")
