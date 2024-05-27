@@ -3,7 +3,7 @@
 import time
 import json
 
-import machine
+import machine, esp32
 from machine import Pin, RTC, deepsleep
 
 import windsensor
@@ -26,7 +26,8 @@ PIN_MOTOR2 = Pin(12, Pin.OUT)
 PIN_MOTOR2D = Pin(14, Pin.OUT)
 # PIN_POWER_GOOD = Pin(13, Pin.IN, Pin.PULL_DOWN)
 ADC_BATT = machine.ADC(39)      # VN
-ADC_POWER = machine.ADC(36)     # VP
+PINNUM_POWER = 36
+ADC_POWER = machine.ADC(PINNUM_POWER)     # VP
 # pins 32+33 are xtal32
 # 22,21: scl/sda esp8266?
 # esp32: scl/sda: 25/26 ; 18/19
@@ -42,7 +43,7 @@ class globs:
     # last_waterstate = [0,0]     # possible: 0,1
     port = 80
     dorun = True
-    cfg = None
+    cfg = {"vccok":[4,30e3], "dsonbat":[[3.5,60e3],[3.3,300e3]]}
     lasttime = 0
     todos = [("15:00","nop")]
     loop_sleep = .5
@@ -50,6 +51,7 @@ class globs:
     sturmdelay_on = 10
     sturmdelay_off = 100
     deepsleep_ms = 0
+    lightsleep_ms = 0
 
 def servCB(msg=None):
     if globs.verbosity:
@@ -145,7 +147,7 @@ def readConfig(filename="gwxctrl.cfg"):
         comu.addTx(msg)
         return
     dictLower(cfg)
-    globs.cfg = cfg
+    globs.cfg.update(cfg)
     msg = "Einstellungen geladen"
     if "verbosity" in cfg:
         globs.verbosity = cfg["verbosity"]
@@ -169,6 +171,7 @@ def init():
     comu.globs.verbosity = globs.verbosity
     ADC_BATT.atten(machine.ADC.ATTN_11DB)    # set to 3.3V range
     ADC_POWER.atten(machine.ADC.ATTN_11DB)
+    esp32.wake_on_ext0(pin=PINNUM_POWER, level=esp32.WAKEUP_ANY_HIGH)
     # globs.uart = comu
     comu.init(2)
     rc = machine.reset_cause()
@@ -188,23 +191,13 @@ def init():
             globs.lasttime = cfg.get("t")
             if cfg.get("deepsleeprepeat"):
                 globs.deepsleep_ms = int(cfg.get("ds") * 1000)
-            # todo: if voltage is back, clear deepsleep
-            if 0:  # PIN_POWER_GOOD.value():
-                globs.deepsleep_ms = 0
-            if 0:
-                rx = comu.globs.uart.read()
-                if globs.verbosity:
-                    print("irx:",rx)
-                if "nodeepsleep" in rx:
-                    print("ds=0!")
-                    globs.deepsleep_ms = 0
-                    print("ds:",globs.deepsleep_ms)
-            return
         except Exception as e:
             cfgok=0
             comu.addTx("Fehler: Lesen von RTC-RAM:"+str(e))
+        # if voltage is back, clear deepsleep
+        if getVCCVolt() >4:
+            globs.deepsleep_ms = 0
 
-                    
     globs.lasttime = getTime()
     
     pinsReset()
@@ -383,6 +376,18 @@ def checkTimer():
             if zEnd <= getTime():
                 globs.rx.append(t + off)
 
+def getBatVolt():
+    v, n = 0, 10
+    for i in range(n):
+       v += ADC_BATT.read_uv()*2/1e6
+    return v / n
+
+def getVCCVolt():
+    v, n = 0, 10
+    for i in range(n):
+       v += ADC_POWER.read_uv()*2/1e6
+    return v / n
+
 def checkWind():
     """
     if too much wind, wait a little, before storm-alarm.
@@ -460,8 +465,23 @@ def main():
 
         checkWind()
         globs.lasttime = getTime()  # this line must be after all checks !
-        
-        if globs.deepsleep_ms >0:  # if we run on battery.
+
+        # sleep on power loss
+        vccVal = globs.cfg.get("vccok")
+        if vccVal:
+            if getVCCVolt() > vccVal[0]:
+                globs.lightsleep_ms = 0
+            else:
+                battV = getBatVolt()
+                sendAlarm(f"gwxctrl Spannung zu klein: USB={getVCCVolt()}V ; Batt={battV}V.")
+                globs.lightsleep_ms = int(vccVal[1])
+                batSets = globs.cfg.get("dsonbat")	# deepsleep on low bat
+                if batSets:
+                    for setting in batSets:
+                        if battV < setting[0]:
+                            globs.deepsleep_ms = int(setting[1])
+
+        if globs.deepsleep_ms >0:  # if we run on battery. 
             msg = f"Goto deepsleep for {globs.deepsleep_ms/1000}s..."
             comu.addTx(msg)
             comu.proc()
@@ -471,6 +491,11 @@ def main():
             nv_info = {"t":globs.lasttime, "ds":globs.deepsleep_ms/1000}
             RTC().memory(json.dumps(nv_info))
             deepsleep(int(globs.deepsleep_ms))
+        if globs.lightsleep_ms:
+            comu.addTx(f"goto lightsleep for {globs.lightsleep_ms/1000}s.")
+            comu.proc()
+            machine.lightsleep(globs.lightsleep_ms)
+            comu.addTx(f"Woke up from lightsleep.")
     print("stopped.")
     return
 
