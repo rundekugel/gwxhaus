@@ -309,12 +309,12 @@ def parseMsg():
                 print(f"deepsleep {globs.deepsleep_ms} sec.")
             return
         if b"bat?" in cmd:
-            m = f"Battery: {ADC_BATT.read_uv()/1e6} V."
+            m = f"Battery: {ADC_BATT.read_uv()*2/1e6} V."
             comu.addTx(m)
             if globs.verbosity:
                 print(m)
         if b"power?" in cmd:
-            m = f"Power: {ADC_POWER.read_uv()/1e6} V."
+            m = f"Power: {ADC_POWER.read_uv()*2/1e6} V."
             comu.addTx(m)
             if globs.verbosity:
                 print(m)
