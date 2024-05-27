@@ -1,20 +1,22 @@
 # gwxcontroller main core
 
 import time
+import json
+
+import machine
+from machine import Pin, RTC, deepsleep
+
 import windsensor
 import HYT221 
 import comu
-import machine
-from machine import Pin, RTC
-import json
 
 __version__ = "0.1.2"
 
 PIN_WIND = 32   # Pin(35, Pin.IN, pull=Pin.PULL_UP)    # pin35 is also ADC1_7
 PIN_SCL1 = 5
 PIN_SDA1 = 4
-PIN_SCL2 = 19
-PIN_SDA2 = 18
+PIN_SCL2 = 18
+PIN_SDA2 = 19
 PIN_LED1 = Pin(22, Pin.OUT)
 PIN_WATER1 = Pin(27, Pin.OUT)
 PIN_WATER2 = Pin(23, Pin.OUT)
@@ -22,8 +24,10 @@ PIN_MOTOR1 = Pin(25, Pin.OUT)
 PIN_MOTOR1D = Pin(26, Pin.OUT)
 PIN_MOTOR2 = Pin(12, Pin.OUT)
 PIN_MOTOR2D = Pin(14, Pin.OUT)
+PIN_POWER_GOOD = Pin(3, Pin.IN, Pin.PULL_DOWN)
 # pins 32+33 are xtal32
-# 22,21: scl/sda
+# 22,21: scl/sda esp8266?
+# esp32: scl/sda: 25/26 ; 18/19
 
 class globs:
     verbosity = 2
@@ -43,6 +47,7 @@ class globs:
     sturm = 0
     sturmdelay_on = 10
     sturmdelay_off = 100
+    deepsleep_ms = 0
 
 def servCB(msg=None):
     if globs.verbosity:
@@ -162,20 +167,58 @@ def init():
     comu.globs.verbosity = globs.verbosity
     # globs.uart = comu
     comu.init(2)
+    rc = machine.reset_cause()
+    comu.addTx("resetcause:"+str(rc))
     if globs.verbosity:
-        print("init done.")
+        print("resetcause:"+str(rc))
+    if 4 == rc:
+        if globs.verbosity:
+            print("wake up from deepsleep...")
+        # read values from nvr
+        cfg = RTC().memory()
+        RTC().memory(b"")  # erase, don't use this values next time
+        comu.addTx(cfg)
+        time.sleep(1)  # time for client to send infos, before goto deep sleep again
+        try:
+            cfg = json.loads(cfg)
+            globs.lasttime = cfg.get("t")
+            globs.deepsleep_ms = int(cfg.get("ds") * 1000)
+            # todo: if voltage is back, clear deepsleep
+            if 0:  # PIN_POWER_GOOD.value():
+                globs.deepsleep_ms = 0
+            if 0:
+                rx = comu.globs.uart.read()
+                if globs.verbosity:
+                    print("irx:",rx)
+                if "nodeepsleep" in rx:
+                    print("ds=0!")
+                    globs.deepsleep_ms = 0
+                    print("ds:",globs.deepsleep_ms)
+            return
+        except Exception as e:
+            cfgok=0
+            comu.addTx("Fehler: Lesen von RTC-RAM:"+str(e))
+
+                    
     globs.lasttime = getTime()
     
-    PIN_WATER1.value(0)
-    PIN_WATER2.value(0)
-    PIN_MOTOR1.value(0)
-    PIN_MOTOR2.value(0)
+    pinsReset()
     
     test_activated = 0
     if test_activated:
         globs.hy1.testremotecontrol=(0,40,20)
         globs.hy2.testremotecontrol=(0,42,22)
-        
+
+    if globs.verbosity:
+        print("init done.")
+
+def pinsReset():
+    PIN_WATER1.value(0)
+    PIN_WATER2.value(0)
+    PIN_MOTOR1.value(0)
+    PIN_MOTOR2.value(0)
+    PIN_MOTOR2D.value(0)
+
 def getTH(sensor):
     try:
         s=sensor.getValues(postdec=1)
@@ -189,12 +232,25 @@ def getTH(sensor):
 def parseMsg():
     """execute all cmds in globs.rx"""
     try:
-        msg = globs.rx.pop()
-        if isinstance(msg, str):
-            msg = msg.encode()
-        if "motor" in msg:
-            num = msg.split(b"motor", 1)[1].strip()
-            num,direction = num.split(b"=", 1)
+        msg=None
+        if globs.verbosity > 1:
+            print("PM.")
+        while globs.rx and not msg:
+            msg = globs.rx.pop().strip()
+            if globs.verbosity>1:
+                print("pM:"+str(msg))
+        if not msg:
+            return
+        cmd, val = msg, None
+        if isinstance(cmd, str):
+            cmd = cmd.encode()
+        if b"=" in cmd:
+            cmd, val = cmd.split(b"=",1)
+        if globs.verbosity > 1:
+            print("pM:", cmd, val)
+        if b"motor" in cmd:
+            num = cmd.split(b"motor", 1)[1].strip()
+            direction = val[1]
             if direction == b"?":
                 msg = "Motor1:"+getMotor(1)+". Motor2:"+getMotor(2)
                 if globs.verbosity:
@@ -202,43 +258,51 @@ def parseMsg():
                 comu.addTx(msg)
             else:
                 setMotor(num, direction)
-        if "wasser" in msg:
-            num = msg.split(b"wasser", 1)[1].strip()
-            num,direction = num.split(b"=", 1)
+            return
+        if b"wasser" in cmd:
+            num = cmd.split(b"wasser", 1)[1].strip()
+            direction = val[1]
             if direction == "?":
                 comu.addTx(f"Wasser1:{getWater(1)}, Wasser2:{getWater(2)}")
             else:
                 setWater(num, direction)
-        if "testalarm" in msg:
+            return
+        if b"testalarm" in cmd:
             sendAlarm("test:"+str(msg))
-        if "fwupdate!!" in msg:
+            return
+        if b"fwupdate!!" in cmd:
             sendAlarm("pause für fw-update:"+str(msg))
             # globs.dorun = False
             for i in range(40):
                 toggleLed()
                 time.sleep(.5)
             print("back.")
-        if "fwmainstop!!" in msg:
+        if b"fwmainstop!!" in cmd:
             sendAlarm("stop für fw-update:"+str(msg))
             globs.dorun = False
-        if "todos?" in msg:
+        if b"todos?" in msg:
             comu.addTx(str(globs.todos))
-        if "globs?" in msg:
+        if b"globs?" in msg:
             comu.addTx(str(globs.__dict__))
-        if "cfg?" in msg:
+        if b"cfg?" in msg:
             comu.addTx(str(globs.cfg))
-        if "verbosity" in msg:
-            globs.verbosity = int(msg.split(b"=", 1)[1])
-        if "rtc=" in msg:
-            ti = msg.split(b"rtc=", 1)[1].split(b',')
+        if b"verbosity" in cmd:
+            globs.verbosity = int(val)
+        if b"rtc" == cmd:
+            ti = val.split(b',')
             tii=[]
             for t in ti:
                 tii.append(int(t))
             if len(tii)<8:
                 tii.append(0)
             RTC().init(tii)
-        if "reset!" in msg:
+        if b"reset!" == cmd:
             machine.reset()
+        if b"deepsleep" in cmd:
+            globs.deepsleep_ms = int(val)*1000
+            if globs.verbosity:
+                print(f"deepsleep {globs.deepsleep_ms} sec.")
+            return
     except Exception as e:
         if globs.verbosity:
             print("error in parseMsg:"+str(e))
@@ -342,7 +406,7 @@ def main():
         try:
             speed = -1
             if globs.ws:
-                speed = round(globs.ws.getValue())
+                speed = globs.ws.getValue()
         except Exception as e:
             if globs.verbosity:
                 print("eWs:"+str(e))
@@ -355,8 +419,8 @@ def main():
         motors = "Motoren 1:"+getMotor(1, 'de')+", 2:"+getMotor(2, 'de')
         water = f"\r\nWasser 1:{getWater(1, 'de')}, 2:{getWater(2, 'de')}"
         fenster = "Fenster: ?\r\n"  # todo. need 8 gpios first.
-        comu.globs.tx.append(motors)   
-        comu.globs.tx.append(water)     
+        comu.addTx(motors)
+        comu.addTx(water)
         comu.proc()
         if globs.rx:
             parseMsg()
@@ -379,5 +443,23 @@ def main():
                 continue
 
         checkWind()
-        globs.lasttime = getTime()  # last line !
+        globs.lasttime = getTime()  # this line must be after all checks !
+        
+        if globs.deepsleep_ms >0:  # if we run on battery.
+            msg = f"Goto deepsleep for {globs.deepsleep_ms/1000}s..."
+            comu.addTx(msg)
+            comu.proc()
+            print(msg)
+            pinsReset()
+            time.sleep(.1)
+            nv_info = {"t":globs.lasttime, "ds":globs.deepsleep_ms/1000}
+            RTC().memory(json.dumps(nv_info))
+            deepsleep(int(globs.deepsleep_ms))
+    print("stopped.")
+    return
+
+if __name__ == "__main__":
+    # test
+    globs.rx.append(b"deepsleep=2")
+    parseMsg()
 # eof
