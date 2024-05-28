@@ -163,8 +163,8 @@ def init():
     readConfig(globs.cfgfile)
     globs.ws = windsensor.Windsensor(PIN_WIND)
     globs.ws.verbosity = globs.verbosity
-    addr1 = globs.cfg.get("sensoraddr1")
-    globs.hy1 = HYT221.HYT221(PIN_SCL1, PIN_SDA1, addr1)
+    addr1 = globs.cfg.get("sensoraddr1")    # this is None, if not given
+    globs.hy1 = HYT221.HYT221(PIN_SCL1, PIN_SDA1, addr1)    # if addr1 is None, default is used
     addr2 = globs.cfg.get("sensoraddr2")
     globs.hy2 = HYT221.HYT221(PIN_SCL2, PIN_SDA2, addr2)
     globs.hy1.verbosity = globs.verbosity
@@ -378,17 +378,17 @@ def checkTimer():
             if zEnd <= getTime():
                 globs.rx.append(t + off)
 
-def getBatVolt():
+def getBatVolt(rounded=2):
     v, n = 0, 10
     for i in range(n):
        v += ADC_BATT.read_uv()*2/1e6
-    return v / n
+    return round(v / n, rounded)
 
-def getVCCVolt():
+def getVCCVolt(rounded=2):
     v, n = 0, 10
     for i in range(n):
        v += ADC_POWER.read_uv()*2/1e6
-    return v / n
+    return round(v / n, rounded)
 
 def checkWind():
     """
@@ -440,10 +440,11 @@ def main():
         if globs.verbosity:
             print(ths)
         motors = "Motoren 1:"+getMotor(1, 'de')+", 2:"+getMotor(2, 'de')
-        water = f"\r\nWasser 1:{getWater(1, 'de')}, 2:{getWater(2, 'de')}"
+        water = f"Wasser 1:{getWater(1, 'de')}, 2:{getWater(2, 'de')}"
         fenster = "Fenster: ?\r\n"  # todo. need 8 gpios first.
         comu.addTx(motors)
         comu.addTx(water)
+        comu.addTx(f"Spannung: USB={getVCCVolt()}V ; Batt={getBatVolt()}V.")
         comu.proc()
         if globs.rx:
             parseMsg()
