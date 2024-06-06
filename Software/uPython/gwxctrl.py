@@ -17,7 +17,7 @@ PIN_SCL1 = 5
 PIN_SDA1 = 4
 PIN_SCL2 = 18
 PIN_SDA2 = 19
-PIN_LED1 = Pin(22, Pin.OUT)
+PIN_LED1 = Pin(2, Pin.OUT)
 PIN_WATER1 = Pin(27, Pin.OUT)
 PIN_WATER2 = Pin(23, Pin.OUT)
 PIN_MOTOR1 = Pin(25, Pin.OUT)
@@ -32,11 +32,15 @@ ADC_POWER = machine.ADC(PINNUM_POWER)     # VP
 # 22,21: scl/sda esp8266?
 # esp32: scl/sda: 25/26 ; 18/19
 
+# ALLOWED_UART_VARS_W = ("loop_sleep","verbosity")
+# ALLOWED_UART_VARS_R = ("loop_sleep","verbosity","globs","cfg","todos")
+
 class globs:
     verbosity = 2
     cfgfile = "gwxctrl.cfg"
     ws, hy1, hy2 = None, None, None
     serv = None
+    inited=False
     # uart = None
     rx = []
     # last_motorstate = [b"0",b"0"]   # possible: "u","d","0" // up, down, off
@@ -211,6 +215,7 @@ def init():
 
     if globs.verbosity:
         print("init done.")
+    globs.inited = True
 
 def pinsReset():
     PIN_WATER1.value(0)
@@ -424,6 +429,8 @@ def formTime(text):
     return text
 
 def main():
+    if not globs.inited:
+        init()
     while globs.dorun:     # do forever
         toggleLed()     # heartbeat
         try:
@@ -444,7 +451,7 @@ def main():
         fenster = "Fenster: ?\r\n"  # todo. need 8 gpios first.
         comu.addTx(motors)
         comu.addTx(water)
-        comu.addTx(f"Spannung: USB={getVCCVolt()}V ; Batt={getBatVolt()}V.")
+        comu.addTx(f"Spannung: USB={getVCCVolt()}V ; Batt={getBatVolt(2)}V.")
         comu.proc()
         if globs.rx:
             parseMsg()
