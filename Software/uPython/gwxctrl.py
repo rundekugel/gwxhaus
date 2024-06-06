@@ -298,7 +298,7 @@ def parseMsg():
             tii=[]
             for t in ti:
                 tii.append(int(t))
-            if len(tii)<8:
+            while len(tii)<8:
                 tii.append(0)
             RTC().init(tii)
         if b"reset!" == cmd:
