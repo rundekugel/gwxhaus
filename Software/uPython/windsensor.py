@@ -80,7 +80,7 @@ class Windsensor:
             print("d:",self.lastdelta)
             print("m/s:",self.speed)
 
-    def getValue(self):
+    def getValue(self, rounded=1):
         """wind m/s"""
         # print(utime.time(), self.lasttime, self.lastdelta)
         # after 1 second asume no wind
@@ -92,7 +92,7 @@ class Windsensor:
         if self.verbosity >1:
             print("d:",self.lastdelta)
             print("m/s:",self.speed)
-        return self.speed
+        return round(self.speed, rounded)
 
 
 if __name__ == "__main__":
