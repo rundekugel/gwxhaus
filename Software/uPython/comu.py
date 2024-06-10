@@ -58,7 +58,7 @@ def proc(msg=""):
             content = msg
             # globs.ths = ""
             while globs.tx:
-                content += str(globs.tx.pop(0)) +"\r\n"
+                content += str(globs.tx.pop(0)) +"; "
                 globs.uart.write(content.encode())
                 content = ""
                 # time.sleep(.1)

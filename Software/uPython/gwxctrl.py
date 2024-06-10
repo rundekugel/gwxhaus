@@ -448,26 +448,19 @@ def main():
         except Exception as e:
             if globs.verbosity:
                 print("eWs:"+str(e))
-        ths ="sp:"+str(speed)+ ";"  #"\r\n"
-        ths += "th1:" + getTH(globs.hy1)+ ";"  #\r\n" + \
+        ths ="sp:"+str(speed)+ "; " 
+        ths += "th1:" + getTH(globs.hy1)+ "; " 
         ths += "th2:" + getTH(globs.hy2)
-        # comu.globs.ths = ths+"\r\n"
         comu.addTx(ths)
-        comu.proc("0:")
-        time.sleep(2.5)
         if globs.verbosity:
             print(ths)
-        # comu.proc()
-        # time.sleep(.1) # wait for buffer read in receiver
         motors = "Motoren 1:"+getMotor(1, 'de')+", 2:"+getMotor(2, 'de')
         water = f"Wasser 1:{getWater(1, 'de')}, 2:{getWater(2, 'de')}"
         fenster = "Fenster: ?\r\n"  # todo. need 8 gpios first.
         comu.addTx(motors)
         comu.addTx(water)
-        # comu.proc("t:")
-        # time.sleep(.1) # wait for buffer read in receiver
         comu.addTx(f"Spannung: USB={getVCCVolt()}V ; Batt={getBatVolt(2)}V.")
-        # comu.proc("t:")
+        comu.proc("t:")
         end=globs.loop_sleep *2
         while end >0:
             if globs.rx:
