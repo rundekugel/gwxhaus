@@ -160,3 +160,4 @@ cython_debug/
 #.idea/
 *.backup
 *.?#?
+/Software/uPython/test/*

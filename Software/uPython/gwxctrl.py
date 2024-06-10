@@ -10,22 +10,23 @@ import windsensor
 import HYT221 
 import comu
 
-__version__ = "0.1.2"
+__version__ = "0.1.3"
 
+# pinning for esp32-lite
 PIN_WIND = 32   # Pin(35, Pin.IN, pull=Pin.PULL_UP)    # pin35 is also ADC1_7
 PIN_SCL1 = 5
 PIN_SDA1 = 4
-PIN_SCL2 = 18
-PIN_SDA2 = 19
-PIN_LED1 = Pin(2, Pin.OUT)
+PIN_SCL2 = 2
+PIN_SDA2 = 15
+PIN_LED1 = Pin(22, Pin.OUT)	 # on bigger boards it's pin2
 PIN_WATER1 = Pin(27, Pin.OUT)
 PIN_WATER2 = Pin(33, Pin.OUT)
 PIN_MOTOR1 = Pin(25, Pin.OUT)
 PIN_MOTOR1D = Pin(26, Pin.OUT)
 PIN_MOTOR2 = Pin(12, Pin.OUT)
 PIN_MOTOR2D = Pin(14, Pin.OUT)
-DOSE1 = Pin(15, Pin.OUT)
-DOSE2 = Pin(22, Pin.OUT)
+DOSE1 = Pin(19, Pin.OUT)
+DOSE2 = Pin(18, Pin.OUT)
 # PIN_POWER_GOOD = Pin(13, Pin.IN, Pin.PULL_DOWN)
 ADC_BATT = machine.ADC(39)      # VN
 PINNUM_POWER = 36
@@ -253,6 +254,7 @@ def parseMsg():
             cmd = cmd.encode()
         if b"=" in cmd:
             cmd, val = cmd.split(b"=",1)
+            val=val.strip() ; cmd=cmd.strip()
         if globs.verbosity > 1:
             print("pM:", cmd, val)
         if b"motor" in cmd:
@@ -295,6 +297,9 @@ def parseMsg():
             comu.addTx(str(globs.cfg))
         if b"verbosity" in cmd:
             globs.verbosity = int(val)
+        if b"interval" in cmd:
+            globs.loop_sleep = int(val)/10
+            comu.addTx(f"loop sleep:{globs.loop_sleep}s")
         if b"rtc" == cmd:
             ti = val.split(b',')
             tii=[]
