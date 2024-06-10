@@ -15,6 +15,7 @@ class globs:
     timeout_ms = 500
     dorun = 1
     rx=b""
+    # ths = ""
 
 def bytessplit(data, splitchar):
     for i in range(len(data)):
@@ -53,16 +54,21 @@ def init(portnum=None):
     # globs.uart.irq(UART.RX_ANY, handler=irq_handler)
     globs.dorun = 1
 
-def proc(msg=None):
-            content = globs.ths
-            globs.ths = ""
+def proc(msg=""):
+            content = msg
+            # globs.ths = ""
             while globs.tx:
-                content += str(globs.tx.pop())+"\r\n"
-            content += "---\r\n"
+                content += str(globs.tx.pop(0)) +"\r\n"
+                globs.uart.write(content.encode())
+                content = ""
+                # time.sleep(.1)
+            # content += "---\r\n"
             d = RTC().datetime()
-            content += (f"ts:{d[0]}-{d[1]:02}-{d[2]:02} {d[4]:02}:{d[5]:02}:{d[6]:02}\r\n"+\
-                        "---\r\n")
+            content += (f"ts:{d[0]}-{d[1]:02}-{d[2]:02} {d[4]:02}:{d[5]:02}:{d[6]:02}\r\n")
+            content = content.replace("'","") # tasmota can't deal with quotes
             globs.uart.write(content.encode())
+            if globs.verbosity >1:
+                print(content.encode())
 
             if globs.uart.any() or globs.rx:
                 irq_handler()

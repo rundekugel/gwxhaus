@@ -232,10 +232,10 @@ def getTH(sensor):
         s=sensor.getValues(postdec=1)
         t,h = s.temperature, s.humidity
     except Exception as e:
-        t,h = None, None
+        t,h = "-", "-"
         if globs.verbosity:
             print("eTh:"+str(e))
-    return "Temperatur: "+str(t)+"°C, Luftfeuchte: "+str(h)+"%"
+    return "Temperatur: "+str(t)+"C, Luftfeuchte: "+str(h)+"%"
 
 def parseMsg():
     """execute all cmds in globs.rx"""
@@ -297,6 +297,7 @@ def parseMsg():
             comu.addTx(str(globs.cfg))
         if b"verbosity" in cmd:
             globs.verbosity = int(val)
+            comu.globs.verbosity = int(val)
         if b"interval" in cmd:
             globs.loop_sleep = int(val)/10
             comu.addTx(f"loop sleep:{globs.loop_sleep}s")
@@ -447,23 +448,33 @@ def main():
         except Exception as e:
             if globs.verbosity:
                 print("eWs:"+str(e))
-        ths ="sp:"+str(speed)+"\r\n"
-        ths += "th1:" + getTH(globs.hy1)+"\r\n" + \
-              "th2:" + getTH(globs.hy2)
-        comu.globs.ths = ths+"\r\n"
+        ths ="sp:"+str(speed)+ ";"  #"\r\n"
+        ths += "th1:" + getTH(globs.hy1)+ ";"  #\r\n" + \
+        ths += "th2:" + getTH(globs.hy2)
+        # comu.globs.ths = ths+"\r\n"
+        comu.addTx(ths)
+        comu.proc("0:")
+        time.sleep(2.5)
         if globs.verbosity:
             print(ths)
+        # comu.proc()
+        # time.sleep(.1) # wait for buffer read in receiver
         motors = "Motoren 1:"+getMotor(1, 'de')+", 2:"+getMotor(2, 'de')
         water = f"Wasser 1:{getWater(1, 'de')}, 2:{getWater(2, 'de')}"
         fenster = "Fenster: ?\r\n"  # todo. need 8 gpios first.
         comu.addTx(motors)
         comu.addTx(water)
+        # comu.proc("t:")
+        # time.sleep(.1) # wait for buffer read in receiver
         comu.addTx(f"Spannung: USB={getVCCVolt()}V ; Batt={getBatVolt(2)}V.")
-        comu.proc()
-        if globs.rx:
-            parseMsg()
-        else:
-            time.sleep(globs.loop_sleep)
+        # comu.proc("t:")
+        end=globs.loop_sleep *2
+        while end >0:
+            if globs.rx:
+                break
+            time.sleep(.5)
+            end -= .5
+        parseMsg()
 
         # check for command which must be executed at a specific time.
         checkTemp(1)
