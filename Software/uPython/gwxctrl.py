@@ -59,7 +59,7 @@ class globs:
     cfg = {"vccok":[4,30e3], "dsonbat":[[3.5,60e3],[3.3,300e3]]}
     lasttime = 0
     todos = [("15:00","nop")]
-    loop_sleep = .5
+    loop_sleep = 2.5
     sturm = 0
     sturmdelay_on = 10
     sturmdelay_off = 100
@@ -190,6 +190,7 @@ def readConfig(filename="gwxctrl.cfg"):
     if "verbosity" in cfg:
         globs.verbosity = cfg["verbosity"]
     if globs.verbosity:
+        cfg.pop("ak")  # remove secrets before tx
         msg += str(cfg)
         print(msg)
         comu.addTx(msg)
