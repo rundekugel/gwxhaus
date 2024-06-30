@@ -97,6 +97,19 @@ def setWater(num, onOff=None):
     p.value(onOff)
     # globs.last_waterstate[num-1] = onOff
 
+
+def setDose(num, onOff=None):
+    num = int(num)
+    if globs.verbosity:
+        print("d:",num,onOff)
+    if not isinstance(num,int):
+        num = int(str(num).replace("'","")[-1])
+    if not isinstance(onOff,int):
+        onOff = int(str(onOff).replace("'","")[-1])
+    p=[DOSE1, DOSE2][num-1]
+    p.value(onOff)
+    # globs.last_waterstate[num-1] = onOff
+
 def getMotor(num, lang=""):
     num=int(num)
     pd=[PIN_MOTOR1D, PIN_MOTOR2D][num-1]
@@ -116,17 +129,24 @@ def getWater(num, lang=""):
         return ["Zu", "Auf"][v]
     return v
 
+def getDose(num, lang=""):
+    p=[DOSE1, DOSE2][num-1]
+    v=p.value()
+    if lang == "de":
+        return ["Aus", "An"][v]
+    return v
+
 def toggleLed():
     PIN_LED1.value(not PIN_LED1.value())
 
 def getTime(offset_m=None):
-    "param: offset in minutes"
+    """param: offset in minutes"""
     d = RTC().datetime()
     if offset_m:
         d = list(d)	
         if offset_m > 23*60:
             offset_m = 23 * 60
-            print("Warnung! offset sehr gross:"+offset_m)
+            print("Warnung! offset sehr gross:"+str(offset_m))
         d[5]+=offset_m
         while d[5]>59:
             d[5]-=60
@@ -201,7 +221,7 @@ def init():
             if cfg.get("deepsleeprepeat"):
                 globs.deepsleep_ms = int(cfg.get("ds") * 1000)
         except Exception as e:
-            cfgok=0
+            # cfgok=0
             comu.addTx("Fehler: Lesen von RTC-RAM:"+str(e))
         # if voltage is back, clear deepsleep
         if getVCCVolt() >4:
@@ -275,6 +295,14 @@ def parseMsg():
                 comu.addTx(f"Wasser1:{getWater(1)}, Wasser2:{getWater(2)}")
             else:
                 setWater(num, direction)
+            return
+        if b"dose" in cmd:
+            num = cmd[-1:]
+            direction = val
+            if direction == "?":
+                comu.addTx(f"dose1:{getDose(1)}, dose:{getDose(2)}")
+            else:
+                setDose(num, direction)
             return
         if b"testalarm" in cmd:
             sendAlarm("test:"+str(msg))
@@ -437,6 +465,7 @@ def formTime(text):
     return text
 
 def main():
+    speed = -1
     if not globs.inited:
         init()
     while globs.dorun:     # do forever
@@ -456,7 +485,7 @@ def main():
             print(ths)
         motors = "Motoren 1:"+getMotor(1, 'de')+", 2:"+getMotor(2, 'de')
         water = f"Wasser 1:{getWater(1, 'de')}, 2:{getWater(2, 'de')}"
-        fenster = "Fenster: ?\r\n"  # todo. need 8 gpios first.
+        # fenster = "Fenster: ?\r\n"  # todo. need 8 gpios first.
         comu.addTx(motors)
         comu.addTx(water)
         comu.addTx(f"Spannung: USB={getVCCVolt()}V ; Batt={getBatVolt(2)}V.")
