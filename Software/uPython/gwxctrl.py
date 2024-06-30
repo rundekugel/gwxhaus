@@ -5,6 +5,10 @@ import json
 
 import machine, esp32
 from machine import Pin, RTC, deepsleep
+from ucryptolib import aes
+from os import urandom
+from binascii import hexlify
+from hashlib import sha256
 
 import windsensor
 import HYT221 
@@ -12,8 +16,9 @@ import comu
 
 __version__ = "0.1.3"
 
+MODE_CBC = 2
 # pinning for esp32-lite
-PIN_WIND = 32   # Pin(35, Pin.IN, pull=Pin.PULL_UP)    # pin35 is also ADC1_7
+PIN_WIND = 13   # Pin(35, Pin.IN, pull=Pin.PULL_UP)    # pin35 is also ADC1_7
 PIN_SCL1 = 5
 PIN_SDA1 = 4
 PIN_SCL2 = 2
@@ -25,8 +30,8 @@ PIN_MOTOR1 = Pin(25, Pin.OUT)
 PIN_MOTOR1D = Pin(26, Pin.OUT)
 PIN_MOTOR2 = Pin(12, Pin.OUT)
 PIN_MOTOR2D = Pin(14, Pin.OUT)
-DOSE1 = Pin(19, Pin.OUT)
-DOSE2 = Pin(18, Pin.OUT)
+DOSE1 = Pin(18, Pin.OUT)
+DOSE2 = Pin(23, Pin.OUT)
 # PIN_POWER_GOOD = Pin(13, Pin.IN, Pin.PULL_DOWN)
 ADC_BATT = machine.ADC(39)      # VN
 PINNUM_POWER = 36
@@ -59,6 +64,9 @@ class globs:
     sturmdelay_off = 100
     deepsleep_ms = 0
     lightsleep_ms = 0
+    encoder = None
+    decoder = None
+    iv = b""
 
 def servCB(msg=None):
     if globs.verbosity:
@@ -201,6 +209,12 @@ def init():
     ADC_BATT.atten(machine.ADC.ATTN_11DB)    # set to 3.3V range
     ADC_POWER.atten(machine.ADC.ATTN_11DB)
     esp32.wake_on_ext0(pin=PINNUM_POWER, level=esp32.WAKEUP_ANY_HIGH)
+    ak = globs.cfg.get("ak").encode()
+    globs.iv = urandom(16)
+    if ak:
+        ak = sha256(ak).digest()
+        globs.decoder=aes(ak, MODE_CBC, globs.iv).decrypt
+        globs.encoder=aes(ak, MODE_CBC, globs.iv).encrypt
     # globs.uart = comu
     comu.init(2)
     rc = machine.reset_cause()
@@ -354,6 +368,22 @@ def parseMsg():
             comu.addTx(m)
             if globs.verbosity:
                 print(m)
+        if b"iv?" in cmd:
+            m = f"iv: {hexlify(globs.iv)}."
+            comu.addTx(m)
+            if globs.verbosity:
+                print(m)
+        if b"am:" in cmd[:3]:
+            if globs.decoder:
+                encrypted = cmd[3:]
+                encrypted += " " * (16 - len(encrypted) % 16)
+                dec = globs.decoder(encrypted)
+                print(dec)
+            else:
+                m="no dec!"
+                if globs.verbosity:
+                    print(m)
+                comu.addTx(m)
 
     except Exception as e:
         if globs.verbosity:
