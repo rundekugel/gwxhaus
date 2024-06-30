@@ -13,6 +13,7 @@ from hashlib import sha256
 import windsensor
 import HYT221 
 import comu
+import docrypt
 
 __version__ = "0.1.3"
 
@@ -161,7 +162,7 @@ def getTime(offset_m=None):
             d[4] += 1   # next hour
         if d[4] >23:
             d[4] -= 24  # next day
-    return  f"{d[4]:02}:{d[5]:02}:{d[6]:02}"
+    return f"{d[4]:02}:{d[5]:02}:{d[6]:02}"
 
 def dictLower(d):
     for k in list(d):
@@ -378,7 +379,9 @@ def parseMsg():
                 encrypted = cmd[3:]
                 encrypted += " " * (16 - len(encrypted) % 16)
                 dec = globs.decoder(encrypted)
-                print(dec)
+                if globs.verbosity:
+                    print(dec)
+                docrypt.parse(dec)
             else:
                 m="no dec!"
                 if globs.verbosity:
@@ -555,7 +558,7 @@ def main():
                 battV = getBatVolt()
                 sendAlarm(f"gwxctrl Spannung zu klein: USB={getVCCVolt()}V ; Batt={battV}V.")
                 globs.lightsleep_ms = int(vccVal[1])
-                batSets = globs.cfg.get("dsonbat")	# deepsleep on low bat
+                batSets = globs.cfg.get("dsonbat")  	# deepsleep on low bat
                 if batSets:
                     for setting in batSets:
                         if battV < setting[0]:
