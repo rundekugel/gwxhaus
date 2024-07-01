@@ -63,7 +63,7 @@
         }
         if(text.includes("Batt=")) {
             var v = text.split("=")[1];
-            add2Id("log",v);
+            //add2Id("log",v);
             var v2 = parseFloat(v);
             var p = Math.round(v2/4.5*100);
             if(v2 >3.5) 
@@ -73,7 +73,7 @@
                 else write2Id("cbat", "Backupbatterie wird entladen. ");
                 add2Id("cbat", ""+p);
             }
-            add2Id("log",v2);
+            //add2Id("log",v2);
         }
       }  );
       //if(iohdlSens.state) write2Id("hbs", " /"); else write2Id("hbs", " \\");
@@ -85,20 +85,28 @@
       wifihdl.state = 1-wifihdl.state;
       if(wifihdl.state) write2Id("hbc", " /"); else write2Id("hbc", " \\");
       //write2Id("wifictrl", text);
-    
-      var jsn = JSON.parse(text);
-      //add2Id("hbc", jsn.DHT11);
-      write2Id("dht11T", jsn.DHT11.Temperature.toFixed(1));
-      write2Id("dht11H", jsn.DHT11.Humidity);
-      write2Id("dht11D", jsn.DHT11.DewPoint.toFixed(1));
-      write2Id("ct", jsn.ESP32.Temperature.toFixed(1));
-      write2Id("cts", jsn.Time);
+      try {
+          var jsn = JSON.parse(text);
+          //add2Id("hbc", jsn.DHT11);
+          write2Id("dht11T", jsn.DHT11.Temperature.toFixed(1));
+          write2Id("dht11H", jsn.DHT11.Humidity);
+          write2Id("dht11D", jsn.DHT11.DewPoint.toFixed(1));
+          write2Id("ct", jsn.ESP32.Temperature.toFixed(1));
+          write2Id("cts", jsn.Time);
+          write2Id("wifictrl", "Warte auf neue Daten...");
+      } catch (error) {
+          console.error(error);  
+          add2Id("wifictrl", "dauert länger...");
+      }
       oFileioWifiCtrl.load(m_ioGetWifiController); 
   }//--------------------------------------------     
   
 
   function wasseraus(){
       write2Id("hbs","wasser aus!");
+  }
+  function wasseran(minuten){
+      write2Id("hbs","wasser an fuer "+minuten+" min.");
   }
 </script>
 </head>    
@@ -107,7 +115,7 @@
     
 <h1>Gew&auml;chshaus Unter&ouml;d</h1>
 <hr>
-Test Version 0.3.0b
+Test Version 0.3.1
 <hr>
 
 <h3>Testsensor im Sicherungskasten </h3>
@@ -142,8 +150,8 @@ Heartbeat: [<textbox id="hb">.</textbox>] <br>
 <h3>Wasser Haus1</h3>
 Das sind nur Demo Buttons, die sind im Moment noch nicht an die Elektrik angeschlossen.<br>
 <button onclick="wasseraus()" name="butTimer">Wasser aus</button><br>
-<button>Wasser an 15min</button><br>
-<button>Wasser an 2h</button><br>
+<button onclick="wasseran(15)" >Wasser an 15min</button><br>
+<button onclick="wasseran(120)">Wasser an 2h</button><br>
 
 <h3>Bodenfeuchte</h3>
 Haus1: ??% &nbsp;&nbsp;&nbsp;&nbsp; Haus2: ??%
