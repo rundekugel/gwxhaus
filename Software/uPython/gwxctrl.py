@@ -523,7 +523,7 @@ def main():
         comu.addTx(motors)
         comu.addTx(water)
         comu.addTx(f"Spannung: USB={getVCCVolt()}V ; Batt={getBatVolt(2)}V.")
-        comu.proc("t:")
+        comu.proc()
         end=globs.loop_sleep *2
         while end >0:
             if globs.rx:
