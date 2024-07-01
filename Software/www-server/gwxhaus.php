@@ -96,7 +96,7 @@
           write2Id("wifictrl", "Warte auf neue Daten...");
       } catch (error) {
           console.error(error);  
-          add2Id("wifictrl", "dauert länger...");
+          write2Id("wifictrl", "dauert länger...");
       }
       oFileioWifiCtrl.load(m_ioGetWifiController); 
   }//--------------------------------------------     
