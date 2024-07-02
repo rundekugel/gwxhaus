@@ -35,6 +35,7 @@
   function iohdlSens(text){
       if(!iohdlSens.state) iohdlSens.state =0;
       iohdlSens.state = 1-iohdlSens.state;
+      if(text=="") return;
       lines = text.split(";");
       lines.forEach( line => 
       //for each(var line in lines)
@@ -46,7 +47,10 @@
             var s=text.split(":")
             var k=s[0].trim();
             var val=s[1].trim();
-            if(k=="sp") write2Id("wind", Math.round(val*10)/10);
+            if(k=="sp") {
+                write2Id("wind", Math.round(val*10)/10);
+                write2Id("wkmh", Math.round(val*36)/10);
+            }
             if(k=="th1") write2Id("th1", val+s[2]);
             if(k=="th2") write2Id("th2", val+s[2]+s[3]);
             if(k.includes("asser")) {
@@ -86,6 +90,8 @@
       wifihdl.state = 1-wifihdl.state;
       if(wifihdl.state) write2Id("hbc", " /"); else write2Id("hbc", " \\");
       //write2Id("wifictrl", text);
+      if(text=="") return;
+      if(text.includes("<title>504 ")) return;
       try {
           var jsn = JSON.parse(text);
           //add2Id("hbc", jsn.DHT11);
@@ -120,7 +126,7 @@
     
 <h1>Gew&auml;chshaus Unter&ouml;d</h1>
 <hr>
-Test Version 0.3.1a
+Test Version 0.3.2
 <hr>
 
 <h3>Testsensor im Sicherungskasten </h3>
@@ -131,10 +137,10 @@ Test Version 0.3.1a
 <tr><td>Aussensensor: </td><td id="dht11T">-</td><td>°C / Feuchte: <td id="dht11H">-</td><td>%rel. / Taupunkt: </td><td id="dht11D">-</td><td>°C</td><tr>
 <tr><td>Letztes Lebenszeichen um:</td><td id="cts">-</td>
 </table>
-<h3>Gewaechshaus Sensoren</h3>
+<h3>Gew&auml;chshaus Sensoren</h3>
 <pre id="hbs">Lade Daten...</pre>
 <table>
-<tr><td>Wind: </td><td id="wind">-</td><td>m/s</td></tr>
+<tr><td>Wind: </td><td id="wind">-</td><td>m/s =</td><td id="wkmh">-</td><td>km/h</td></tr></tr>
 <tr><td>Haus1: </td><td id="th1">-</td><td>%rel.</td><td> / Wasser:</td><td id="w1">-</td></tr>
 <tr><td>Haus2: </td><td id="th2">-</td><td>%rel.</td><td> / Wasser:</td><td id="w2">-</td></tr>
 
