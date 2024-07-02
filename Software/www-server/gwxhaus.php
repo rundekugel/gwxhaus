@@ -46,7 +46,7 @@
             var s=text.split(":")
             var k=s[0].trim();
             var val=s[1].trim();
-            if(k=="sp") write2Id("wind", val);
+            if(k=="sp") write2Id("wind", Math.round(val*10)/10);
             if(k=="th1") write2Id("th1", val+s[2]);
             if(k=="th2") write2Id("th2", val+s[2]+s[3]);
             if(k.includes("asser")) {
@@ -80,6 +80,7 @@
       oFileioSens.load(m_ioGetGwxSens); 
   }//--------------------------------------------      
       
+      
   function wifihdl(text){
       if(!wifihdl.state) wifihdl.state =0;
       wifihdl.state = 1-wifihdl.state;
@@ -88,9 +89,13 @@
       try {
           var jsn = JSON.parse(text);
           //add2Id("hbc", jsn.DHT11);
-          write2Id("dht11T", jsn.DHT11.Temperature.toFixed(1));
+          v = jsn.DHT11.Temperature;
+          if(v==null) v="?"; else v=v.toFixed(1);
+          write2Id("dht11T", v);
           write2Id("dht11H", jsn.DHT11.Humidity);
-          write2Id("dht11D", jsn.DHT11.DewPoint.toFixed(1));
+          v = jsn.DHT11.DewPoint;
+          if(v==null) v="?"; else v=v.toFixed(1);
+          write2Id("dht11D", v);
           write2Id("ct", jsn.ESP32.Temperature.toFixed(1));
           write2Id("cts", jsn.Time);
           write2Id("wifictrl", "Warte auf neue Daten...");
@@ -115,7 +120,7 @@
     
 <h1>Gew&auml;chshaus Unter&ouml;d</h1>
 <hr>
-Test Version 0.3.1
+Test Version 0.3.1a
 <hr>
 
 <h3>Testsensor im Sicherungskasten </h3>
