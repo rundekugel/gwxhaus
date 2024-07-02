@@ -35,63 +35,71 @@
   function iohdlSens(text){
       if(!iohdlSens.state) iohdlSens.state =0;
       iohdlSens.state = 1-iohdlSens.state;
-      if(text=="") return;
-      lines = text.split(";");
-      lines.forEach( line => 
-      //for each(var line in lines)
-      {
-        text= trim(line);
-        //if(text == "") continue;
- 
-        if(text.includes(":")) {
-            var s=text.split(":")
-            var k=s[0].trim();
-            var val=s[1].trim();
-            if(k=="sp") {
-                write2Id("wind", Math.round(val*10)/10);
-                write2Id("wkmh", Math.round(val*36)/10);
+      if(text=="" || text.includes("<title>504 ")) {
+          oFileioSens.load(m_ioGetGwxSens); 
+          return;
+      }
+      try{
+          lines = text.split(";");
+          lines.forEach( line => 
+          //for each(var line in lines)
+          {
+            text= trim(line);
+            //if(text == "") continue;
+     
+            if(text.includes(":")) {
+                var s=text.split(":")
+                var k=s[0].trim();
+                var val=s[1].trim();
+                if(k=="sp") {
+                    write2Id("wind", Math.round(val*10)/10);
+                    write2Id("wkmh", Math.round(val*36)/10);
+                }
+                if(k=="th1") write2Id("th1", val+s[2]);
+                if(k=="th2") write2Id("th2", val+s[2]+s[3]);
+                if(k.includes("asser")) {
+                    var ww = val.split(",")
+                    write2Id("w1", ww[0]);
+                    write2Id("w2", s[2]);
+                }
+                if(k=="Spannung") {
+                    var s = parseFloat(val.split("=")[1]);
+                    write2Id("cusb", val);
+                    if(s<4.5) write2Id("cusb2", " !Spannung zu gering. Defekt, oder Stromausfall!")                
+                 }
+                if(k=="ts") write2Id("ts", val+":"+s[2]+":"+s[3] );
             }
-            if(k=="th1") write2Id("th1", val+s[2]);
-            if(k=="th2") write2Id("th2", val+s[2]+s[3]);
-            if(k.includes("asser")) {
-                var ww = val.split(",")
-                write2Id("w1", ww[0]);
-                write2Id("w2", s[2]);
+            if(text.includes("Batt=")) {
+                var v = text.split("=")[1];
+                //add2Id("log",v);
+                var v2 = parseFloat(v);
+                var p = Math.round(v2/4.5*100);
+                if(v2 >3.5) 
+                    write2Id("cbat", "Backupbatterie ok.");
+                else {
+                    if(p <20) write2Id("cbat", "Backupbatterie unter 20% ! ");
+                    else write2Id("cbat", "Backupbatterie wird entladen. ");
+                    add2Id("cbat", ""+p);
+                }
+                //add2Id("log",v2);
             }
-            if(k=="Spannung") {
-                var s = parseFloat(val.split("=")[1]);
-                write2Id("cusb", val);
-                if(s<4.5) write2Id("cusb2", " !Spannung zu gering. Defekt, oder Stromausfall!")                
-             }
-            if(k=="ts") write2Id("ts", val+":"+s[2]+":"+s[3] );
-        }
-        if(text.includes("Batt=")) {
-            var v = text.split("=")[1];
-            //add2Id("log",v);
-            var v2 = parseFloat(v);
-            var p = Math.round(v2/4.5*100);
-            if(v2 >3.5) 
-                write2Id("cbat", "Backupbatterie ok.");
-            else {
-                if(p <20) write2Id("cbat", "Backupbatterie unter 20% ! ");
-                else write2Id("cbat", "Backupbatterie wird entladen. ");
-                add2Id("cbat", ""+p);
-            }
-            //add2Id("log",v2);
-        }
-      }  );
-      //if(iohdlSens.state) write2Id("hbs", " /"); else write2Id("hbs", " \\");
+          }  );
+      }catch (error) {
+          console.error(error);  
+      }
       oFileioSens.load(m_ioGetGwxSens); 
   }//--------------------------------------------      
-      
       
   function wifihdl(text){
       if(!wifihdl.state) wifihdl.state =0;
       wifihdl.state = 1-wifihdl.state;
       if(wifihdl.state) write2Id("hbc", " /"); else write2Id("hbc", " \\");
       //write2Id("wifictrl", text);
-      if(text=="") return;
-      if(text.includes("<title>504 ")) return;
+      if(text=="" || text.includes("<title>504 ")) {
+          //no valid data - init next data callback
+          oFileioWifiCtrl.load(m_ioGetWifiController); 
+          return;
+      }
       try {
           var jsn = JSON.parse(text);
           //add2Id("hbc", jsn.DHT11);
