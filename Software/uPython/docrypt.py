@@ -5,7 +5,7 @@ import os
 from binascii import hexlify
 from hashlib import sha256
 
-__version__ = "0.0.2"
+__version__ = "0.1.0"
 
 MODE_ECB = 1
 MODE_CBC = 2
@@ -22,6 +22,8 @@ class globs:
     ak = b""
     
 def init(ak):
+    if globs.verbosity:
+        print("docrypt version:"+__version__)
     globs.ive = os.urandom(16)
     globs.ivd = os.urandom(16)
     if ak:

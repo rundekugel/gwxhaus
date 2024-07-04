@@ -10,7 +10,7 @@ from machine import Pin
 import binascii
 import utime
 
-__version__ = "1.1.0"
+__version__ = "1.1.1"
 
 HYT_Addr = 0x28		# default address (7-bit) of HYT221 sensor
 DHT10_Addr = 0x70
@@ -45,7 +45,7 @@ class HYT221:
     params: pins as object from Pin or as integer
     """
     i2c = None
-    address = None
+    address = HYT_Addr
     verbosity = 0
     testremotecontrol = None
 
@@ -58,9 +58,8 @@ class HYT221:
             pinSDA = Pin(pinSDA, Pin.PULL_UP, Pin.OPEN_DRAIN)
         self.pinSCK = pinSCK
         self.pinSDA = pinSDA
-        if address is None:
-            address = HYT_Addr
-        self.address = address
+        if address is not None:
+            self.address = address
         self.i2c = I2C(scl=self.pinSCK, sda=self.pinSDA, freq=freq)
     
     def __str__(self):
