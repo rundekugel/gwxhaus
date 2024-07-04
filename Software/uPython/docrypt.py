@@ -6,23 +6,30 @@ from binascii import hexlify
 from hashlib import sha256
 
 __version__ = "0.0.2"
+
+MODE_ECB = 1
 MODE_CBC = 2
+MODE_CTR = 6
 
 class globs:
     filename = ""
     filehandle = None
-    encoder = None
-    decoder = None
-    iv = b""
+    encr = None
+    decr = None
+    ive = b""
+    ivd = b""
     verbosity = 3
     ak = b""
     
 def init(ak):
-    globs.iv = os.urandom(16)
+    globs.ive = os.urandom(16)
+    globs.ivd = os.urandom(16)
     if ak:
+        if not isinstance(ak, bytes):
+            ak = str(ak).encode()
         globs.ak = sha256(ak).digest()
-        globs.decoder=aes(globs.ak, MODE_CBC, globs.iv).decrypt
-        globs.encoder=aes(globs.ak, MODE_CBC, globs.iv).encrypt
+        globs.decr=aes(globs.ak, MODE_ECB, globs.ivd).decrypt
+        globs.encr=aes(globs.ak, MODE_ECB, globs.ive).encrypt
         
 def bin2str(btext):
     r=""
@@ -30,14 +37,21 @@ def bin2str(btext):
         r+=chr(c)
     return r
         
+def encode(plain,iv=None):
+    if iv: globs.ive = iv
+    globs.encr=aes(globs.ak, MODE_ECB, globs.ive).encrypt
+    if not isinstance(plain, bytes):
+        plain=plain.encode()
+    return
+        
 def parse(text):
     try:
-        if globs.decoder:
+        if globs.decr:
             c=" "
             if not isinstance(text, bytes):
                 c=b" "
             text += c * (16 - len(text) % 16)
-            text=globs.decoder(text)
+            text=globs.decr(text)
             if globs.verbosity>2:
                 print(text)
         text = bin2str(text)
@@ -58,18 +72,25 @@ def parse(text):
             globs.filehandle.close()
             globs.filehandle = None
             return "ok."
-        if c=='r' and globs.filehandle and globs.encoder():
+        if c=='r' and globs.filehandle and globs.encr():
             r = globs.filehandle.read(128)
             r + " " * (16 - len(r) % 16)
-            r = globs.encoder(r)
+            r = globs.encr(r)
             return r
         if c=='l':
-            if globs.encoder:
+            if globs.encr:
                 r=str(os.listdir())
                 r += " " * (16 - len(r) % 16)
-                return hexlify(globs.encoder(r))
+                return hexlify(globs.encr(r))
+        if c=='t':
+            if globs.encr:
+                r="test!"
+                r += " " * (16 - len(r) % 16)
+                if globs.verbosity:
+                    print(r)
+                return hexlify(globs.encr(r))
     except Exception as e:
-        print("Error: "+str(e))
+        print("Error parse: "+str(e))
     return "nok!"
             
 # eof

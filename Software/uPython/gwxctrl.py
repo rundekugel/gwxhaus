@@ -15,7 +15,7 @@ import HYT221
 import comu
 import docrypt
 
-__version__ = "0.1.3"
+__version__ = "0.1.3a"
 
 MODE_CBC = 2
 # pinning for esp32-lite
@@ -211,12 +211,9 @@ def init():
     ADC_BATT.atten(machine.ADC.ATTN_11DB)    # set to 3.3V range
     ADC_POWER.atten(machine.ADC.ATTN_11DB)
     esp32.wake_on_ext0(pin=PINNUM_POWER, level=esp32.WAKEUP_ANY_HIGH)
-    ak = globs.cfg.get("ak").encode()
-    globs.iv = urandom(16)
+    ak = globs.cfg.get("ak")
     if ak:
-        ak = sha256(ak).digest()
-        globs.decoder=aes(ak, MODE_CBC, globs.iv).decrypt
-        globs.encoder=aes(ak, MODE_CBC, globs.iv).encrypt
+        docrypt.init(ak = ak)
     # globs.uart = comu
     comu.init(2)
     rc = machine.reset_cause()
@@ -335,6 +332,11 @@ def parseMsg():
             globs.dorun = False
         if b"todos?" in msg:
             comu.addTx(str(globs.todos))
+        elif b"todo" in msg:
+            if "grfx" in val:
+                val = val.replace("grfx","")
+                if globs.verbosity: print("todo:"+str(val))
+                globs.todo.append(val)
         if b"globs?" in msg:
             comu.addTx(str(globs.__dict__))
         if b"cfg?" in msg:
@@ -375,16 +377,15 @@ def parseMsg():
             comu.addTx(m)
             if globs.verbosity:
                 print(m)
+        if b"i2cscan" in cmd:
+            hy = [globs.hy1, globs.hy2][int(val)]
+            devs = hy.scan()
+            m= b"I2C devices found: "+str(devs).encode() +b" = "+hexlify(bytes(devs), " ")
+            if globs.verbosity: print(m)
+            comu.addTx(m)
         if b"am:" in cmd[:3]:
-            if globs.decoder:
                 encrypted = cmd[3:]
-                encrypted += " " * (16 - len(encrypted) % 16)
-                dec = globs.decoder(encrypted)
-                if globs.verbosity:
-                    print(dec)
-                docrypt.parse(dec)
-            else:
-                m="no dec!"
+                m = docrypt.parse(dec)
                 if globs.verbosity:
                     print(m)
                 comu.addTx(m)
