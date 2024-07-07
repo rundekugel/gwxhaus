@@ -4,6 +4,8 @@
 <title>Unter&ouml;d Gew&auml;chshaus</title>
 <!-- gwxhaus GUI test -->
 
+<link rel="stylesheet" href="styles.css">
+ 
 <script type="text/javascript" src="js/tools.js"></script>
 <script type="text/javascript" src="js/timer.js"></script>
 <script type="text/javascript" src="js/gAjax.js"></script>
@@ -61,6 +63,11 @@
                     var ww = val.split(",")
                     write2Id("w1", ww[0]);
                     write2Id("w2", s[2]);
+                }
+                if(k.includes("otor")) {
+                    var ww = val.split(",")
+                    write2Id("m1", ww[0]);
+                    write2Id("m2", s[2]);
                 }
                 if(k=="Spannung") {
                     var s = parseFloat(val.split("=")[1]);
@@ -134,23 +141,15 @@
     
 <h1>Gew&auml;chshaus Unter&ouml;d</h1>
 <hr>
-Test Version 0.3.2
+Test Version 0.3.3
 <hr>
 
-<h3>Testsensor im Sicherungskasten </h3>
-<pre id="hbc">Lade Daten...</pre>
-<div id="wifictrl">-</div>
-<table>
-<tr><td>Controllertemperatur: </td><td id="ct">-</td><td>°C</td></tr>
-<tr><td>Aussensensor: </td><td id="dht11T">-</td><td>°C / Feuchte: <td id="dht11H">-</td><td>%rel. / Taupunkt: </td><td id="dht11D">-</td><td>°C</td><tr>
-<tr><td>Letztes Lebenszeichen um:</td><td id="cts">-</td>
-</table>
 <h3>Gew&auml;chshaus Sensoren</h3>
 <pre id="hbs">Lade Daten...</pre>
 <table>
 <tr><td>Wind: </td><td id="wind">-</td><td>m/s =</td><td id="wkmh">-</td><td>km/h</td></tr></tr>
-<tr><td>Haus1: </td><td id="th1">-</td><td>%rel.</td><td> / Wasser:</td><td id="w1">-</td></tr>
-<tr><td>Haus2: </td><td id="th2">-</td><td>%rel.</td><td> / Wasser:</td><td id="w2">-</td></tr>
+<tr><td>Haus1: </td><td id="th1">-</td><td> %rel.</td></tr>
+<tr><td>Haus2: </td><td id="th2">-</td><td> %rel.</td></tr>
 
 <!--
 Heartbeat: [<textbox id="hb">.</textbox>] <br>
@@ -158,20 +157,39 @@ Heartbeat: [<textbox id="hb">.</textbox>] <br>
 <tr><td>Letzte Nachricht: </td><td id="ts">-</td></tr>
 </table>
 <hr>
+<h3>Wasser Haus1</h3>
+Ventile noch nicht angeschlossen
+<s><table><tr class="strikeout"><td>Status Wasser: </td><td id="w1">-</td></tr><br></table></s>
+Das sind nur Demo Buttons, die sind im Moment noch nicht an die Elektrik angeschlossen.<br>
+<button onclick="wasseraus()" name="butTimer">Wasser aus</button><br>
+<button onclick="wasseran(15)" >Wasser an 15min</button><br>
+<button onclick="wasseran(120)">Wasser an 2h</button><br>
+<h3>Wasser Haus2</h3>
+Ventile noch nicht angeschlossen
+<s><table><tr class="strikeout"><td>Status Wasser: </td><td id="w2">-</td></tr><br></table></s>
+Das sind nur Demo Buttons, die sind im Moment noch nicht an die Elektrik angeschlossen.<br>
+<button onclick="wasseraus()" name="butTimer">Wasser aus</button><br>
+<button onclick="wasseran(15)" >Wasser an 15min</button><br>
+<button onclick="wasseran(120)">Wasser an 2h</button><br>
+<hr>
+
 <h3>Controller</h3>
 <table>
+<tr class="strikeout"><td>Motoren noch nicht angeschlossen Haus1:</td><td id="m1">-</td><td><s>Haus2:</td><td id="m2">-</td></tr>
 <tr><td>Batterieladung: </td><td id="cbat">-</td><td>%</td></tr>
 <tr><td>Spannung: </td><td id="cusb">-</td><td id="cusb2"></td></tr>
 </table>
 <hr>
 
+<h3>Sensor im Sicherungskasten </h3>
+<pre id="hbc">Lade Daten...</pre>
+<div id="wifictrl">-</div>
+<table>
+<tr><td>Controllertemperatur: </td><td id="ct">-</td><td>°C</td></tr>
+<tr><td>Aussensensor: </td><td id="dht11T">-</td><td>°C / Feuchte: <td id="dht11H">-</td><td>%rel. / Taupunkt: </td><td id="dht11D">-</td><td>°C</td><tr>
+<tr><td>Letztes Lebenszeichen um:</td><td id="cts">-</td>
+</table>
 <hr>
-<h3>Wasser Haus1</h3>
-Das sind nur Demo Buttons, die sind im Moment noch nicht an die Elektrik angeschlossen.<br>
-<button onclick="wasseraus()" name="butTimer">Wasser aus</button><br>
-<button onclick="wasseran(15)" >Wasser an 15min</button><br>
-<button onclick="wasseran(120)">Wasser an 2h</button><br>
-
 <h3>Bodenfeuchte</h3>
 Haus1: ??% &nbsp;&nbsp;&nbsp;&nbsp; Haus2: ??%
 <h2>Fenster Status</h2>
