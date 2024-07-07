@@ -1,11 +1,13 @@
 table, th, td {
-    border: 1px solid black;
+    border: 2px solid #007000;
     border-collapse: collapse;
+    font-family:verdana,sans-serif;
 }
 
 td {
     position: relative;
     padding: 5px 10px;
+    background-color:#006000 ;
 }
 
 tr.strikeout td:before {
@@ -17,4 +19,5 @@ tr.strikeout td:before {
     width: 100%;
 }
 
-body {background-color:"#80ff80" ; color:black}
+body {background-color:#007000 ; color:white}
+button{background-color: #80cf80; color:black; border-radius: 8px;}

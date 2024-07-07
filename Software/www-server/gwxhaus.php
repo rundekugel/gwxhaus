@@ -137,7 +137,7 @@
 </script>
 </head>    
 
-<body bgcolor="#80ff80" onload="startAjax(); ">
+<body onload="startAjax(); ">
     
 <h1>Gew&auml;chshaus Unter&ouml;d</h1>
 <hr>
@@ -161,9 +161,9 @@ Heartbeat: [<textbox id="hb">.</textbox>] <br>
 Ventile noch nicht angeschlossen
 <s><table><tr class="strikeout"><td>Status Wasser: </td><td id="w1">-</td></tr><br></table></s>
 Das sind nur Demo Buttons, die sind im Moment noch nicht an die Elektrik angeschlossen.<br>
-<button onclick="wasseraus()" name="butTimer">Wasser aus</button><br>
-<button onclick="wasseran(15)" >Wasser an 15min</button><br>
-<button onclick="wasseran(120)">Wasser an 2h</button><br>
+<button onclick="wasseraus()" name="butTimer">Wasser aus</button> 
+<button onclick="wasseran(15)" >Wasser an 15min</button>
+<button onclick="wasseran(120)">Wasser an 2h</button> 
 <h3>Wasser Haus2</h3>
 Ventile noch nicht angeschlossen
 <s><table><tr class="strikeout"><td>Status Wasser: </td><td id="w2">-</td></tr><br></table></s>
