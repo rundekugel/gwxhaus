@@ -201,7 +201,7 @@ def init():
     globs.ws = windsensor.Windsensor(PIN_WIND)
     globs.ws.verbosity = globs.verbosity
     addr1 = globs.cfg.get("sensoraddr1")    # this is None, if not given
-    globs.hy1 = HYT221.HYT221(PIN_SCL1, PIN_SDA1, addr1)    # if addr1 is None, default is used
+    globs.hy1 = HYT221.HYT221(PIN_SCL1, PIN_SDA1, addr1, freq=500)    # if addr1 is None, default is used
     addr2 = globs.cfg.get("sensoraddr2")
     globs.hy2 = HYT221.HYT221(PIN_SCL2, PIN_SDA2, addr2)
     globs.hy1.verbosity = globs.verbosity
