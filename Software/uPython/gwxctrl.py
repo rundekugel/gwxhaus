@@ -68,6 +68,7 @@ class globs:
     encoder = None
     decoder = None
     iv = b""
+    modcfg = ""
 
 def servCB(msg=None):
     if globs.verbosity:
@@ -190,10 +191,27 @@ def readConfig(filename="gwxctrl.cfg"):
     if "verbosity" in cfg:
         globs.verbosity = cfg["verbosity"]
     if globs.verbosity:
-        cfg.pop("ak")  # remove secrets before tx
+        cfg.pop("ak",None)  # remove secrets before tx
+        cfg.pop("secret",None) 
         msg += str(cfg)
         print(msg)
         comu.addTx(msg)
+        
+def updateConfigFile(addcfg, filename="gwxctrl.cfg"):
+    cfg = None
+    with open(filename,"r") as f:
+        cfg = json.load(f)
+    if not cfg:
+        msg = "Fehler! konnte config nicht laden!"
+        print(msg)
+        comu.addTx(msg)
+        return
+    dictLower(cfg)
+    dictLower(addcfg)
+    cfg.update(addcfg)
+    with open(filename,"w") as f:
+        json.dump(cfg,f)
+    return
 
 def init():
     print("GwxControl version:" + str(__version__))
@@ -257,6 +275,7 @@ def pinsReset():
     PIN_WATER1.value(0)
     PIN_WATER2.value(0)
     PIN_MOTOR1.value(0)
+    PIN_MOTOR1D.value(0)
     PIN_MOTOR2.value(0)
     PIN_MOTOR2D.value(0)
 
@@ -389,7 +408,19 @@ def parseMsg():
                 if globs.verbosity:
                     print(m)
                 comu.addTx(m)
-
+        if b"modcfgs" in cmd:
+            globs.modcfg = val
+        if b"modcfga" in cmd:
+            globs.modcfg += val
+        if b"modcfg." in cmd:
+            globs.modcfg += val
+            if globs.verbosity: print(globs.modcfg)
+            j=json.loads(globs.modcfg)
+            if globs.verbosity: print(str(j))
+            updateConfigFile(j)
+            globs.modcfg=""
+            comu.addTx("updated: "+str(j))
+                
     except Exception as e:
         if globs.verbosity:
             print("error in parseMsg:"+str(e))
@@ -517,13 +548,16 @@ def main():
         ths += "th2:" + getTH(globs.hy2)
         comu.addTx(ths)
         if globs.verbosity:
-            print(ths)
+            # print(ths)
+            pass
         motors = "Motoren 1:"+getMotor(1, 'de')+", 2:"+getMotor(2, 'de')
         water = f"Wasser 1:{getWater(1, 'de')}, 2:{getWater(2, 'de')}"
         # fenster = "Fenster: ?\r\n"  # todo. need 8 gpios first.
         comu.addTx(motors)
         comu.addTx(water)
         comu.addTx(f"Spannung: USB={getVCCVolt()}V ; Batt={getBatVolt(2)}V.")
+        if globs.verbosity:
+            print(comu.globs.tx)
         comu.proc()
         end=globs.loop_sleep *2
         while end >0:
