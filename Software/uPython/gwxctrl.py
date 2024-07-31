@@ -15,7 +15,7 @@ import HYT221
 import comu
 import docrypt
 
-__version__ = "0.1.3a"
+__version__ = "0.2.0"
 
 MODE_CBC = 2
 # pinning for esp32-lite
@@ -56,7 +56,7 @@ class globs:
     # last_waterstate = [0,0]     # possible: 0,1
     port = 80
     dorun = True
-    cfg = {"vccok":[4,30e3], "dsonbat":[[3.5,60e3],[3.3,300e3]]}
+    cfg = {"vccok":[4,30e3], "dsonbat":[[3.5,60e3],[3.3,300e3]], "sensf1":50,"sensf2":50}
     lasttime = 0
     todos = [("15:00","nop")]
     loop_sleep = 2.5
@@ -218,10 +218,16 @@ def init():
     readConfig(globs.cfgfile)
     globs.ws = windsensor.Windsensor(PIN_WIND)
     globs.ws.verbosity = globs.verbosity
-    addr1 = globs.cfg.get("sensoraddr1")    # this is None, if not given
-    globs.hy1 = HYT221.HYT221(PIN_SCL1, PIN_SDA1, addr1, freq=500)    # if addr1 is None, default is used
+    addr1 = globs.cfg.get("sensoraddr1")      # this is None, if not given
+    #freq = 50
+    f=globs.cfg.get("sensf1")
+    #if f: freq=f
+    globs.hy1 = HYT221.HYT221(PIN_SCL1, PIN_SDA1, addr1, freq=f)    # if addr1 is None, default is used
     addr2 = globs.cfg.get("sensoraddr2")
-    globs.hy2 = HYT221.HYT221(PIN_SCL2, PIN_SDA2, addr2)
+    #freq = 50
+    f=globs.cfg.get("sensf2")
+    #if f: freq=f
+    globs.hy2 = HYT221.HYT221(PIN_SCL2, PIN_SDA2, addr2, freq=f)
     globs.hy1.verbosity = globs.verbosity
     globs.hy2.verbosity = globs.verbosity
     comu.globs.callbackRx = servCB
@@ -287,7 +293,7 @@ def getTH(sensor):
         t,h = "-", "-"
         if globs.verbosity:
             print("eTh:"+str(e))
-    return "Temperatur: "+str(t)+"C, Luftfeuchte: "+str(h)+"%"
+    return "Temp.: "+str(t)+"C, Luftfeuchte: "+str(h)+"%"
 
 def parseMsg():
     """execute all cmds in globs.rx"""
@@ -301,7 +307,7 @@ def parseMsg():
                 print("pM:"+str(msg))
         if not msg:
             return
-        cmd, val = msg, None
+        cmd, val = msg, ""
         if isinstance(cmd, str):
             cmd = cmd.encode()
         if b"=" in cmd:
@@ -409,11 +415,13 @@ def parseMsg():
                     print(m)
                 comu.addTx(m)
         if b"modcfgs" in cmd:
+            if not val: val=b""
             globs.modcfg = val
         if b"modcfga" in cmd:
             globs.modcfg += val
         if b"modcfg." in cmd:
             globs.modcfg += val
+            globs.modcfg = globs.modcfg.decode()
             if globs.verbosity: print(globs.modcfg)
             j=json.loads(globs.modcfg)
             if globs.verbosity: print(str(j))
@@ -555,7 +563,7 @@ def main():
         # fenster = "Fenster: ?\r\n"  # todo. need 8 gpios first.
         comu.addTx(motors)
         comu.addTx(water)
-        comu.addTx(f"Spannung: USB={getVCCVolt()}V ; Batt={getBatVolt(2)}V.")
+        comu.addTx(f"USB={getVCCVolt()}V ; Bat.={getBatVolt(2)}V.")
         if globs.verbosity:
             print(comu.globs.tx)
         comu.proc()
