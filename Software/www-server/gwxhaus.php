@@ -57,7 +57,7 @@
                     write2Id("wind", Math.round(val*10)/10);
                     write2Id("wkmh", Math.round(val*36)/10);
                 }
-                if(k=="th1") write2Id("th1", val+s[2]);
+                if(k=="th1") write2Id("th1", val+s[2]+s[3]);
                 if(k=="th2") write2Id("th2", val+s[2]+s[3]);
                 if(k.includes("asser")) {
                     var ww = val.split(",")
