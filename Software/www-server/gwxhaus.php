@@ -187,7 +187,7 @@ Das sind nur Demo Buttons, die sind im Moment noch nicht an die Elektrik angesch
 <table>
 <tr><td>Controllertemperatur: </td><td id="ct">-</td><td>°C</td></tr>
 <tr><td>Aussensensor: </td><td id="dht11T">-</td><td>°C / Feuchte: <td id="dht11H">-</td><td>%rel. / Taupunkt: </td><td id="dht11D">-</td><td>°C</td><tr>
-<tr><td>Letztes Lebenszeichen um:</td><td id="cts">-</td>
+<tr><td>Letztes Lebenszeichen um:</td><td id="cts">-</td></tr>
 </table>
 <hr>
 <h3>Bodenfeuchte</h3>
