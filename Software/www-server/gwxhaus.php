@@ -21,17 +21,19 @@
   //data stuff
   var m_ioGetGwxSens = "getGwxSensors.php";
   var m_ioGetWifiController = "getWifiController.php";
+  var m_ioGetvsupplyhdl = "getVSupply.php";
   
   //cFileContent is the ajax callback
   oFileioSens = new cFileContent(iohdlSens);
   oFileioWifiCtrl = new cFileContent(wifihdl);
-   
+  oFileiovsupplyhdl = new cFileContent(vsupplyhdl);
   //--------------------------------------------
     
 
   function startAjax(){
       oFileioSens.load(m_ioGetGwxSens); 
       oFileioWifiCtrl.load(m_ioGetWifiController);
+      oFileiovsupplyhdl.load(m_ioGetvsupplyhdl);
   }
       
   function iohdlSens(text){
@@ -128,6 +130,41 @@
   }//--------------------------------------------     
   
 
+      
+  function vsupplyhdl(text){
+      if(!vsupplyhdl.state) vsupplyhdl.state =0;
+      vsupplyhdl.state = 1-vsupplyhdl.state;
+      //if(vsupplyhdl.state) write2Id("hbc", " /"); else write2Id("hbc", " \\");
+      //add2Id("log", text);
+      if(text=="" || text.includes("<title>504 ")) {
+          //no valid data - init next data callback
+          oFileiovsupplyhdl.load(m_ioGetvsupplyhdl); 
+          return;
+      }
+      try {
+          var jsn = JSON.parse(text);
+
+          v = jsn.ANALOG.A1;
+          if(v==null) v="?"; else v=(v/10).toFixed(1);
+          write2Id("L1", v);
+          v = jsn.ANALOG.A1;
+          if(v==null) v="?"; else v=(v/10).toFixed(1);
+          write2Id("L2", v);
+          v = jsn.ANALOG.A1;
+          if(v==null) v="?"; else v=(v/10).toFixed(1);
+          write2Id("L3", v);
+        
+          write2Id("Lct", jsn.ESP32.Temperature.toFixed(1));
+          write2Id("Lts", jsn.Time);
+          write2Id("VSupply", "Warte auf neue Daten...");
+      } catch (error) {
+          console.error(error);  
+          write2Id("VSupply", "dauert länger...");
+      }
+      oFileiovsupplyhdl.load(m_ioGetvsupplyhdl); 
+  }//--------------------------------------------     
+  
+
   function wasseraus(){
       write2Id("hbs","wasser aus!");
   }
@@ -141,7 +178,7 @@
     
 <h1>Gew&auml;chshaus Unter&ouml;d</h1>
 <hr>
-Test Version 0.3.3
+Test Version 0.4.0
 <hr>
 
 <h3>Gew&auml;chshaus Sensoren</h3>
@@ -173,11 +210,15 @@ Das sind nur Demo Buttons, die sind im Moment noch nicht an die Elektrik angesch
 <button onclick="wasseran(120)">Wasser an 2h</button><br>
 <hr>
 
+<h3>Bodenfeuchte</h3>
+Haus1: ??% &nbsp;&nbsp;&nbsp;&nbsp; Haus2: ??%
+<h2>Fenster Status</h2>
+Haus1: ?.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Haus2: ?
+<hr>
+
 <h3>Controller</h3>
 <table>
 <tr class="strikeout"><td>Motoren noch nicht angeschlossen Haus1:</td><td id="m1">-</td><td><s>Haus2:</td><td id="m2">-</td></tr>
-<tr><td>Batterieladung: </td><td id="cbat">-</td><td>%</td></tr>
-<tr><td>Spannung: </td><td id="cusb">-</td><td id="cusb2"></td></tr>
 </table>
 <hr>
 
@@ -185,19 +226,33 @@ Das sind nur Demo Buttons, die sind im Moment noch nicht an die Elektrik angesch
 <pre id="hbc">Lade Daten...</pre>
 <div id="wifictrl">-</div>
 <table>
-<tr><td>Controllertemperatur: </td><td id="ct">-</td><td>°C</td></tr>
 <tr><td>Aussensensor: </td><td id="dht11T">-</td><td>°C / Feuchte: <td id="dht11H">-</td><td>%rel. / Taupunkt: </td><td id="dht11D">-</td><td>°C</td><tr>
 <tr><td>Letztes Lebenszeichen um:</td><td id="cts">-</td></tr>
 </table>
 <hr>
-<h3>Bodenfeuchte</h3>
-Haus1: ??% &nbsp;&nbsp;&nbsp;&nbsp; Haus2: ??%
-<h2>Fenster Status</h2>
-Haus1: ?.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Haus2: ?
-<hr>
+<h3>Stromversorgung</h3>
+<h4>Verteilerkasten Links</h4>
+<table>
+<tr><td>L1</td><td>L2</td><td>L3</td><td>Einheit</td><tr>
+<tr><td id="L1">-</td><td id="L2">-</td><td id="L3">-</td><td>Volt</td><tr>
+</table><table>    
+<tr><td>Controllertemperatur: </td><td id="Lct">-</td><td>°C</td></tr>    
+<tr><td>Letztes Lebenszeichen um:</td><td id="Lts">-</td></tr>
+</table>
+<h4>Controller-wifi-Schaltkasten</h4>
+<pre id="hbc">Lade Daten...</pre>
+<div id="wifictrl">-</div>
+<table>
+<tr><td>Controllertemperatur: </td><td id="ct">-</td><td>°C</td></tr>
+<tr><td>Batterieladung: </td><td id="cbat">-</td><td>%</td></tr>
+<tr><td>Spannung: </td><td id="cusb">-</td><td id="cusb2"></td></tr>
+<tr><td>Letztes Lebenszeichen um:</td><td id="cts">-</td></tr>
+</table>
+<hr><hr>
 <pre id="log">-</pre>
 <hr>
 Daten werden bei der Übertragung verschlüsselt. Aktionen können nur nach Login durchgeführt werden.<br>
 Datenschutz: <a href="/Datenschutz.html">Hier klicken.</a><br>
 20240118-2
 </body>
+
