@@ -1,4 +1,4 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<!DOCTYPE html>
 <html><head>
 <meta http-equiv="content-type" content="text/html; charset=UTF-8">
 <title>Unter&ouml;d Gew&auml;chshaus</title>
@@ -17,9 +17,13 @@
   var m_reloadTimeSens = 2000;
   var vIntervalId=0;
   var vIntervalId2=0;
+  var vLockSens=0;
+  var vLockWifi=0;
+  var vLockV1=0;
   
   //data stuff
-  var m_ioGetGwxSens = "getGwxSensors.php";
+  var m_ioGetGwxSens = "getGwxSensorsLast.php";
+  var m_ioGetGwxSens2 = "getGwxSensors.php";
   var m_ioGetWifiController = "getWifiController.php";
   var m_ioGetvsupplyhdl = "getVSupply.php";
   
@@ -31,16 +35,46 @@
     
 
   function startAjax(){
-      oFileioSens.load(m_ioGetGwxSens); 
-      oFileioWifiCtrl.load(m_ioGetWifiController);
-      oFileiovsupplyhdl.load(m_ioGetvsupplyhdl);
+      if(!vLockSens){
+          oFileioSens.load(m_ioGetGwxSens); 
+      }
+      vLockSens += 1;
+      if(vLockSens > 30){
+          vLockSens=0;
+      }
+      if(!vLockWifi){
+        oFileioWifiCtrl.load(m_ioGetWifiController);
+      }
+      vLockWifi += 1;
+      if(vLockWifi > 30){
+          vLockWifi=0;
+      }
+      if(!vLockV1){
+          oFileiovsupplyhdl.load(m_ioGetvsupplyhdl);
+      }
+      vLockV1 +=1;
+      if(vLockV1 >30){
+          vLockV1=0;
+      }
   }
-      
+
+  function timer1(){
+    startAjax();
+  }
+
+  function timer1An() {
+      startAjax();
+      m_ioGetGwxSens = m_ioGetGwxSens2;
+      vIntervalId = setInterval ( "timer1()", m_reloadTime );
+  }//-------------------
+            
   function iohdlSens(text){
+      vLockSens=0;
+      add2Id("log", "s:"+text);
       if(!iohdlSens.state) iohdlSens.state =0;
       iohdlSens.state = 1-iohdlSens.state;
       if(text=="" || text.includes("<title>504 ")) {
-          oFileioSens.load(m_ioGetGwxSens); 
+          //oFileioSens.load(m_ioGetGwxSens); 
           return;
       }
       try{
@@ -48,11 +82,14 @@
           lines.forEach( line => 
           //for each(var line in lines)
           {
-            text= trim(line);
-            //if(text == "") continue;
+            add2Id("log", "b:"+line);
+            // line = str_replace("}", "", line);   //why doesn't this work?
+            add2Id("log","r:" +line);
+            line= trim(line);
+            //if(line == "") continue;
      
-            if(text.includes(":")) {
-                var s=text.split(":")
+            if(line.includes(":")) {
+                var s=line.split(":")
                 var k=s[0].trim();
                 var val=s[1].trim();
                 if(k=="sp") {
@@ -78,7 +115,7 @@
                  }
                 if(k=="ts") write2Id("ts", val+":"+s[2]+":"+s[3] );
             }
-            if(text.includes("Batt=")) {
+            if(line.includes("Batt=")) {
                 var v = text.split("=")[1];
                 //add2Id("log",v);
                 var v2 = parseFloat(v);
@@ -96,10 +133,11 @@
       }catch (error) {
           console.error(error);  
       }
-      oFileioSens.load(m_ioGetGwxSens); 
+      //oFileioSens.load(m_ioGetGwxSens); 
   }//--------------------------------------------      
       
   function wifihdl(text){
+      vLockWifi=0;
       if(!wifihdl.state) wifihdl.state =0;
       wifihdl.state = 1-wifihdl.state;
       if(wifihdl.state) write2Id("hbc", " /"); else write2Id("hbc", " \\");
@@ -126,7 +164,7 @@
           console.error(error);  
           write2Id("wifictrl", "dauert länger...");
       }
-      oFileioWifiCtrl.load(m_ioGetWifiController); 
+      //oFileioWifiCtrl.load(m_ioGetWifiController); 
   }//--------------------------------------------     
   
 
@@ -134,6 +172,7 @@
   function vsupplyhdl(text){
       if(!vsupplyhdl.state) vsupplyhdl.state =0;
       vsupplyhdl.state = 1-vsupplyhdl.state;
+      vLockV1=0;
       //if(vsupplyhdl.state) write2Id("hbc", " /"); else write2Id("hbc", " \\");
       //add2Id("log", text);
       if(text=="" || text.includes("<title>504 ")) {
@@ -156,12 +195,12 @@
         
           write2Id("Lct", jsn.ESP32.Temperature.toFixed(1));
           write2Id("Lts", jsn.Time);
-          write2Id("VSupply", "Warte auf neue Daten...");
+          //write2Id("VSupply", "Warte auf neue Daten...");
       } catch (error) {
           console.error(error);  
-          write2Id("VSupply", "dauert länger...");
+          //write2Id("VSupply", "dauert länger...");
       }
-      oFileiovsupplyhdl.load(m_ioGetvsupplyhdl); 
+      //oFileiovsupplyhdl.load(m_ioGetvsupplyhdl); 
   }//--------------------------------------------     
   
 
@@ -174,11 +213,11 @@
 </script>
 </head>    
 
-<body onload="startAjax(); ">
+<body onload="timer1An(); ">
     
 <h1>Gew&auml;chshaus Unter&ouml;d</h1>
 <hr>
-Test Version 0.4.0
+Test Version 0.5.0
 <hr>
 
 <h3>Gew&auml;chshaus Sensoren</h3>
