@@ -55,13 +55,14 @@ def init(portnum=None):
     globs.dorun = 1
 
 def proc(msg=""):
-            content = msg
+            content = ""
             # globs.ths = ""
             while globs.tx:
                 content += str(globs.tx.pop(0)) +"; "
-                globs.uart.write(content.encode())
-                content = ""
-                # time.sleep(.1)
+            content += ";"+msg+";"
+            globs.uart.write(content.encode())
+            content = ""
+            # time.sleep(.1)
             # content += "---\r\n"
             d = RTC().datetime()
             content += (f"ts:{d[0]}-{d[1]:02}-{d[2]:02} {d[4]:02}:{d[5]:02}:{d[6]:02}\r\n")

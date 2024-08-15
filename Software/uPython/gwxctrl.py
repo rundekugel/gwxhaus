@@ -4,7 +4,7 @@ import time
 import json
 
 import machine, esp32
-from machine import Pin, RTC, deepsleep
+from machine import Pin, RTC, deepsleep, WDT
 from ucryptolib import aes
 from os import urandom
 from binascii import hexlify
@@ -15,7 +15,7 @@ import HYT221
 import comu
 import docrypt
 
-__version__ = "0.2.0"
+__version__ = "0.2.1"
 
 MODE_CBC = 2
 # pinning for esp32-lite
@@ -69,6 +69,7 @@ class globs:
     decoder = None
     iv = b""
     modcfg = ""
+    wdttime = 20
 
 def servCB(msg=None):
     if globs.verbosity:
@@ -539,10 +540,13 @@ def formTime(text):
     return text
 
 def main():
+    wdt=WDT(timeout=globs.wdttime*1000)
     speed = -1
     if not globs.inited:
+        wdt.feed()
         init()
     while globs.dorun:     # do forever
+        wdt.feed()
         toggleLed()     # heartbeat
         try:
             speed = -1
