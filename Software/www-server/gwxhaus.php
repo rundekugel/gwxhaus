@@ -70,21 +70,19 @@
             
   function iohdlSens(text){
       vLockSens=0;
-      add2Id("log", "s:"+text);
+      //add2Id("log", "s:"+text);
+      //write2Id("log", "s:"+text);
       if(!iohdlSens.state) iohdlSens.state =0;
       iohdlSens.state = 1-iohdlSens.state;
       if(text=="" || text.includes("<title>504 ")) {
-          //oFileioSens.load(m_ioGetGwxSens); 
           return;
       }
       try{
           lines = text.split(";");
           lines.forEach( line => 
-          //for each(var line in lines)
           {
-            add2Id("log", "b:"+line);
-            // line = str_replace("}", "", line);   //why doesn't this work?
-            add2Id("log","r:" +line);
+            line = line.replace( "\\r\\n}", "", line);
+            //line = line.replace( "{SSerialReceived:", "", line);
             line= trim(line);
             //if(line == "") continue;
      
@@ -108,15 +106,16 @@
                     write2Id("m1", ww[0]);
                     write2Id("m2", s[2]);
                 }
-                if(k=="Spannung") {
+                if(k=="USB=") {
                     var s = parseFloat(val.split("=")[1]);
                     write2Id("cusb", val);
+                    write2Id("cusb2", "ok");
                     if(s<4.5) write2Id("cusb2", " !Spannung zu gering. Defekt, oder Stromausfall!")                
                  }
                 if(k=="ts") write2Id("ts", val+":"+s[2]+":"+s[3] );
             }
-            if(line.includes("Batt=")) {
-                var v = text.split("=")[1];
+            if(line.includes("Bat.=")) {
+                var v = line.split("=")[1];
                 //add2Id("log",v);
                 var v2 = parseFloat(v);
                 var p = Math.round(v2/4.5*100);
@@ -128,6 +127,12 @@
                     add2Id("cbat", ""+p);
                 }
                 //add2Id("log",v2);
+
+            if(line.includes("USB=")) {
+                var s = parseFloat(line.split("=")[1]);
+                write2Id("cusb", line);
+                if(s<4.5) write2Id("cusb2", " !Spannung zu gering. Defekt, oder Stromausfall!")                
+             }                
             }
           }  );
       }catch (error) {
@@ -144,12 +149,14 @@
       //write2Id("wifictrl", text);
       if(text=="" || text.includes("<title>504 ")) {
           //no valid data - init next data callback
-          oFileioWifiCtrl.load(m_ioGetWifiController); 
+          //oFileioWifiCtrl.load(m_ioGetWifiController); 
           return;
       }
       try {
           var jsn = JSON.parse(text);
           //add2Id("hbc", jsn.DHT11);
+          write2Id("ct", jsn.ESP32.Temperature.toFixed(1));
+          write2Id("cts", jsn.Time);
           v = jsn.DHT11.Temperature;
           if(v==null) v="?"; else v=v.toFixed(1);
           write2Id("dht11T", v);
@@ -157,8 +164,6 @@
           v = jsn.DHT11.DewPoint;
           if(v==null) v="?"; else v=v.toFixed(1);
           write2Id("dht11D", v);
-          write2Id("ct", jsn.ESP32.Temperature.toFixed(1));
-          write2Id("cts", jsn.Time);
           write2Id("wifictrl", "Warte auf neue Daten...");
       } catch (error) {
           console.error(error);  
@@ -182,15 +187,15 @@
       }
       try {
           var jsn = JSON.parse(text);
-
+          var vdiv = 10.6
           v = jsn.ANALOG.A1;
-          if(v==null) v="?"; else v=(v/10).toFixed(1);
+          if(v==null) v="?"; else v=(v/vdiv).toFixed(1);
           write2Id("L1", v);
-          v = jsn.ANALOG.A1;
-          if(v==null) v="?"; else v=(v/10).toFixed(1);
+          v = jsn.ANALOG.A2;
+          if(v==null) v="?"; else v=(v/vdiv).toFixed(1);
           write2Id("L2", v);
-          v = jsn.ANALOG.A1;
-          if(v==null) v="?"; else v=(v/10).toFixed(1);
+          v = jsn.ANALOG.A3;
+          if(v==null) v="?"; else v=(v/vdiv).toFixed(1);
           write2Id("L3", v);
         
           write2Id("Lct", jsn.ESP32.Temperature.toFixed(1));
@@ -217,7 +222,7 @@
     
 <h1>Gew&auml;chshaus Unter&ouml;d</h1>
 <hr>
-Test Version 0.5.0
+Test Version 0.5.0a
 <hr>
 
 <h3>Gew&auml;chshaus Sensoren</h3>
@@ -233,14 +238,15 @@ Heartbeat: [<textbox id="hb">.</textbox>] <br>
 <tr><td>Letzte Nachricht: </td><td id="ts">-</td></tr>
 </table>
 <hr>
-<h3>Wasser Haus1</h3>
+<h3>Wasser</h3>
+<h4>Wasser Haus 1</h4>
 Ventile noch nicht angeschlossen
 <s><table><tr class="strikeout"><td>Status Wasser: </td><td id="w1">-</td></tr><br></table></s>
 Das sind nur Demo Buttons, die sind im Moment noch nicht an die Elektrik angeschlossen.<br>
 <button onclick="wasseraus()" name="butTimer">Wasser aus</button> 
 <button onclick="wasseran(15)" >Wasser an 15min</button>
 <button onclick="wasseran(120)">Wasser an 2h</button> 
-<h3>Wasser Haus2</h3>
+<h4>Wasser Haus2</h4>
 Ventile noch nicht angeschlossen
 <s><table><tr class="strikeout"><td>Status Wasser: </td><td id="w2">-</td></tr><br></table></s>
 Das sind nur Demo Buttons, die sind im Moment noch nicht an die Elektrik angeschlossen.<br>
@@ -273,9 +279,9 @@ Haus1: ?.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Haus2: ?
 <h4>Verteilerkasten Links</h4>
 <table>
 <tr><td>L1</td><td>L2</td><td>L3</td><td>Einheit</td><tr>
-<tr><td id="L1">-</td><td id="L2">-</td><td id="L3">-</td><td>Volt</td><tr>
+<tr class="strikeout"><td id="L1">-</td><td id="L2">-</td><td id="L3">-</td><td>Volt</td><tr>
 </table><table>    
-<tr><td>Controllertemperatur: </td><td id="Lct">-</td><td>°C</td></tr>    
+<tr class="strikeout"><td>Controllertemperatur: </td><td id="Lct">-</td><td>°C</td></tr>    
 <tr><td>Letztes Lebenszeichen um:</td><td id="Lts">-</td></tr>
 </table>
 <h4>Controller-wifi-Schaltkasten</h4>
