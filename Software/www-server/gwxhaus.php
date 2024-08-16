@@ -146,7 +146,8 @@
       if(!wifihdl.state) wifihdl.state =0;
       wifihdl.state = 1-wifihdl.state;
       if(wifihdl.state) write2Id("hbc", " /"); else write2Id("hbc", " \\");
-      //write2Id("wifictrl", text);
+      write2Id("wifictrl", text);
+      //write2Id("log", text);
       if(text=="" || text.includes("<title>504 ")) {
           //no valid data - init next data callback
           //oFileioWifiCtrl.load(m_ioGetWifiController); 
@@ -157,6 +158,7 @@
           //add2Id("hbc", jsn.DHT11);
           write2Id("ct", jsn.ESP32.Temperature.toFixed(1));
           write2Id("cts", jsn.Time);
+          write2Id("ctsa", jsn.Time);
           v = jsn.DHT11.Temperature;
           if(v==null) v="?"; else v=v.toFixed(1);
           write2Id("dht11T", v);
@@ -187,7 +189,7 @@
       }
       try {
           var jsn = JSON.parse(text);
-          var vdiv = 10.6
+          var vdiv = 10.86
           v = jsn.ANALOG.A1;
           if(v==null) v="?"; else v=(v/vdiv).toFixed(1);
           write2Id("L1", v);
@@ -222,7 +224,7 @@
     
 <h1>Gew&auml;chshaus Unter&ouml;d</h1>
 <hr>
-Test Version 0.5.0a
+Test Version 0.5.1a
 <hr>
 
 <h3>Gew&auml;chshaus Sensoren</h3>
@@ -272,7 +274,7 @@ Haus1: ?.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Haus2: ?
 <div id="wifictrl">-</div>
 <table>
 <tr><td>Aussensensor: </td><td id="dht11T">-</td><td>°C / Feuchte: <td id="dht11H">-</td><td>%rel. / Taupunkt: </td><td id="dht11D">-</td><td>°C</td><tr>
-<tr><td>Letztes Lebenszeichen um:</td><td id="cts">-</td></tr>
+<tr><td>Letztes Lebenszeichen um:</td><td id="ctsa">-</td></tr>
 </table>
 <hr>
 <h3>Stromversorgung</h3>
@@ -295,6 +297,7 @@ Haus1: ?.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Haus2: ?
 </table>
 <hr><hr>
 <pre id="log">-</pre>
+<a href="tec1.php">Techn. Details</a>
 <hr>
 Daten werden bei der Übertragung verschlüsselt. Aktionen können nur nach Login durchgeführt werden.<br>
 Datenschutz: <a href="/Datenschutz.html">Hier klicken.</a><br>
