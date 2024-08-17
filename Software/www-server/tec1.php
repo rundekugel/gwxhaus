@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html><head>
 <meta http-equiv="content-type" content="text/html; charset=UTF-8">
-<title>Unter&ouml;d Gew&auml;chshaus</title>
+<title>Technik Unter&ouml;d Gew&auml;chshaus</title>
 <!-- gwxhaus GUI test -->
 
 <link rel="stylesheet" href="styles.css">
@@ -13,7 +13,7 @@
 <script type="text/javascript">
   //defaults
   var m_timerButton = 1;
-  var m_reloadTime = 900;
+  var m_reloadTime = 950;
   var vIntervalId=0;
   
   //data stuff
@@ -46,9 +46,11 @@
   function iohdlSens(text){
       //add2Id("log", "s:"+text);
       //write2Id("log", "s:"+text);
+
       if(text=="" || text.includes("<title>504 ")) {
           return;
       }
+
       try{
           lines = text.split(";");
           lines.forEach( line => 
@@ -58,7 +60,7 @@
             line = line.replace( "{SSerialReceived:", "", line);
             line= trim(line);
             //if(line == "") continue;
-     
+            add2Id("log", " -l:"+line);
             if(line.includes(":")) {
                 var s=line.split(":")
                 var k=s[0].trim();
@@ -92,13 +94,9 @@
                 //add2Id("log",v);
                 var v2 = parseFloat(v);
                 var p = Math.round(v2/4.5*100);
-                if(v2 >3.5) 
-                    write2Id("cbat", "Backupbatterie ok.");
-                else {
-                    if(p <20) write2Id("cbat", "Backupbatterie unter 20% ! ");
-                    else write2Id("cbat", "Backupbatterie wird entladen. ");
-                    add2Id("cbat", ""+p);
-                }
+                write2Id("cbat", v2);
+                add2Id("cbat", "("+p+"%)");
+
                 //add2Id("log",v2);
 
             if(line.includes("USB=")) {
@@ -111,20 +109,23 @@
       }catch (error) {
           console.error(error);  
       }
+      //oFileioSens.load(m_ioGetGwxSens); 
   }//--------------------------------------------      
       
   function wifihdl(text){
       write2Id("wifictrl", text);
-      //write2Id("log", text);
+      add2Id("log", text);
       if(text=="" || text.includes("<title>504 ")) {
+          //no valid data - init next data callback
+          //oFileioWifiCtrl.load(m_ioGetWifiController); 
           return;
       }
       try {
           var jsn = JSON.parse(text);
-          //add2Id("hbc", jsn.DHT11);
+          add2Id("log", text);
           write2Id("ct", jsn.ESP32.Temperature.toFixed(1));
-          write2Id("cts", jsn.Time);
-          write2Id("ctsa", jsn.Time);
+          write2Id("cts", jsn.Time);  
+          write2Id("ctsa", jsn.Time);    
           v = jsn.DHT11.Temperature;
           if(v==null) v="?"; else v=v.toFixed(1);
           write2Id("dht11T", v);
@@ -137,10 +138,12 @@
           console.error(error);  
           write2Id("wifictrl", "dauert länger...");
       }
+      //oFileioWifiCtrl.load(m_ioGetWifiController); 
   }//--------------------------------------------     
   
   function vsupplyhdl(text){
-      //add2Id("log", text);
+      add2Id("log", text);
+      
       if(text=="" || text.includes("<title>504 ")) {
           return;
       }
@@ -148,13 +151,13 @@
           var jsn = JSON.parse(text);
           var vdiv = 10.86
           v = jsn.ANALOG.A1;
-          if(v==null) v="?"; else v=(v/vdiv).toFixed(1);
+          if(v==null) v="?"; else v=(v/vdiv).toFixed(2);
           write2Id("L1", v);
           v = jsn.ANALOG.A2;
-          if(v==null) v="?"; else v=(v/vdiv).toFixed(1);
+          if(v==null) v="?"; else v=(v/vdiv).toFixed(2);
           write2Id("L2", v);
           v = jsn.ANALOG.A3;
-          if(v==null) v="?"; else v=(v/vdiv).toFixed(1);
+          if(v==null) v="?"; else v=(v/vdiv).toFixed(2);
           write2Id("L3", v);
         
           write2Id("Lct", jsn.ESP32.Temperature.toFixed(1));
@@ -178,11 +181,11 @@
 
 <body onload="timer1An(); ">
     
-<h1>Gew&auml;chshaus Unter&ouml;d</h1>
+<h1>Technik Gew&auml;chshaus Unter&ouml;d</h1>
 <hr>
-Test Version 0.5.3
+Test Version 0.1.2
 <hr>
-
+<a href="gwxhaus.php">Einfache Ansicht</a>
 <h3>Gew&auml;chshaus Sensoren</h3>
 <pre id="hbs">Lade Daten...</pre>
 <table>
@@ -197,22 +200,17 @@ Heartbeat: [<textbox id="hb">.</textbox>] <br>
 </table>
 <hr>
 <h3>Wasser</h3>
-<h4>Wasser Haus 1</h4>
 Ventile noch nicht angeschlossen
-<s><table><tr class="strikeout"><td>Status Wasser: </td><td id="w1">-</td></tr><br></table></s>
-Das sind nur Demo Buttons, die sind im Moment noch nicht an die Elektrik angeschlossen.<br>
-<button onclick="wasseraus()" name="butTimer">Wasser aus</button> 
-<button onclick="wasseran(15)" >Wasser an 15min</button>
-<button onclick="wasseran(120)">Wasser an 2h</button> 
-<h4>Wasser Haus2</h4>
-Ventile noch nicht angeschlossen
-<s><table><tr class="strikeout"><td>Status Wasser: </td><td id="w2">-</td></tr><br></table></s>
-Das sind nur Demo Buttons, die sind im Moment noch nicht an die Elektrik angeschlossen.<br>
-<button onclick="wasseraus()" name="butTimer">Wasser aus</button><br>
-<button onclick="wasseran(15)" >Wasser an 15min</button><br>
-<button onclick="wasseran(120)">Wasser an 2h</button><br>
-<hr>
 
+<s><table><tr class="strikeout"><td>Status Wasser1: </td><td id="w1">-</td></tr><br></table></s>
+<s><table><tr class="strikeout"><td>Status Wasser2: </td><td id="w2">-</td></tr><br></table></s>
+
+<hr>
+<h3>Motoren</h3>
+<!--table><tr class="strikeout"><td>Motor1: </td><td id="m1">-</td></tr><br></table></s>
+<table><tr class="strikeout"><td>Motor2: </td><td id="m2">-</td></tr><br></table></s>
+-->
+<hr>
 <h3>Bodenfeuchte</h3>
 Haus1: ??% &nbsp;&nbsp;&nbsp;&nbsp; Haus2: ??%
 <h2>Fenster Status</h2>
@@ -247,13 +245,13 @@ Haus1: ?.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Haus2: ?
 <div id="wifictrl">-</div>
 <table>
 <tr><td>Controllertemperatur: </td><td id="ct">-</td><td>°C</td></tr>
-<tr><td>Batterieladung: </td><td id="cbat">-</td><td>%</td></tr>
+<tr><td>Batterieladung: </td><td id="cbat">-</td><td>V</td></tr>
 <tr><td>Spannung: </td><td id="cusb">-</td><td id="cusb2"></td></tr>
 <tr><td>Letztes Lebenszeichen um:</td><td id="cts">-</td></tr>
 </table>
 <hr><hr>
 <pre id="log">-</pre>
-<a href="tec1.php">Techn. Details</a>
+<a href="gwxhaus.php">Einfache Ansicht</a>
 <hr>
 Daten werden bei der Übertragung verschlüsselt. Aktionen können nur nach Login durchgeführt werden.<br>
 Datenschutz: <a href="/Datenschutz.html">Hier klicken.</a><br>
