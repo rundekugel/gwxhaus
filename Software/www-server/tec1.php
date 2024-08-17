@@ -15,6 +15,7 @@
   var m_timerButton = 1;
   var m_reloadTime = 950;
   var vIntervalId=0;
+  var m_timerButton = 1
   
   //data stuff
   var m_ioGetGwxSens = "s2.php";
@@ -28,20 +29,46 @@
   //--------------------------------------------
     
 
+  function add2Log(text){
+    if(document.getElementById("cb_log").checked){
+        add2Id("log",text);
+    }
+  }
+
   function startAjax(){
+    add2Log("---------------------");
     oFileioSens.load(m_ioGetGwxSens); 
     oFileioWifiCtrl.load(m_ioGetWifiController);
     oFileiovsupplyhdl.load(m_ioGetvsupplyhdl);
   }
 
   function timer1(){
-    startAjax();
+    if(m_timerButton){
+        startAjax();
+    }
   }
 
   function timer1An() {
+      if(0==m_timerButton){
+          return;
+      }
       startAjax();
-      vIntervalId = setInterval ( "timer1()", m_reloadTime );
+      vIntervalId = setInterval( "timer1()", m_reloadTime );
   }//-------------------
+  
+  function timerButton(){
+      m_timerButton = 1 - m_timerButton; 
+      write2Id("butTimer","asdf");
+      if(m_timerButton) {
+          write2Id("butTimer","Stop");
+          timer1An();    //init next
+      } else {
+          if(vIntervalId){
+            clearInterval(vIntervalId);
+          }          
+          write2Id("butTimer","Continue");
+      }
+  }//-----------------------  
             
   function iohdlSens(text){
       //add2Id("log", "s:"+text);
@@ -60,7 +87,7 @@
             line = line.replace( "{SSerialReceived:", "", line);
             line= trim(line);
             //if(line == "") continue;
-            add2Id("log", " -l:"+line);
+            add2Log(" -l:"+line);
             if(line.includes(":")) {
                 var s=line.split(":")
                 var k=s[0].trim();
@@ -114,7 +141,7 @@
       
   function wifihdl(text){
       write2Id("wifictrl", text);
-      add2Id("log", text);
+      add2Log(text);
       if(text=="" || text.includes("<title>504 ")) {
           //no valid data - init next data callback
           //oFileioWifiCtrl.load(m_ioGetWifiController); 
@@ -122,7 +149,7 @@
       }
       try {
           var jsn = JSON.parse(text);
-          add2Id("log", text);
+          add2Log(text);
           write2Id("ct", jsn.ESP32.Temperature.toFixed(1));
           write2Id("cts", jsn.Time);  
           write2Id("ctsa", jsn.Time);    
@@ -142,7 +169,7 @@
   }//--------------------------------------------     
   
   function vsupplyhdl(text){
-      add2Id("log", text);
+      add2Log(text);
       
       if(text=="" || text.includes("<title>504 ")) {
           return;
@@ -176,6 +203,18 @@
   function wasseran(minuten){
       write2Id("hbs","wasser an fuer "+minuten+" min.");
   }
+  
+  function ch_refresh(){
+      add2Id("log","refresh:");
+      r=parseInt(document.getElementById("refresh").value);
+      add2Id("log","r:"+r+"<br>");
+      m_reloadTime = r;
+      if(vIntervalId){
+        clearInterval(vIntervalId);
+        vIntervalId=0;
+      }          
+      if(m_timerButton) vIntervalId = setInterval( "timer1()", m_reloadTime );
+  }
 </script>
 </head>    
 
@@ -183,9 +222,26 @@
     
 <h1>Technik Gew&auml;chshaus Unter&ouml;d</h1>
 <hr>
-Test Version 0.1.2
+Test Version 0.1.3
 <hr>
-<a href="gwxhaus.php">Einfache Ansicht</a>
+<!--label for="refresh">HTML Update Interval:</label-->
+HTML Update Interval:
+<select name="refresh" id="refresh" onchange="ch_refresh()">
+<option value="500">0,5s</option>
+<option value="1000">1s</option>
+<option value="2000">2s</option>
+<option value="5000">5s</option>
+<option value="10000">10s</option>
+<option value="30000">30s</option>
+<option value="60000">1m</option>
+<option value="60000">10m</option>
+<option value="3600000">1h</option>
+</select>
+ &nbsp; &nbsp; 
+<a href="gwxhaus.php">Einfache Ansicht</a> &nbsp; &nbsp; 
+<button id="butTimer" onclick="timerButton()">Stop</button> &nbsp; &nbsp; 
+<button onclick="startAjax()">Poll 1</button> &nbsp; &nbsp; 
+
 <h3>Gew&auml;chshaus Sensoren</h3>
 <pre id="hbs">Lade Daten...</pre>
 <table>
@@ -249,9 +305,13 @@ Haus1: ?.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Haus2: ?
 <tr><td>Spannung: </td><td id="cusb">-</td><td id="cusb2"></td></tr>
 <tr><td>Letztes Lebenszeichen um:</td><td id="cts">-</td></tr>
 </table>
-<hr><hr>
-<pre id="log">-</pre>
-<a href="gwxhaus.php">Einfache Ansicht</a>
+<hr>
+<input type="checkbox" name="x" id="cb_log" value="off" > Log on. &nbsp; &nbsp; 
+<button id="clrLog" onclick="write2Id('log','')">Clear Log</button> &nbsp; &nbsp; 
+<a href="gwxhaus.php">[Einfache Ansicht]</a> &nbsp; &nbsp;
+<button onclick="startAjax()">Poll 1</button> &nbsp; &nbsp; 
+<br>
+<pre id="log">-</pre> &nbsp; &nbsp; 
 <hr>
 Daten werden bei der Übertragung verschlüsselt. Aktionen können nur nach Login durchgeführt werden.<br>
 Datenschutz: <a href="/Datenschutz.html">Hier klicken.</a><br>
