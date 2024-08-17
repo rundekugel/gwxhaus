@@ -22,10 +22,10 @@
   var vLockV1=0;
   
   //data stuff
-  var m_ioGetGwxSens = "getGwxSensorsLast.php";
-  var m_ioGetGwxSens2 = "getGwxSensors.php";
-  var m_ioGetWifiController = "getWifiController.php";
-  var m_ioGetvsupplyhdl = "getVSupply.php";
+  var m_ioGetGwxSens = "s2.php";
+  //var m_ioGetGwxSens2 = "getGwxSensors.php";
+  var m_ioGetWifiController = "w2.php";
+  var m_ioGetvsupplyhdl = "v1.php";
   
   //cFileContent is the ajax callback
   oFileioSens = new cFileContent(iohdlSens);
@@ -35,27 +35,9 @@
     
 
   function startAjax(){
-      if(!vLockSens){
-          oFileioSens.load(m_ioGetGwxSens); 
-      }
-      vLockSens += 1;
-      if(vLockSens > 30){
-          vLockSens=0;
-      }
-      if(!vLockWifi){
-        oFileioWifiCtrl.load(m_ioGetWifiController);
-      }
-      vLockWifi += 1;
-      if(vLockWifi > 30){
-          vLockWifi=0;
-      }
-      if(!vLockV1){
-          oFileiovsupplyhdl.load(m_ioGetvsupplyhdl);
-      }
-      vLockV1 +=1;
-      if(vLockV1 >30){
-          vLockV1=0;
-      }
+    oFileioSens.load(m_ioGetGwxSens); 
+    oFileioWifiCtrl.load(m_ioGetWifiController);
+    oFileiovsupplyhdl.load(m_ioGetvsupplyhdl);
   }
 
   function timer1(){
@@ -64,7 +46,7 @@
 
   function timer1An() {
       startAjax();
-      m_ioGetGwxSens = m_ioGetGwxSens2;
+      //m_ioGetGwxSens = m_ioGetGwxSens2;
       vIntervalId = setInterval ( "timer1()", m_reloadTime );
   }//-------------------
             
@@ -81,7 +63,7 @@
           lines = text.split(";");
           lines.forEach( line => 
           {
-            line = line.replace( "\\r\\n}", "", line);
+            line = line.replace( '\\r\\n"}', "", line);
             //line = line.replace( "{SSerialReceived:", "", line);
             line= trim(line);
             //if(line == "") continue;
@@ -143,9 +125,6 @@
       
   function wifihdl(text){
       vLockWifi=0;
-      if(!wifihdl.state) wifihdl.state =0;
-      wifihdl.state = 1-wifihdl.state;
-      if(wifihdl.state) write2Id("hbc", " /"); else write2Id("hbc", " \\");
       write2Id("wifictrl", text);
       //write2Id("log", text);
       if(text=="" || text.includes("<title>504 ")) {
@@ -174,17 +153,9 @@
       //oFileioWifiCtrl.load(m_ioGetWifiController); 
   }//--------------------------------------------     
   
-
-      
   function vsupplyhdl(text){
-      if(!vsupplyhdl.state) vsupplyhdl.state =0;
-      vsupplyhdl.state = 1-vsupplyhdl.state;
-      vLockV1=0;
-      //if(vsupplyhdl.state) write2Id("hbc", " /"); else write2Id("hbc", " \\");
-      //add2Id("log", text);
+      add2Id("log", text);
       if(text=="" || text.includes("<title>504 ")) {
-          //no valid data - init next data callback
-          oFileiovsupplyhdl.load(m_ioGetvsupplyhdl); 
           return;
       }
       try {
@@ -207,7 +178,6 @@
           console.error(error);  
           //write2Id("VSupply", "dauert länger...");
       }
-      //oFileiovsupplyhdl.load(m_ioGetvsupplyhdl); 
   }//--------------------------------------------     
   
 
