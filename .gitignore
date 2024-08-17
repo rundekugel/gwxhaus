@@ -161,3 +161,8 @@ cython_debug/
 *.backup
 *.?#?
 /Software/uPython/test/*
+/Software/www-server/s2.php
+/Software/www-server/t0.php
+/Software/www-server/v1.php
+/Software/www-server/w2.php
+/Software/www-server/wifiHaus2.tmp
