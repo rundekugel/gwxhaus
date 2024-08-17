@@ -14,16 +14,10 @@
   //defaults
   var m_timerButton = 1;
   var m_reloadTime = 900;
-  var m_reloadTimeSens = 2000;
   var vIntervalId=0;
-  var vIntervalId2=0;
-  var vLockSens=0;
-  var vLockWifi=0;
-  var vLockV1=0;
   
   //data stuff
   var m_ioGetGwxSens = "s2.php";
-  //var m_ioGetGwxSens2 = "getGwxSensors.php";
   var m_ioGetWifiController = "w2.php";
   var m_ioGetvsupplyhdl = "v1.php";
   
@@ -46,16 +40,12 @@
 
   function timer1An() {
       startAjax();
-      //m_ioGetGwxSens = m_ioGetGwxSens2;
       vIntervalId = setInterval ( "timer1()", m_reloadTime );
   }//-------------------
             
   function iohdlSens(text){
-      vLockSens=0;
       //add2Id("log", "s:"+text);
       //write2Id("log", "s:"+text);
-      if(!iohdlSens.state) iohdlSens.state =0;
-      iohdlSens.state = 1-iohdlSens.state;
       if(text=="" || text.includes("<title>504 ")) {
           return;
       }
@@ -120,16 +110,12 @@
       }catch (error) {
           console.error(error);  
       }
-      //oFileioSens.load(m_ioGetGwxSens); 
   }//--------------------------------------------      
       
   function wifihdl(text){
-      vLockWifi=0;
       write2Id("wifictrl", text);
       //write2Id("log", text);
       if(text=="" || text.includes("<title>504 ")) {
-          //no valid data - init next data callback
-          //oFileioWifiCtrl.load(m_ioGetWifiController); 
           return;
       }
       try {
@@ -150,11 +136,10 @@
           console.error(error);  
           write2Id("wifictrl", "dauert länger...");
       }
-      //oFileioWifiCtrl.load(m_ioGetWifiController); 
   }//--------------------------------------------     
   
   function vsupplyhdl(text){
-      add2Id("log", text);
+      //add2Id("log", text);
       if(text=="" || text.includes("<title>504 ")) {
           return;
       }
@@ -194,7 +179,7 @@
     
 <h1>Gew&auml;chshaus Unter&ouml;d</h1>
 <hr>
-Test Version 0.5.1a
+Test Version 0.5.2
 <hr>
 
 <h3>Gew&auml;chshaus Sensoren</h3>
