@@ -32,7 +32,8 @@ PIN_MOTOR1D = Pin(26, Pin.OUT)
 PIN_MOTOR2 = Pin(12, Pin.OUT)
 PIN_MOTOR2D = Pin(14, Pin.OUT)
 DOSE1 = Pin(32, Pin.OUT)
-DOSE2 = Pin(35, Pin.OUT)
+# pin35 can only be input
+# DOSE2 = Pin(35, Pin.OUT)
 # PIN_POWER_GOOD = Pin(13, Pin.IN, Pin.PULL_DOWN)
 ADC_BATT = machine.ADC(39)      # VN
 PINNUM_POWER = 36
