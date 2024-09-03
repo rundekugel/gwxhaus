@@ -237,9 +237,9 @@ Haus1: ?.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Haus2: ?
 <h4>Verteilerkasten Links</h4>
 <table>
 <tr><td>L1</td><td>L2</td><td>L3</td><td>Einheit</td><tr>
-<tr class="strikeout"><td id="L1">-</td><td id="L2">-</td><td id="L3">-</td><td>Volt</td><tr>
+<tr><td id="L1">-</td><td id="L2">-</td><td id="L3">-</td><td>Volt</td><tr>
 </table><table>    
-<tr class="strikeout"><td>Controllertemperatur: </td><td id="Lct">-</td><td>°C</td></tr>    
+<tr><td>Controllertemperatur: </td><td id="Lct">-</td><td>°C</td></tr>    
 <tr><td>Letztes Lebenszeichen um:</td><td id="Lts">-</td></tr>
 </table>
 <h4>Controller-wifi-Schaltkasten</h4>

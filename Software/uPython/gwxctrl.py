@@ -15,7 +15,7 @@ import HYT221
 import comu
 import docrypt
 
-__version__ = "0.2.1"
+__version__ = "0.2.2"
 
 MODE_CBC = 2
 # pinning for esp32-lite
@@ -31,8 +31,8 @@ PIN_MOTOR1 = Pin(25, Pin.OUT)
 PIN_MOTOR1D = Pin(26, Pin.OUT)
 PIN_MOTOR2 = Pin(12, Pin.OUT)
 PIN_MOTOR2D = Pin(14, Pin.OUT)
-DOSE1 = Pin(18, Pin.OUT)
-DOSE2 = Pin(23, Pin.OUT)
+DOSE1 = Pin(32, Pin.OUT)
+DOSE2 = Pin(35, Pin.OUT)
 # PIN_POWER_GOOD = Pin(13, Pin.IN, Pin.PULL_DOWN)
 ADC_BATT = machine.ADC(39)      # VN
 PINNUM_POWER = 36
@@ -70,6 +70,7 @@ class globs:
     iv = b""
     modcfg = ""
     wdttime = 20
+    manually_timeend = 0
 
 def servCB(msg=None):
     if globs.verbosity:
@@ -409,6 +410,8 @@ def parseMsg():
             m= b"I2C devices found: "+str(devs).encode() +b" = "+hexlify(bytes(devs), " ")
             if globs.verbosity: print(m)
             comu.addTx(m)
+        if b"manually" in cmd:
+            globs.manually_timeend = time.time() + int(val)
         if b"am:" in cmd[:3]:
                 encrypted = cmd[3:]
                 m = docrypt.parse(dec)
@@ -445,19 +448,27 @@ def checkTemp(hausnum):
     if not s:
         return
     cfg = globs.cfg["haus"+str(hausnum)]
+
+    if s.temperature > cfg.get("talarm",40):
+        sendAlarm(f"Temperatur in Haus{hausnum}:{s.temperature}°C")
+
+    # 'manually control' set?
+    if globs.manually_timeend > time.time():
+        return
+    globs.manually_timeend = 0  # if RTC will be reset after power-loss. This helps. 
+
     if s.temperature > cfg["tmax"]:
         setMotor(hausnum,"u")
+    if s.temperature < cfg["tmin"]:
+        setMotor(hausnum,"d")
+        
     if s.humidity > cfg["hmax"]:
         setMotor(hausnum,"u")
         setWater(hausnum, 0)
-    if s.temperature < cfg["tmin"]:
-        setMotor(hausnum,"d")
     if s.humidity < cfg["hmin"]:
         if getWater(hausnum) == 0:
             setWater(hausnum,1)
             globs.todos.append((getTime(1), "wasser"+str(hausnum)+"=0"))
-    if s.temperature > cfg.get("talarm",99):
-        sendAlarm(f"Temperatur in Haus{hausnum}:{s.temperature}°C")
 
 def checkTimer():
     """
