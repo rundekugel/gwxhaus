@@ -8,7 +8,7 @@ import time
 import json
 import configparser
 
-__version__ = "0.1.0"
+__version__ = "0.1.1"
 
 class globs:
     doit = 1
@@ -18,15 +18,15 @@ def mqttbuf(name, user, pwd, topic, filename,sleep=1):
     print("start "+sys.argv[0]+" thread: "+ name +" / "+topic)
     while globs.doit:
         try:
-            os.system("touch "+name+".tmp")
+            os.system("touch "+filename+".tmp")
             cmd = "mosquitto_sub -h mq.qc9.de -p 18883 --tls-use-os-certs -u " + \
-               user+" -P "+pwd+" -t "+topic+" -C 1 > "+name+".tmp"
+               user+" -P "+pwd+" -t "+topic+" -C 1 > "+filename+".tmp"
             os.system(cmd)
             d=""
-            with open(name+".tmp") as f:
+            with open(filename+".tmp") as f:
                 d=f.read()
             if d:
-                os.rename(name+".tmp", filename)
+                os.rename(filename+".tmp", filename)
             time.sleep(sleep)    
         except Exception as e:
             print(f"Error in {name}: "+str(e))
