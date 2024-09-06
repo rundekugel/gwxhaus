@@ -2,7 +2,7 @@
 from machine import UART,RTC
 import time
 
-__version__ = "1.1.0"
+__version__ = "1.2.0"
 
 
 class globs:
@@ -46,8 +46,10 @@ def irq_handler():
         if globs.callbackRx:
             globs.callbackRx(r1)
 
-def init(portnum=None):
+def init(portnum=None, baudrate=None):
     print("comu version:" + str(__version__))
+    if baudrate in (300,600,1200,2400,4800,9600,19200,57600,115200,230400):
+        globs.baud = baudrate
     if portnum is not None:
         globs.portnum = portnum
     globs.uart = UART(globs.uartport, globs.baud, timeout=globs.timeout_ms)
