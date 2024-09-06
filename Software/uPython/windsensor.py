@@ -69,7 +69,7 @@ class Windsensor:
         d = utime.ticks_ms()/1e3 - self.lasttime
         # debouncing
         if d < min_delta:
-            if self.verbosity:
+            if self.verbosity>1:
                 print("invalid d:", d)
             self.lasttime = utime.ticks_ms()/1e3
             return
@@ -77,7 +77,7 @@ class Windsensor:
         self.lasttime = utime.ticks_ms()/1e3
         self.speed = self.filter.feed(
                                 self.circumference / self.lastdelta / 2)
-        if self.verbosity:
+        if self.verbosity>1:
             print("d:",self.lastdelta)
             print("m/s:",self.speed)
 
