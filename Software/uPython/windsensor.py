@@ -9,9 +9,9 @@ from machine import Pin
 import utime
 # from machine import Timer
 
-__version__ = "0.1.1"
+__version__ = "0.1.2"
 PI = 3.141592653589793
-WINDSENSOR_DIAMETER = 250e-3    # diameter in m
+WINDSENSOR_DIAMETER = 120e-3    # diameter in m
 
 class Filter:
     lastval = None
@@ -48,13 +48,14 @@ class Windsensor:
     testremotecontrol = None
     
 
-    def __init__(self, pin, diameter=WINDSENSOR_DIAMETER, filtersize=2):
+    def __init__(self, pin, diameter=None, filtersize=2):
         """param: pinnumber for data input"""
         self.pin = Pin(pin, Pin.IN, pull=Pin.PULL_UP)
         self.lasttime = utime.ticks_ms()/1e3
         self.pin.irq(trigger=Pin.IRQ_RISING, handler = self.pinhandler)
         self.pin.irq(trigger=Pin.IRQ_FALLING, handler = self.pinhandler)
-        self.diameter = diameter
+        if diameter:
+            self.diameter = diameter
         self.circumference = self.diameter * PI
         self.filter = Filter(filtersize)
 
