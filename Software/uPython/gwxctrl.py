@@ -15,7 +15,7 @@ import HYT221
 import comu
 import docrypt
 
-__version__ = "0.2.2"
+__version__ = "0.2.3"
 
 MODE_CBC = 2
 # pinning for esp32-lite
@@ -44,6 +44,7 @@ ADC_POWER = machine.ADC(PINNUM_POWER)     # VP
 
 # ALLOWED_UART_VARS_W = ("loop_sleep","verbosity")
 # ALLOWED_UART_VARS_R = ("loop_sleep","verbosity","globs","cfg","todos")
+SECRET_GLOBS = ("ak")
 
 class globs:
     verbosity = 2
@@ -175,6 +176,12 @@ def dictLower(d):
         if k.lower() != k:
             d[k.lower()] = d.pop(k)
 
+def pubconfig(cfg):
+    cfg_tmp = dict(cfg)
+    for c in SECRET_GLOBS:
+        cfg_tmp.get(c ,None)  # remove secrets before show cfg
+    return cfg
+
 def readConfig(filename="gwxctrl.cfg"):
     cfg = None
     msg = "Lese Einstellungen von:"+filename
@@ -194,9 +201,7 @@ def readConfig(filename="gwxctrl.cfg"):
     if "verbosity" in cfg:
         globs.verbosity = cfg["verbosity"]
     if globs.verbosity:
-        cfg.pop("ak",None)  # remove secrets before tx
-        cfg.pop("secret",None) 
-        msg += str(cfg)
+        msg += str(pubconfig(cfg))
         print(msg)
         comu.addTx(msg)
         
@@ -242,7 +247,7 @@ def init():
     if ak:
         docrypt.init(ak = ak)
     # globs.uart = comu
-    comu.init(2)
+    comu.init(2, globs.cfg.get("baudrate"))
     rc = machine.reset_cause()
     comu.addTx("resetcause:"+str(rc))
     if globs.verbosity:
@@ -366,9 +371,11 @@ def parseMsg():
                 if globs.verbosity: print("todo:"+str(val))
                 globs.todo.append(val)
         if b"globs?" in msg:
-            comu.addTx(str(globs.__dict__))
+            g = dict(globs.__dict__)
+            g.pop("cfg", None)
+            comu.addTx(str(g))
         if b"cfg?" in msg:
-            comu.addTx(str(globs.cfg))
+            comu.addTx(str(pubconfig(globs.cfg)))
         if b"verbosity" in cmd:
             globs.verbosity = int(val)
             comu.globs.verbosity = int(val)
@@ -552,13 +559,16 @@ def formTime(text):
     return text
 
 def main():
-    wdt=WDT(timeout=globs.wdttime*1000)
+    globs.wdt=None
+    # wdt=WDT(timeout=globs.wdttime*1000)
     speed = -1
     if not globs.inited:
-        wdt.feed()
+        # wdt.feed()
         init()
+    globs.wdt=WDT(timeout=globs.wdttime*1000)
+    
     while globs.dorun:     # do forever
-        wdt.feed()
+        globs.wdt.feed()
         toggleLed()     # heartbeat
         try:
             speed = -1
