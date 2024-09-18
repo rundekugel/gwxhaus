@@ -5,8 +5,7 @@ session_start();
 hi<br>
 
 <?php
-echo("s:".var_dump($_SESSION));
-echo("p:".var_dump($_POST));
+require("table.php");
 
 if(isset($_SESSION["user"])) {
  echo("hi user!".$_SESSION["user"]);
@@ -17,13 +16,17 @@ if(isset($_SESSION["user"])) {
 
 if (!empty($_POST["user"]))
     {
+        if (empty($_POST["ps"]))
+          exit("no pwd!");
         echo("login...");
         $_username = $_POST["user"];
         $_passwort = $_POST["ps"];
-        if($_passwort == "ok"){
+        //if($_passwort == "ok"){
+        if( checkuser($_username, $_passwort)) {
           echo("login ok");
-          $_SESSION["user"]=$_username;
-          $_SESSION["rights"]="w,m";
+          echo implode(";",$_SESSION);
+          //$_SESSION["user"]=$_username;
+          //$_SESSION["rights"]="w,m";
             echo("hi user!".$_SESSION["user"]);
             echo("<br><a href='main.php'>continue here</a>");
             echo "<script>window.location = 'gwxhaus.php'</script>";
