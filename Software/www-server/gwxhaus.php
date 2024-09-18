@@ -1,3 +1,4 @@
+<?php session_start(); ?>
 <!DOCTYPE html>
 <html><head>
 <meta http-equiv="content-type" content="text/html; charset=UTF-8">
@@ -167,10 +168,12 @@
   }//--------------------------------------------     
   
 
-  function wasseraus(){
+  function wasseraus(id){
+      fetch("switcher.php?w"+id+"=0");
       write2Id("hbs","wasser aus!");
   }
-  function wasseran(minuten){
+  function wasseran(id,minuten){
+      fetch("switcher.php?w"+id+"="+minuten);
       write2Id("hbs","wasser an fuer "+minuten+" min.");
   }
 </script>
@@ -180,7 +183,13 @@
     
 <h1>Gew&auml;chshaus Unter&ouml;d</h1>
 <hr>
-Test Version 0.5.3
+Test Version 0.5.4
+<?php
+if(isset($_SESSION["user"])) {
+  echo "<hr>Angemeldet als: ".$_SESSION["user"];
+  echo " &nbsp;&nbsp;<a href='logout.php'><button>Logout</button></a><hr>";
+}
+?>
 <hr>
 
 <h3>Gew&auml;chshaus Sensoren</h3>
@@ -201,16 +210,16 @@ Heartbeat: [<textbox id="hb">.</textbox>] <br>
 Ventile noch nicht angeschlossen
 <s><table><tr class="strikeout"><td>Status Wasser: </td><td id="w1">-</td></tr><br></table></s>
 Das sind nur Demo Buttons, die sind im Moment noch nicht an die Elektrik angeschlossen.<br>
-<button onclick="wasseraus()" name="butTimer">Wasser aus</button> 
-<button onclick="wasseran(15)" >Wasser an 15min</button>
-<button onclick="wasseran(120)">Wasser an 2h</button> 
+<button onclick="wasseraus(1)" name="butTimer">Wasser aus</button> &nbsp;
+<button onclick="wasseran(1,15)" >Wasser an 15min</button>&nbsp;
+<button onclick="wasseran(1,120)">Wasser an 2h</button> 
 <h4>Wasser Haus2</h4>
 Ventile noch nicht angeschlossen
 <s><table><tr class="strikeout"><td>Status Wasser: </td><td id="w2">-</td></tr><br></table></s>
 Das sind nur Demo Buttons, die sind im Moment noch nicht an die Elektrik angeschlossen.<br>
-<button onclick="wasseraus()" name="butTimer">Wasser aus</button><br>
-<button onclick="wasseran(15)" >Wasser an 15min</button><br>
-<button onclick="wasseran(120)">Wasser an 2h</button><br>
+<button onclick="wasseraus(2)" name="butTimer">Wasser aus</button>&nbsp;
+<button onclick="wasseran(2,15)" >Wasser an 15min</button>&nbsp;
+<button onclick="wasseran(2,120)">Wasser an 2h</button>
 <hr>
 
 <h3>Bodenfeuchte</h3>
@@ -251,7 +260,12 @@ Haus1: ?.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Haus2: ?
 <tr><td>Spannung: </td><td id="cusb">-</td><td id="cusb2"></td></tr>
 <tr><td>Letztes Lebenszeichen um:</td><td id="cts">-</td></tr>
 </table>
-<hr><hr>
+<hr>
+<?php
+if(!isset($_SESSION["user"])) {
+echo '<a href="login.php"><button>Login</button></a><hr>';
+}
+?>
 <pre id="log">-</pre>
 <a href="tec1.php">Techn. Details</a>
 <hr>
