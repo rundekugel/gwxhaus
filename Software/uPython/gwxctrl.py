@@ -565,7 +565,7 @@ def main():
     if not globs.inited:
         # wdt.feed()
         init()
-    globs.wdt=WDT(timeout=globs.wdttime*1000)
+    globs.wdt=WDT(timeout=int(globs.wdttime*1000))
     
     while globs.dorun:     # do forever
         globs.wdt.feed()
