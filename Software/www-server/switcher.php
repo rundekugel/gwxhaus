@@ -9,7 +9,18 @@ if(isset($_SESSION["user"])) {
  echo("hi user!".$_SESSION["user"]."<br>");
 }
 
+function tcptx($msg){
+    $fp = fsockopen("localhost", 18891, $errn,$errs, 5);
+    if (!$fp) {
+    echo "$errstr ($errno)<br />\n";
+    } else {
+        fwrite($fp, $msg);
+        fclose($fp);
+    }
+}    
+
 function logit($text){
+    //    
     return;
     $fp=fopen("sw.log","a");
     fwrite($fp,$text);
@@ -19,20 +30,21 @@ function logit($text){
 if(isset($_SESSION["rights"])){
      $rights = $_SESSION["rights"];
      echo $rights."<br>";
-     foreach ($_GET as $get) {
-        echo strval($get)."<br>";
-        
-    }
-    $keys = array("w1","w2","w3","w4","m1","m2");
+mqtttx("r1");
+    $keys = array("w1","w2","w3","w4","m1","m2","cfg","rem");
     foreach($keys as $k) {
         if(isset($_GET[$k])) {
             $v = $_GET[$k];
             echo $k."=".$v."<br>";
+            $user= $_SESSION["user"];
+            tcptx($k."=".$v.";u:".$user.";r:".$rights);
+            //mqtttx($k."=".$v.";u:".$user.";r:".$rights);
             logit($k."=".$v."\r\n");
             // send via mqtt
         }
     }
 }
+
 echo "<br>done.";
 ?>
 <hr>

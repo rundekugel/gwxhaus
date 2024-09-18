@@ -176,6 +176,10 @@
       fetch("switcher.php?w"+id+"="+minuten);
       write2Id("hbs","wasser an fuer "+minuten+" min.");
   }
+  function motor(id,richtung){
+      fetch("switcher.php?m"+id+"="+richtung);
+      write2Id("motinfo","Motor "+id+"="+richtung);
+  }
 </script>
 </head>    
 
@@ -229,9 +233,19 @@ Haus1: ?.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Haus2: ?
 <hr>
 
 <h3>Controller</h3>
+Motoren noch nicht angeschlossen 
+<pre id="motinfo"></pre>
 <table>
-<tr class="strikeout"><td>Motoren noch nicht angeschlossen Haus1:</td><td id="m1">-</td><td><s>Haus2:</td><td id="m2">-</td></tr>
+<tr class="strikeout"><td>Haus1:</td><td id="m1">-</td><td><s>Haus2:</td><td id="m2">-</td></tr>
 </table>
+Haus1 Fenster: <button onclick="motor(1,'u')" >Auf</button> &nbsp;
+<button onclick="motor(1,'0')" >Stop</button> &nbsp;
+<button onclick="motor(1,'d')" >Zu</button> &nbsp;
+<br><br>
+Haus2 Fenster: <button onclick="motor(2,'u')" >Auf</button> &nbsp;
+<button onclick="motor(2,'0')" >Stop</button> &nbsp;
+<button onclick="motor(2,'d')" >Zu</button> &nbsp;<br>
+
 <hr>
 
 <h3>Sensor im Sicherungskasten </h3>
