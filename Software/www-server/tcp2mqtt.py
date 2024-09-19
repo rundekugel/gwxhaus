@@ -17,6 +17,15 @@ class globs:
     verbosity = 3
     portrx = 18891
 
+    @staticmethod
+    def set(key, value):
+        if key[0]=="_":
+            return
+        if isinstance(getattr(globs,key) ,int):
+            value = int(value)
+        if isinstance(getattr(globs,key) ,float):
+            value = float(value)
+        setattr(globs, key, value)
 class MyTCPHandler(socketserver.BaseRequestHandler):
     """
     The request handler class for our server.
@@ -29,10 +38,13 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
     def handle(self):
         # self.request is the TCP socket connected to the client
         self.data = self.request.recv(1024).strip().decode()
-        print("Received from {}:".format(self.client_address[0]))
-        print(self.data)
+        if globs.verbosity>1:
+            print("Received from {}:".format(self.client_address[0]))
+        if globs.verbosity:
+            print(self.data)
         value=""
-        p= self.data.split("=",1)
+        p= self.data.split(";")[0]  # don't send stuff after the semicolon
+        p= p.split("=",1)
         p0= p[0]
         if len(p)>1:
             # todo: check value for validity
@@ -92,7 +104,7 @@ def main():
     globs.config = config
     for key in ("verbosity","portrx"):
         try:
-            globs.__dict__[key] = int(config["global"][key])
+            globs.set(key, config["global"][key])
         except:
             pass
     for name in config.sections():
