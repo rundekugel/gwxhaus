@@ -30,8 +30,9 @@ function logit($text){
 if(isset($_SESSION["rights"])){
      $rights = $_SESSION["rights"];
      echo $rights."<br>";
-mqtttx("r1");
-    $keys = array("w1","w2","w3","w4","m1","m2","cfg","rem");
+    $keys = array("w1","w2","w3","w4","m1","m2",
+                "cfg","rem","manually","globs",
+                "d1","d2","li1","li2");
     foreach($keys as $k) {
         if(isset($_GET[$k])) {
             $v = $_GET[$k];

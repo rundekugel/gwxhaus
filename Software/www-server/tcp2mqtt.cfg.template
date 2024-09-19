@@ -1,0 +1,15 @@
+#  sample config
+
+[DEFAULT]
+interval=2
+pw=secretsecret
+
+[global]
+user=g1
+topic=sensor2/cmnd/sserialsend
+
+[debug]
+user=g1
+topic=test/dbg/stx
+
+#eof
