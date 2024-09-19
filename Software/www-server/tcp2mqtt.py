@@ -36,14 +36,21 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
         if len(p)>1:
             # todo: check value for validity
             value = "=" +p[1]
-        if p0 in ("w1","w2","w3","w4","m1","m2"):
+        if p0 in ("w1","w2","w3","w4","m1","m2","manually","globs?",
+                  "wasser1","wasser2","motor1","motor2"):
+            # remove this, if fw updated
+            if p0=="w1": p0="wasser1"
+            if p0 == "w2": p0 = "wasser2"
+            if p0 == "m1": p0 = "motor1"
+            if p0 == "m2": p0 = "motor2"
+
             mqtttx(globs.config["global"]["user"], globs.config["global"]["pw"],
                    globs.config["global"]["topic"], p0 + value)
         else:
             mqtttx(globs.config["debug"]["user"], globs.config["debug"]["pw"],
                    globs.config["debug"]["topic"], p0 + value)
 
-def mqtttx(user, pwd, topic, msg, sleep=0.1):   
+def mqtttx(user, pwd, topic, msg, sleep=0.1):
         try:
             cmd = "mosquitto_pub -h mq.qc9.de -p 18883 --tls-use-os-certs -u " + \
                user+" -P "+pwd+" -t "+topic+" -m '"+msg+"'"
