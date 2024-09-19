@@ -15,6 +15,7 @@ class globs:
     doit = 1
     config = None
     verbosity = 3
+    portrx = 18891
 
 class MyTCPHandler(socketserver.BaseRequestHandler):
     """
@@ -89,6 +90,11 @@ def main():
     if path:
         os.chdir(path)
     globs.config = config
+    for key in ("verbosity","portrx"):
+        try:
+            globs.__dict__[key] = int(config["global"][key])
+        except:
+            pass
     for name in config.sections():
         try:
             c=config[name]
@@ -98,7 +104,7 @@ def main():
     try:     
         while globs.doit:
             time.sleep(1)
-            HOST, PORT = "localhost", 9999
+            HOST, PORT = "localhost", globs.portrx
             socketserver.TCPServer.allow_reuse_address = True
             server = socketserver.TCPServer((HOST, PORT), MyTCPHandler)
             server.serve_forever()
