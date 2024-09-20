@@ -187,7 +187,7 @@
     
 <h1>Gew&auml;chshaus Unter&ouml;d</h1>
 <hr>
-Test Version 0.5.4
+Test Version 0.5.5
 <?php
 if(isset($_SESSION["user"])) {
   echo "<hr>Angemeldet als: ".$_SESSION["user"];
@@ -211,19 +211,23 @@ Heartbeat: [<textbox id="hb">.</textbox>] <br>
 <hr>
 <h3>Wasser</h3>
 <h4>Wasser Haus 1</h4>
-Ventile noch nicht angeschlossen
-<s><table><tr class="strikeout"><td>Status Wasser: </td><td id="w1">-</td></tr><br></table></s>
-Das sind nur Demo Buttons, die sind im Moment noch nicht an die Elektrik angeschlossen.<br>
+<table><tr><td>Status Wasser: </td><td id="w1">-</td></tr><br></table></s>
+<?php
+if(isset($_SESSION["user"])) {
+    echo '
 <button onclick="wasseraus(1)" name="butTimer">Wasser aus</button> &nbsp;
 <button onclick="wasseran(1,15)" >Wasser an 15min</button>&nbsp;
 <button onclick="wasseran(1,120)">Wasser an 2h</button> 
+';
+}
+?>
 <h4>Wasser Haus2</h4>
-Ventile noch nicht angeschlossen
-<s><table><tr class="strikeout"><td>Status Wasser: </td><td id="w2">-</td></tr><br></table></s>
-Das sind nur Demo Buttons, die sind im Moment noch nicht an die Elektrik angeschlossen.<br>
+<table><tr><td>Status Wasser: </td><td id="w2">-</td></tr><br></table></s>
+<?php if(isset($_SESSION["user"])) { echo '
 <button onclick="wasseraus(2)" name="butTimer">Wasser aus</button>&nbsp;
 <button onclick="wasseran(2,15)" >Wasser an 15min</button>&nbsp;
 <button onclick="wasseran(2,120)">Wasser an 2h</button>
+';}?>
 <hr>
 
 <h3>Bodenfeuchte</h3>
@@ -233,19 +237,19 @@ Haus1: ?.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Haus2: ?
 <hr>
 
 <h3>Controller</h3>
-Motoren noch nicht angeschlossen 
 <pre id="motinfo"></pre>
 <table>
-<tr class="strikeout"><td>Haus1:</td><td id="m1">-</td><td><s>Haus2:</td><td id="m2">-</td></tr>
+<tr><td>Haus1:</td><td id="m1">-</td><td>Haus2:</td><td id="m2">-</td></tr>
 </table>
-Haus1 Fenster: <button onclick="motor(1,'u')" >Auf</button> &nbsp;
-<button onclick="motor(1,'0')" >Stop</button> &nbsp;
-<button onclick="motor(1,'d')" >Zu</button> &nbsp;
+<?php if(isset($_SESSION["user"])) { echo '
+Haus1 Fenster: <button onclick="motor(1,\'u\')" >Auf</button> &nbsp;
+<button onclick="motor(1,\'0\')" >Stop</button> &nbsp;
+<button onclick="motor(1,\'d\')" >Zu</button> &nbsp;
 <br><br>
-Haus2 Fenster: <button onclick="motor(2,'u')" >Auf</button> &nbsp;
-<button onclick="motor(2,'0')" >Stop</button> &nbsp;
-<button onclick="motor(2,'d')" >Zu</button> &nbsp;<br>
-
+Haus2 Fenster: <button onclick="motor(2,\'u\')" >Auf</button> &nbsp;
+<button onclick="motor(2,\'0\')" >Stop</button> &nbsp;
+<button onclick="motor(2,\'d\')" >Zu</button> &nbsp;<br>
+';}?>
 <hr>
 
 <h3>Sensor im Sicherungskasten </h3>
