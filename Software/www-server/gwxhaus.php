@@ -187,7 +187,7 @@
     
 <h1>Gew&auml;chshaus Unter&ouml;d</h1>
 <hr>
-Test Version 0.5.5
+Test Version 0.5.5-a
 <?php
 if(isset($_SESSION["user"])) {
   echo "<hr>Angemeldet als: ".$_SESSION["user"];
@@ -211,22 +211,24 @@ Heartbeat: [<textbox id="hb">.</textbox>] <br>
 <hr>
 <h3>Wasser</h3>
 <h4>Wasser Haus 1</h4>
-<table><tr><td>Status Wasser: </td><td id="w1">-</td></tr><br></table></s>
+<table><tr><td>Status Wasser: </td><td id="w1">-</td></tr></table>
 <?php
 if(isset($_SESSION["user"])) {
     echo '
 <button onclick="wasseraus(1)" name="butTimer">Wasser aus</button> &nbsp;
-<button onclick="wasseran(1,15)" >Wasser an 15min</button>&nbsp;
-<button onclick="wasseran(1,120)">Wasser an 2h</button> 
+<button onclick="wasseran(1,1)" >Wasser an</button>&nbsp;
+<button onclick="wasseran(1,15)" ><s>Wasser an 15min</button>&nbsp;
+<button onclick="wasseran(1,120)">Wasser an 2h</s></button> 
 ';
 }
 ?>
 <h4>Wasser Haus2</h4>
-<table><tr><td>Status Wasser: </td><td id="w2">-</td></tr><br></table></s>
+<table><tr><td>Status Wasser: </td><td id="w2">-</td></tr></table>
 <?php if(isset($_SESSION["user"])) { echo '
 <button onclick="wasseraus(2)" name="butTimer">Wasser aus</button>&nbsp;
-<button onclick="wasseran(2,15)" >Wasser an 15min</button>&nbsp;
-<button onclick="wasseran(2,120)">Wasser an 2h</button>
+<button onclick="wasseran(2,1)" >Wasser an</button>&nbsp
+<button onclick="wasseran(2,15)" ><s>Wasser an 15min</button>&nbsp;
+<button onclick="wasseran(2,120)">Wasser an 2h</s></button>
 ';}?>
 <hr>
 
@@ -248,8 +250,9 @@ Haus1 Fenster: <button onclick="motor(1,\'u\')" >Auf</button> &nbsp;
 <br><br>
 Haus2 Fenster: <button onclick="motor(2,\'u\')" >Auf</button> &nbsp;
 <button onclick="motor(2,\'0\')" >Stop</button> &nbsp;
-<button onclick="motor(2,\'d\')" >Zu</button> &nbsp;<br>
+<button onclick="motor(2,\'d\')" >Zu</button></s> &nbsp;<br>
 ';}?>
+</s>
 <hr>
 
 <h3>Sensor im Sicherungskasten </h3>
