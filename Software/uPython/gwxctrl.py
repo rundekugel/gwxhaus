@@ -78,6 +78,7 @@ class globs:
     modcfg = ""
     wdttime = 20
     manually_timeend = 0
+    checkEndSwitch_lastTime = 0
     motor_virtual_open1 = 0 # value in percent
     motor_virtual_open2 = 0
 
@@ -230,6 +231,7 @@ def updateConfigFile(addcfg, filename="gwxctrl.cfg"):
 
 def init():
     print("GwxControl version:" + str(__version__))
+    globs.checkEndSwitch_lastTime = time.time()
     readConfig(globs.cfgfile)
     globs.ws = windsensor.Windsensor(PIN_WIND, diameter=globs.cfg.get("windsensordia"))
     globs.ws.verbosity = globs.verbosity
@@ -560,10 +562,10 @@ def checkWind():
         pass
         
 def checkEndSwitch():
-    if not hasattr(checkEndSwitch, "lastTime"):
-        checkEndSwitch.lastTime = time.time()
-    timedelta = time.time() - checkEndSwitch.lastTime
-    
+    #if not hasattr(checkEndSwitch, "lastTime"):
+    #    checkEndSwitch.setattr("lastTime", time.time())
+    timedelta = time.time() - globs.checkEndSwitch_lastTime
+    checkEndSwitch_lastTime = time.time()
     try:
         step = timedelta * float(globs.cfg["mot_openpersec1"])
         if getMotor(1) == "d":
@@ -623,7 +625,7 @@ def main():
             # print(ths)
             pass
         motors = "Md1:"+getMotor(1, 'de')+", Md2:"+getMotor(2, 'de')
-        motors = "Mv1:"+str(globs.motor_virtual_open1)+", Mv2:"+str(motor_virtual_open2)
+        motors = "Mv1:"+str(globs.motor_virtual_open1)+", Mv2:"+str(globs.motor_virtual_open2)
         water = f"Wasser 1:{getWater(1, 'de')}, 2:{getWater(2, 'de')}"
         # fenster = "Fenster: ?\r\n"  # todo. need 8 gpios first.
         comu.addTx(motors)
