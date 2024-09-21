@@ -15,7 +15,7 @@ import HYT221
 import comu
 import docrypt
 
-__version__ = "0.2.4"
+__version__ = "0.3.0"
 
 MODE_CBC = 2
 # pinning for esp32-lite
@@ -79,8 +79,8 @@ class globs:
     wdttime = 20
     manually_timeend = 0
     checkEndSwitch_lastTime = 0
-    motor_virtual_open1 = 0 # value in percent
-    motor_virtual_open2 = 0
+    window_virtual_open1 = 0 # value in percent
+    window_virtual_open2 = 0
 
 def servCB(msg=None):
     if globs.verbosity:
@@ -233,7 +233,7 @@ def init():
     print("GwxControl version:" + str(__version__))
     globs.checkEndSwitch_lastTime = time.time()
     readConfig(globs.cfgfile)
-    globs.ws = windsensor.Windsensor(PIN_WIND, diameter=globs.cfg.get("windsensordia"))
+    globs.ws = windsensor.Windsensor(PIN_WIND, diameter=globs.cfg.get("windsensordia",None))
     globs.ws.verbosity = globs.verbosity
     addr1 = globs.cfg.get("sensoraddr1")      # this is None, if not given
     #freq = 50
@@ -302,15 +302,15 @@ def pinsReset():
     PIN_MOTOR2.value(0)
     PIN_MOTOR2D.value(0)
 
-def getTH(sensor):
+def getTH(sensor,num):
     try:
         s=sensor.getValues(postdec=1)
         t,h = s.temperature, s.humidity
     except Exception as e:
         t,h = "-", "-"
         if globs.verbosity:
-            print("eTh:"+str(e))
-    return "Temp.: "+str(t)+"C, Luftfeuchte: "+str(h)+"%"
+            print("err.Th:"+str(e))
+    return f"T{num}:{t};H{num}:{h}"
 
 def parseMsg():
     """execute all cmds in globs.rx"""
@@ -618,21 +618,23 @@ def main():
             if globs.verbosity:
                 print("eWs:"+str(e))
         ths ="sp:"+str(speed)+ "; " 
-        ths += "th1:" + getTH(globs.hy1)+ "; " 
-        ths += "th2:" + getTH(globs.hy2)
+        ths += getTH(globs.hy1,1) +"; "+ getTH(globs.hy2,2)
         comu.addTx(ths)
         if globs.verbosity:
             # print(ths)
             pass
-        motors = "Md1:"+getMotor(1, 'de')+", Md2:"+getMotor(2, 'de')
-        motors = "Mv1:"+str(globs.motor_virtual_open1)+", Mv2:"+str(globs.motor_virtual_open2)
-        water = f"W1:{getWater(1, 'de')}, W2:{getWater(2, 'de')}"
+        motors = "M1:"+getMotor(1, 'de')+"; M2:"+getMotor(2, 'de')
+        motors += ";F1:"+str(globs.window_virtual_open1)+"; F2:"+str(globs.window_virtual_open2)
+        water = f"W1:{getWater(1, 'de')}; W2:{getWater(2, 'de')}"
         # fenster = "Fenster: ?\r\n"  # todo. need 8 gpios first.
         comu.addTx(motors)
         comu.addTx(water)
         if globs.sturm:
-            comu.addTx(f"Sturm={globs.sturm}")
+            comu.addTx(f"Sturm:{globs.sturm}")
         comu.addTx(f"USB={getVCCVolt()}V ; Bat.={getBatVolt(2)}V.")
+        d=globs.manually_timeend - time.time()
+        if d<0:d=0
+        comu.addTx(f"mn:{d}");
         if globs.verbosity:
             print(comu.globs.tx)
         comu.proc()

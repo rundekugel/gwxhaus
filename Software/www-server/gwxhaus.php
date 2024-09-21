@@ -56,6 +56,7 @@
           {
             line = line.replaceAll( '"', "", line);
             line = line.replace( '\\r\\n}', "", line);
+            line = line.replace( '}', "", line);
             line = line.replace( "{SSerialReceived:", "", line);
             line= trim(line);
             //if(line == "") continue;
@@ -66,10 +67,13 @@
                 var val=s[1].trim();
                 if(k=="sp") {
                     write2Id("wind", Math.round(val*10)/10);
-                    write2Id("wkmh", Math.round(val*36)/10);
+                    add2Id("wind", " m/s = "+Math.round(val*36)/10+" km/h");
                 }
-                if(k=="th1") write2Id("th1", val+s[2]+s[3]);
-                if(k=="th2") write2Id("th2", val+s[2]+s[3]);
+                if(k=="T1") write2Id("T1", val+" &deg;C");
+                if(k=="T2") write2Id("T2", val+" &deg;C");
+                if(k=="H1") write2Id("H1", val+" %rel.");
+                if(k=="H2") write2Id("H2", val+" %rel.");
+                
                 if(k=="W1") write2Id("w1", val);
                 if(k=="W2") write2Id("w2", val);
                 if(k=="W3") write2Id("w3", val);
@@ -81,22 +85,20 @@
                     write2Id("w1", ww[0]);
                     write2Id("w2", s[2]);
                 }
-                
-                if(k.includes("otor")) {
-                    var ww = val.split(".")
-                    write2Id("m1", ww[0]);
-                    write2Id("m2", s[2]);
+                if(k=="M1") write2Id("md1", val);
+                if(k=="M2") write2Id("md2", val);
+                //Fenster
+                if(k=="F1") write2Id("fen1", val+" %");
+                if(k=="F2") write2Id("fen2", val+" %");
+                if(k=="mn") {
+                    if(val==0) write2Id("manu", "");
+                    else {
+                        write2Id("manu",
+                        "<hr><h2 style=color:red;>Manueller Modus aktiv!</h2>Restdauer: "
+                        +val+" Sekunden");
+                    }
                 }
-                
-                if(k=="Mv1") write2Id("mv1", val);
-                if(line.includes(", Mv2")) {
-                    //old: Mv1:0, Mv2:0;
-                    var ww = val.split(",")
-                    write2Id("mv1", ww[0]);
-                    write2Id("mv2", s[2]);
-                }
-                if(k=="Mv2") write2Id("mv2", val);
-                
+                                
                 if(k=="USB=") {
                     var s = parseFloat(val.split("=")[1]);
                     write2Id("cusb", val);
@@ -204,21 +206,22 @@
     
 <h1>Gew&auml;chshaus Unter&ouml;d</h1>
 <hr>
-Test Version 0.5.6
+Test Version 0.6.1
 <?php
 if(isset($_SESSION["user"])) {
   echo "<hr>Angemeldet als: ".$_SESSION["user"];
-  echo " &nbsp;&nbsp;<a href='logout.php'><button>Logout</button></a><hr>";
+  echo " &nbsp;&nbsp;<a href='logout.php'><button>Logout</button></a>";
 }
 ?>
+<div id="manu"></div>
 <hr>
 
 <h3>Gew&auml;chshaus Sensoren</h3>
 <pre id="hbs">Lade Daten...</pre>
 <table>
-<tr><td>Wind: </td><td id="wind">-</td><td>m/s =</td><td id="wkmh">-</td><td>km/h</td></tr></tr>
-<tr><td>Haus1: </td><td id="th1">-</td><td> %rel.</td></tr>
-<tr><td>Haus2: </td><td id="th2">-</td><td> %rel.</td></tr>
+<tr><td>Wind: </td><td id="wind">-</td></tr></tr>
+<tr><td>Haus1: </td><td id="T1">-</td><td id="H1">-</td></tr>
+<tr><td>Haus2: </td><td id="T2">-</td><td id="H2">-</td></tr>
 
 <!--
 Heartbeat: [<textbox id="hb">.</textbox>] <br>
@@ -228,7 +231,7 @@ Heartbeat: [<textbox id="hb">.</textbox>] <br>
 <hr>
 <h3>Wasser</h3>
 <h4>Wasser Haus 1</h4>
-<table><tr><td>Status Wasser Haus1 A:</td><td id="w1">-</td><td>B:</td><td id="w3">-</td></tr></table>
+<table><tr><td>A:</td><td id="w1">-</td><td>B:</td><td id="w3">-</td></tr></table>
 <?php
 if(isset($_SESSION["user"])) {
     echo '
@@ -240,7 +243,7 @@ if(isset($_SESSION["user"])) {
 }
 ?>
 <h4>Wasser Haus2</h4>
-<table><tr><td>Status Wasser Haus2 A:</td><td id="w2">-</td><td>B:</td><td id="w4">-</td></tr></table>
+<table><tr><td>A:</td><td id="w2">-</td><td>B:</td><td id="w4">-</td></tr></table>
 <?php if(isset($_SESSION["user"])) { echo '
 <button onclick="wasseraus(2)" name="butTimer">Wasser aus</button>&nbsp;
 <button onclick="wasseran(2,1)" >Wasser an</button>&nbsp
@@ -253,13 +256,13 @@ if(isset($_SESSION["user"])) {
 Haus1: ??% &nbsp;&nbsp;&nbsp;&nbsp; Haus2: ??%
 
 <h2>Fenster Status</h2>
-<table><tr><td>Haus1:</td><td id="mv1">-</td><td>Haus2:</td><td id="mv2">-</td></tr></table>
+<table><tr><td>Haus1:</td><td id="fen1">-</td><td>Haus2:</td><td id="fen2">-</td></tr></table> 
 <hr>
 
 <h3>Controller</h3>
 <pre id="motinfo"></pre>
 <table>
-<tr><td>Haus1:</td><td id="m1">-</td><td>Haus2:</td><td id="m2">-</td></tr>
+<tr><td>Haus1:</td><td id="md1">-</td><td>Haus2:</td><td id="md2">-</td></tr>
 </table>
 <?php if(isset($_SESSION["user"])) { echo '
 Haus1 Fenster: <button onclick="motor(1,\'u\')" >Auf</button> &nbsp;

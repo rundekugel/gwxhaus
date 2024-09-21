@@ -9,9 +9,9 @@ from machine import Pin
 import utime
 # from machine import Timer
 
-__version__ = "0.1.2"
+__version__ = "0.1.3"
 PI = 3.141592653589793
-WINDSENSOR_DIAMETER = 120e-3    # diameter in m
+WINDSENSOR_DIAMETER = 110e-3    # diameter in m
 
 
 class Filter:
@@ -50,7 +50,7 @@ class Windsensor:
     testremotecontrol = None
     
 
-    def __init__(self, pin, diameter=None, filtersize=2):
+    def __init__(self, pin, diameter=None, filtersize=3):
         """param: pinnumber for data input"""
         self.pin = Pin(pin, Pin.IN, pull=Pin.PULL_UP)
         self.lasttime = utime.ticks_ms()/1e3
@@ -78,7 +78,9 @@ class Windsensor:
         self.lastdelta = d
         self.lasttime = utime.ticks_ms()/1e3
         self.speed = self.filter.feed(
-                                self.circumference / self.lastdelta / self.proportionalityfactor)
+                                self.circumference /
+                                (self.lastdelta * self.proportionalityfactor)
+                            )
         if self.verbosity>1:
             print("d:",self.lastdelta)
             print("m/s:",self.speed)
