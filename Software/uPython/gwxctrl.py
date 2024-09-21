@@ -626,7 +626,7 @@ def main():
             pass
         motors = "Md1:"+getMotor(1, 'de')+", Md2:"+getMotor(2, 'de')
         motors = "Mv1:"+str(globs.motor_virtual_open1)+", Mv2:"+str(globs.motor_virtual_open2)
-        water = f"Wasser 1:{getWater(1, 'de')}, 2:{getWater(2, 'de')}"
+        water = f"W1:{getWater(1, 'de')}, W2:{getWater(2, 'de')}"
         # fenster = "Fenster: ?\r\n"  # todo. need 8 gpios first.
         comu.addTx(motors)
         comu.addTx(water)
