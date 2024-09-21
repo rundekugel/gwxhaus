@@ -70,16 +70,33 @@
                 }
                 if(k=="th1") write2Id("th1", val+s[2]+s[3]);
                 if(k=="th2") write2Id("th2", val+s[2]+s[3]);
-                if(k.includes("asser")) {
+                if(k=="W1") write2Id("w1", val);
+                if(k=="W2") write2Id("w2", val);
+                if(k=="W3") write2Id("w3", val);
+                if(k=="W4") write2Id("w4", val);
+                
+                if(line.includes(", W2:")) {
+                    // old: "W1:Zu, W2:Zu; "
                     var ww = val.split(",")
                     write2Id("w1", ww[0]);
                     write2Id("w2", s[2]);
                 }
+                
                 if(k.includes("otor")) {
-                    var ww = val.split(",")
+                    var ww = val.split(".")
                     write2Id("m1", ww[0]);
                     write2Id("m2", s[2]);
                 }
+                
+                if(k=="Mv1") write2Id("mv1", val);
+                if(line.includes(", Mv2")) {
+                    //old: Mv1:0, Mv2:0;
+                    var ww = val.split(",")
+                    write2Id("mv1", ww[0]);
+                    write2Id("mv2", s[2]);
+                }
+                if(k=="Mv2") write2Id("mv2", val);
+                
                 if(k=="USB=") {
                     var s = parseFloat(val.split("=")[1]);
                     write2Id("cusb", val);
@@ -187,7 +204,7 @@
     
 <h1>Gew&auml;chshaus Unter&ouml;d</h1>
 <hr>
-Test Version 0.5.5-a
+Test Version 0.5.6
 <?php
 if(isset($_SESSION["user"])) {
   echo "<hr>Angemeldet als: ".$_SESSION["user"];
@@ -211,7 +228,7 @@ Heartbeat: [<textbox id="hb">.</textbox>] <br>
 <hr>
 <h3>Wasser</h3>
 <h4>Wasser Haus 1</h4>
-<table><tr><td>Status Wasser: </td><td id="w1">-</td></tr></table>
+<table><tr><td>Status Wasser Haus1 A:</td><td id="w1">-</td><td>B:</td><td id="w3">-</td></tr></table>
 <?php
 if(isset($_SESSION["user"])) {
     echo '
@@ -223,7 +240,7 @@ if(isset($_SESSION["user"])) {
 }
 ?>
 <h4>Wasser Haus2</h4>
-<table><tr><td>Status Wasser: </td><td id="w2">-</td></tr></table>
+<table><tr><td>Status Wasser Haus2 A:</td><td id="w2">-</td><td>B:</td><td id="w4">-</td></tr></table>
 <?php if(isset($_SESSION["user"])) { echo '
 <button onclick="wasseraus(2)" name="butTimer">Wasser aus</button>&nbsp;
 <button onclick="wasseran(2,1)" >Wasser an</button>&nbsp
@@ -234,8 +251,9 @@ if(isset($_SESSION["user"])) {
 
 <h3>Bodenfeuchte</h3>
 Haus1: ??% &nbsp;&nbsp;&nbsp;&nbsp; Haus2: ??%
+
 <h2>Fenster Status</h2>
-Haus1: ?.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Haus2: ?
+<table><tr><td>Haus1:</td><td id="mv1">-</td><td>Haus2:</td><td id="mv2">-</td></tr></table>
 <hr>
 
 <h3>Controller</h3>
