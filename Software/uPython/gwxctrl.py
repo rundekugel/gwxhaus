@@ -15,7 +15,7 @@ import HYT221
 import comu
 import docrypt
 
-__version__ = "0.2.3"
+__version__ = "0.2.4"
 
 MODE_CBC = 2
 # pinning for esp32-lite
@@ -31,6 +31,10 @@ PIN_MOTOR1 = Pin(25, Pin.OUT)
 PIN_MOTOR1D = Pin(26, Pin.OUT)
 PIN_MOTOR2 = Pin(12, Pin.OUT)
 PIN_MOTOR2D = Pin(14, Pin.OUT)
+PIN_END1UP = Pin(34, Pin.IN)
+PIN_END1DOWN = Pin(35, Pin.IN)
+PIN_END2UP = Pin(19, Pin.IN)
+PIN_END2DOWN = Pin(23, Pin.IN)
 DOSE1 = Pin(32, Pin.OUT)
 # pin35 can only be input
 # DOSE2 = Pin(35, Pin.OUT)
@@ -58,7 +62,8 @@ class globs:
     # last_waterstate = [0,0]     # possible: 0,1
     port = 80
     dorun = True
-    cfg = {"vccok":[4,30e3], "dsonbat":[[3.5,60e3],[3.3,300e3]], "sensf1":50,"sensf2":50}
+    cfg = {"vccok":[4,30e3], "dsonbat":[[3.5,60e3],[3.3,300e3]], 
+        "sensf1":50,"sensf2":50, "mot_openpersec1":1.2, "mot_openpersec2":1.3}
     lasttime = 0
     todos = [("15:00","nop")]
     loop_sleep = 2.5
@@ -73,6 +78,8 @@ class globs:
     modcfg = ""
     wdttime = 20
     manually_timeend = 0
+    motor_virtual_open1 = 0 # value in percent
+    motor_virtual_open2 = 0
 
 def servCB(msg=None):
     if globs.verbosity:
@@ -84,7 +91,7 @@ def setMotor(num, direction):
         print("m:", num, direction)
     if not isinstance(num, int):
         num = int(str(num).replace("'", "")[-1])
-    d = str(direction.strip()).replace("'", "")[-1].lower()
+    d = str(direction).strip().replace("'", "")[-1].lower()
     if d=="u" and globs.sturm:
         return
     sw = {"0": [0, 0], "d": [1, 0], "u": [1, 1], "o": [0, 0]}  # pinoutput for: motor,direction
@@ -179,7 +186,7 @@ def dictLower(d):
 def pubconfig(cfg):
     cfg_tmp = dict(cfg)
     for c in SECRET_GLOBS:
-        cfg_tmp.get(c ,None)  # remove secrets before show cfg
+        cfg_tmp.pop(c ,None)  # remove secrets before show cfg
     return cfg
 
 def readConfig(filename="gwxctrl.cfg"):
@@ -371,9 +378,9 @@ def parseMsg():
                 if globs.verbosity: print("todo:"+str(val))
                 globs.todo.append(val)
         if b"globs?" in msg:
-            g = dict(globs.__dict__)
+            g = dict(globs.__dict__)    # make a copy
             g.pop("cfg", None)
-            comu.addTx(str(g))
+            comu.addTx(str(pubconfig(g)))
         if b"cfg?" in msg:
             comu.addTx(str(pubconfig(globs.cfg)))
         if b"verbosity" in cmd:
@@ -551,6 +558,37 @@ def checkWind():
 
     except:
         pass
+        
+def checkEndSwitch():
+    if not hasattr(checkEndSwitch, "lastTime"):
+        checkEndSwitch.lastTime = time.time()
+    timedelta = time.time() - checkEndSwitch.lastTime
+    
+    try:
+        step = timedelta * float(globs.cfg["mot_openpersec1"])
+        if getMotor(1) == "d":
+            globs.motor1_virtual_open -= step
+            if PIN_END1DOWN.value ==0:
+                globs.motor1_virtual_open = 0
+                setMotor(1,0)
+        if getMotor(1) == "u":
+            globs.motor1_virtual_open += step
+    except Exception as e:
+        print(str(e))
+        
+    try:
+        step = timedelta * float(globs.cfg["mot_openpersec2"])
+        if getMotor(2) == "d":
+            globs.motor1_virtual_open -= step
+            if PIN_END2DOWN.value ==0:
+                globs.motor2_virtual_open = 0
+                setMotor(2,0)
+        if getMotor(2) == "u":
+            globs.motor1_virtual_open += step
+    except Exception as e:
+        print(str(e))
+        
+    return        
 
 def formTime(text):
     h=text.split(":",1)
@@ -584,11 +622,14 @@ def main():
         if globs.verbosity:
             # print(ths)
             pass
-        motors = "Motoren 1:"+getMotor(1, 'de')+", 2:"+getMotor(2, 'de')
+        motors = "Md1:"+getMotor(1, 'de')+", Md2:"+getMotor(2, 'de')
+        motors = "Mv1:"+str(globs.motor_virtual_open1)+", Mv2:"+str(motor_virtual_open2)
         water = f"Wasser 1:{getWater(1, 'de')}, 2:{getWater(2, 'de')}"
         # fenster = "Fenster: ?\r\n"  # todo. need 8 gpios first.
         comu.addTx(motors)
         comu.addTx(water)
+        if globs.sturm:
+            comu.addTx(f"Sturm={globs.sturm}")
         comu.addTx(f"USB={getVCCVolt()}V ; Bat.={getBatVolt(2)}V.")
         if globs.verbosity:
             print(comu.globs.tx)
@@ -619,6 +660,8 @@ def main():
         checkWind()
         globs.lasttime = getTime()  # this line must be after all checks !
 
+        checkEndSwitch()
+        
         # sleep on power loss
         vccVal = globs.cfg.get("vccok")
         if vccVal:

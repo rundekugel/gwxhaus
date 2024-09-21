@@ -13,6 +13,7 @@ __version__ = "0.1.2"
 PI = 3.141592653589793
 WINDSENSOR_DIAMETER = 120e-3    # diameter in m
 
+
 class Filter:
     lastval = None
     size = 2
@@ -42,6 +43,7 @@ class Windsensor:
     lastdelta = None
     speed = None
     diameter = WINDSENSOR_DIAMETER # diameter in m
+    proportionalityfactor = 2.6
     circumference = None
     filter = None
     verbosity = 1
@@ -76,7 +78,7 @@ class Windsensor:
         self.lastdelta = d
         self.lasttime = utime.ticks_ms()/1e3
         self.speed = self.filter.feed(
-                                self.circumference / self.lastdelta / 2)
+                                self.circumference / self.lastdelta / self.proportionalityfactor)
         if self.verbosity>1:
             print("d:",self.lastdelta)
             print("m/s:",self.speed)
