@@ -151,13 +151,15 @@
              }                
             }
             
-            if(line.includes("__module__")) {
+            if(line.includes("__module__") || line.includes("globs:")) {
                 g=line.split("__module__")[1];
                 g=line.split("}")[0];
-                write2Id("globs", g);
+                var t =document.getElementById("ts").innerHTML;
+                write2Id("globs", t+"<br>"+g);
              }
             if(line.includes("#komm") || line.includes("cfg:")) {
-                write2Id("cfg", line);
+                var t=document.getElementById("ts").innerHTML;
+                write2Id("cfg", t+"<br>"+line);
             }
           }  );
       }catch (error) {
