@@ -25,19 +25,25 @@ PIN_SDA1 = 4
 PIN_SCL2 = 2
 PIN_SDA2 = 15
 PIN_LED1 = Pin(22, Pin.OUT)	 # on bigger boards it's pin2
+
 PIN_WATER1 = Pin(27, Pin.OUT)
 PIN_WATER2 = Pin(33, Pin.OUT)
+PIN_WATER3 = Pin(32, Pin.OUT)
+PIN_WATER4 = Pin(18, Pin.OUT)
+
 PIN_MOTOR1 = Pin(25, Pin.OUT)
 PIN_MOTOR1D = Pin(26, Pin.OUT)
 PIN_MOTOR2 = Pin(12, Pin.OUT)
 PIN_MOTOR2D = Pin(14, Pin.OUT)
+
 PIN_END1UP = Pin(34, Pin.IN)
-PIN_END1DOWN = Pin(35, Pin.IN)
-PIN_END2UP = Pin(19, Pin.IN)
-PIN_END2DOWN = Pin(23, Pin.IN)
-DOSE1 = Pin(32, Pin.OUT)
-# pin35 can only be input
-# DOSE2 = Pin(35, Pin.OUT)
+PIN_END1DOWN = Pin(23, Pin.IN)
+PIN_END2UP = Pin(35, Pin.IN)    # pin35 can only be input
+PIN_END2DOWN = Pin(19, Pin.IN)
+
+DOSE1 = Pin(13, Pin.OUT)
+DOSE2 = Pin(13, Pin.OUT)
+
 # PIN_POWER_GOOD = Pin(13, Pin.IN, Pin.PULL_DOWN)
 ADC_BATT = machine.ADC(39)      # VN
 PINNUM_POWER = 36
@@ -81,7 +87,9 @@ class globs:
     checkEndSwitch_lastTime = 0
     window_virtual_open1 = 0 # value in percent
     window_virtual_open2 = 0
+    watertables = [180*b"\0"]*4
 
+    
 def servCB(msg=None):
     if globs.verbosity:
         print("m:"+str(msg))
@@ -115,7 +123,7 @@ def setWater(num, onOff=None):
         num = int(str(num).replace("'","")[-1])
     if not isinstance(onOff,int):
         onOff = int(str(onOff).replace("'","")[-1])
-    p=[PIN_WATER1, PIN_WATER2][num-1]
+    p=[PIN_WATER1, PIN_WATER2, PIN_WATER3, PIN_WATER4][num-1]
     p.value(onOff)
     # globs.last_waterstate[num-1] = onOff
 
@@ -281,6 +289,12 @@ def init():
         # if voltage is back, clear deepsleep
         if getVCCVolt() >4:
             globs.deepsleep_ms = 0
+    for i in range(1,5):
+        try:
+          with open(f"watertimetable{i}.dat","rb") as f:
+            globs.watertables[i-1] = f.read()
+        except Exception as e:
+            print(f"error wt{i}: "+str(e))
 
     globs.lasttime = getTime()
     
@@ -498,6 +512,9 @@ def checkTimer():
     """
     if not "timer" in globs.cfg:
         return
+    # 'manually control' set?
+    if globs.manually_timeend > time.time():
+        return
     ti = globs.cfg["timer"]
     for t in ti:
         z,zEnd = ti[t], None
@@ -522,7 +539,21 @@ def checkTimer():
                 continue
             if zEnd <= getTime():
                 globs.rx.append(t + off)
-
+    d = RTC().datetime()
+    minute = d[4]*60 + d[5]
+    bitmask = 1<<(minute%8)
+    mi = int(minute/8)
+    for wt in range(1,5):
+        try:
+            byte = globs.watertables[wt][mi]
+            m = (byte & bitmask)
+            if m:
+                setWater(wt, 1)
+            else:
+                setWater(wt, 0)
+        except Exception as e:
+            print(f"err in checkTimer.watertable{wt}: "+str(e))
+            
 def getBatVolt(rounded=2):
     v, n = 0, 10
     for i in range(n):
@@ -538,6 +569,7 @@ def getVCCVolt(rounded=2):
 def checkWind():
     """
     if too much wind, wait a little, before storm-alarm.
+    if there is very strong wind, it's storm ==> close windows immediately
     if storm is over, wait some time, for really end of storm.
     """
     speed = globs.ws.getValue()
