@@ -39,7 +39,7 @@ class Filter:
 
 class FilterWindowed:
     lastvals = []
-    size = 2
+    size = 7
     lastav = 0
 
     def __init__(self, size, initvalue=None):
@@ -57,10 +57,13 @@ class FilterWindowed:
             return value
         while len(self.lastvals) > self.size:
             self.lastvals.pop(0)
+        b = list(self.lastvals)
+        b.sort()
+        if len(b)>2: b.pop() # remove biggest value
         av = 0
-        for i in self.lastvals:
+        for i in b:
             av += i
-        av /= len(self.lastvals)
+        av /= len(b)
         self.lastav = av
         return av
         
@@ -80,7 +83,7 @@ class Windsensor:
     testremotecontrol = None
     
 
-    def __init__(self, pin, diameter=None, filtersize=3):
+    def __init__(self, pin, diameter=None, filtersize=None):
         """param: pinnumber for data input"""
         self.pin = Pin(pin, Pin.IN, pull=Pin.PULL_UP)
         self.lasttime = utime.ticks_ms()/1e3
@@ -89,7 +92,8 @@ class Windsensor:
         if diameter:
             self.diameter = diameter
         self.circumference = self.diameter * PI
-        self.filter = Filter(filtersize)
+        if filtersize is None: filtersize = 7
+        self.filter = FilterWindowed(filtersize)
 
     def __del__(self):
         print("del"+str(self))

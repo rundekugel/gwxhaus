@@ -233,7 +233,8 @@ def init():
     print("GwxControl version:" + str(__version__))
     globs.checkEndSwitch_lastTime = time.time()
     readConfig(globs.cfgfile)
-    globs.ws = windsensor.Windsensor(PIN_WIND, diameter=globs.cfg.get("windsensordia",None))
+    globs.ws = windsensor.Windsensor(PIN_WIND, 
+                    diameter=globs.cfg.get("windsensordia",None))
     globs.ws.verbosity = globs.verbosity
     addr1 = globs.cfg.get("sensoraddr1")      # this is None, if not given
     #freq = 50
