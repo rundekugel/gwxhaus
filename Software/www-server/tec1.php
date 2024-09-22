@@ -107,12 +107,6 @@
                 if(k=="W3") write2Id("w3", val);
                 if(k=="W4") write2Id("w4", val);
                 
-                if(line.includes(", W2:")) {
-                    // old: "W1:Zu, W2:Zu; "
-                    var ww = val.split(",")
-                    write2Id("w1", ww[0]);
-                    write2Id("w2", s[2]);
-                }
                 if(k=="M1") write2Id("md1", val);
                 if(k=="M2") write2Id("md2", val);
                 //Fenster
@@ -136,13 +130,10 @@
             }
             if(line.includes("Bat.=")) {
                 var v = line.split("=")[1];
-                //add2Id("log",v);
                 var v2 = parseFloat(v);
                 var p = Math.round(v2/4.5*100);
                 write2Id("cbat", v2);
                 add2Id("cbat", "("+p+"%)");
-
-                //add2Id("log",v2);
 
             if(line.includes("USB=")) {
                 var s = parseFloat(line.split("=")[1]);
@@ -165,15 +156,13 @@
       }catch (error) {
           console.error(error);  
       }
-      //oFileioSens.load(m_ioGetGwxSens); 
   }//--------------------------------------------      
       
   function wifihdl(text){
       write2Id("wifictrl", text);
       add2Log(text);
       if(text=="" || text.includes("<title>504 ")) {
-          //no valid data - init next data callback
-          //oFileioWifiCtrl.load(m_ioGetWifiController); 
+          //no valid data
           return;
       }
       try {
@@ -240,6 +229,9 @@
   function manually(seconds){
       fetch("switcher.php?manually="+seconds);
   }  
+  function switcher(text){
+      fetch("switcher.php?"+text);
+  }  
   
   function ch_refresh(){
       add2Id("log","refresh:");
@@ -260,7 +252,7 @@
     
 <h1>Technik Gew&auml;chshaus Unter&ouml;d</h1>
 <hr>
-Test Version 0.2.0
+Test Version 0.2.1
 <hr>
 <!--label for="refresh">HTML Update Interval:</label-->
 HTML Update Interval:
@@ -378,14 +370,11 @@ Haus2 Fenster: <button onclick="motor(2,\'u\')" >Auf</button> &nbsp;
 </table>
 <?php
 if(isset($_SESSION["user"])) {
-  echo ' &nbsp;&nbsp;<button onclick="manually(6000)">Manuell 100min</button></a>';
+  echo ' &nbsp;&nbsp;<button onclick=manually(6000)>Manuell 100min</button></a>';
   echo ' &nbsp;&nbsp;<button onclick="manually(0)">Manuell off</button></a>';
-  echo '<br><br>Show variables: <button onclick=switcher("globs%3f")>Globals</button></a>';
-  echo ' &nbsp;&nbsp;<button onclick="switcher("cfg%3f")">Config</button></a>';
-  echo ' &nbsp;&nbsp;<button onclick="switcher("motor%3d%3f")">Motor</button></a>';
-  echo "<br><br>Show variables old:<a href='switcher.php?globs%3f'><button>Globals</button></a>";
-  echo " &nbsp;&nbsp;<a href='switcher.php?cfg%3f'><button>Config</button></a>";
-  echo " &nbsp;&nbsp;<a href='switcher.php?motor%3d%3f'><button>Motor</button></a>";
+  echo '<br><br>Show variables: <button onclick=switcher("globs?")>Globals</button></a>';
+  echo ' &nbsp;&nbsp;<button onclick=switcher("cfg?=?")>Config</button></a>';
+  echo ' &nbsp;&nbsp;<button onclick=switcher("m1=?")>Motor</button></a>';
 }else{
   echo '<a href="login.php"><button>Login</button></a><hr>';
 }

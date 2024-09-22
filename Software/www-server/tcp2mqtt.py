@@ -49,13 +49,15 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
         if len(p)>1:
             # todo: check value for validity
             value = "=" +p[1]
-        if p0 in ("w1","w2","w3","w4","m1","m2","manually","globs?",
-                  "wasser1","wasser2","motor1","motor2"):
+        if p0 in ("w1","w2","w3","w4","m1","m2","manually","globs?","globs","cfg","cfg?",
+                  "wasser1","wasser2","motor1","motor2","d1","d2"):
             # remove this, if fw updated
             if p0=="w1": p0="wasser1"
             if p0 == "w2": p0 = "wasser2"
             if p0 == "m1": p0 = "motor1"
             if p0 == "m2": p0 = "motor2"
+            if p0 == "d1": p0 = "dose1"
+            if p0 == "d2": p0 = "dose2"
 
             mqtttx(globs.config["global"]["user"], globs.config["global"]["pw"],
                    globs.config["global"]["topic"], p0 + value)
