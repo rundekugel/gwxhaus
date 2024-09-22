@@ -15,7 +15,7 @@ import HYT221
 import comu
 import docrypt
 
-__version__ = "0.3.0"
+__version__ = "0.3.1"
 
 MODE_CBC = 2
 # pinning for esp32-lite
@@ -48,7 +48,7 @@ ADC_POWER = machine.ADC(PINNUM_POWER)     # VP
 
 # ALLOWED_UART_VARS_W = ("loop_sleep","verbosity")
 # ALLOWED_UART_VARS_R = ("loop_sleep","verbosity","globs","cfg","todos")
-SECRET_GLOBS = ("ak")
+SECRET_GLOBS = ("ak")   # don't display this value to public
 
 class globs:
     verbosity = 2
