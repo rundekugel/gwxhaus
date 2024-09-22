@@ -165,18 +165,38 @@
           return;
       }
       try {
+          var Vmin = 200;
           var jsn = JSON.parse(text);
           var vdiv = 10.86
-          v = jsn.ANALOG.A1;
-          if(v==null) v="?"; else v=(v/vdiv).toFixed(1);
-          write2Id("L1", v);
-          v = jsn.ANALOG.A2;
-          if(v==null) v="?"; else v=(v/vdiv).toFixed(1);
-          write2Id("L2", v);
-          v = jsn.ANALOG.A3;
-          if(v==null) v="?"; else v=(v/vdiv).toFixed(1);
-          write2Id("L3", v);
-        
+          var v1 = jsn.ANALOG.A1;
+          if(v1 == null) return;
+          v1=(v1/vdiv).toFixed(1);
+          var v2 = jsn.ANALOG.A2;
+          if(v2 == null) return;
+          v2=(v2/vdiv).toFixed(1);
+          var v3 = jsn.ANALOG.A3;
+          if(v3 == null) return;
+          v3=(v3/vdiv).toFixed(1);
+          var err = 0;
+          write2Id("vert1", "");
+          if(v1 < Vmin) {
+              err++;  
+              add2Id("vert1","L1 Unterspannung! ");
+          }
+          if(v2 < Vmin) {
+              err++;  
+              add2Id("vert1","L2 Unterspannung! ");
+          }
+          if(v3 < Vmin) {
+              err++;  
+              add2Id("vert1","L3 Unterspannung! ");
+          }
+          if(err==0) { 
+              add2Id("vert1","OK.");
+          }else{
+               add2Id("vert1", err + " Fehler!");
+           }
+          
           write2Id("Lct", jsn.ESP32.Temperature.toFixed(1));
           write2Id("Lts", jsn.Time);
           //write2Id("VSupply", "Warte auf neue Daten...");
@@ -289,9 +309,7 @@ Haus2 Fenster: <button onclick="motor(2,\'u\')" >Auf</button> &nbsp;
 <h3>Stromversorgung</h3>
 <h4>Verteilerkasten Links</h4>
 <table>
-<tr><td>L1</td><td>L2</td><td>L3</td><td>Einheit</td><tr>
-<tr><td id="L1">-</td><td id="L2">-</td><td id="L3">-</td><td>Volt</td><tr>
-</table><table>    
+<tr><td>Stromversorgung:</td><td id="vert1">-</td></tr>    
 <tr><td>Controllertemperatur: </td><td id="Lct">-</td><td>°C</td></tr>    
 <tr><td>Letztes Lebenszeichen um:</td><td id="Lts">-</td></tr>
 </table>

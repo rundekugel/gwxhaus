@@ -37,6 +37,36 @@ class Filter:
     def getValue(self, rounded=1):
         return round(self.lastval, rounded)
 
+class FilterWindowed:
+    lastvals = []
+    size = 2
+    lastav = 0
+
+    def __init__(self, size, initvalue=None):
+        if initvalue is not None:
+            self.lastval = initvalue
+        size = int(size)
+        if size <1:
+            print("Warning: size must be integer and >0, but is:"+str(size))
+            size=1
+        self.size = size
+
+    def feed(self, value):
+        self.lastvals.append(value)
+        if self.size <2:
+            return value
+        while len(self.lastvals) > self.size:
+            self.lastvals.pop(0)
+        av = 0
+        for i in self.lastvals:
+            av += i
+        av /= len(self.lastvals)
+        self.lastav = av
+        return av
+        
+    def getValue(self, rounded=1):
+        return round(self.lastav, rounded)
+
 class Windsensor:
     pin = None
     lasttime = None

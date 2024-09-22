@@ -69,7 +69,7 @@ class globs:
     loop_sleep = 2.5
     sturm = 0
     sturmdelay_on = 10
-    sturmdelay_off = 100
+    sturmdelay_off = 30
     deepsleep_ms = 0
     lightsleep_ms = 0
     encoder = None
@@ -545,7 +545,7 @@ def checkWind():
     try:
         if speed > globs.cfg["wind"]["max"]:
             globs.sturm +=1
-            if speed > globs.cfg["wind"]["max"] *2:
+            if speed > globs.cfg["wind"]["max"] *2.5:
                 globs.sturm += globs.sturmdelay_on
             if globs.sturm > globs.sturmdelay_on:
                 if globs.verbosity:
