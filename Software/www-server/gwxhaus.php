@@ -99,9 +99,22 @@
                 if(k=="mn") {
                     if(val==0) write2Id("manu", "");
                     else {
+                        var rest = ""
+                        val = parseInt(val)
+                        if(val > 3600) {
+                            h= parseInt(val/3600);
+                            rest = h+" Stunden, ";
+                            val -= h*3600;
+                        }
+                        if(val >60) {
+                            m = parseInt(val/60);
+                            rest += m +" Minuten, ";
+                            val -= m*60;
+                        }
+                        rest += val+" Sekunden";
                         write2Id("manu",
                         "<hr><h2 style=color:red;>Manueller Modus aktiv!</h2>Restdauer: "
-                        +val+" Sekunden");
+                        +rest);
                     }
                 }
                                 
