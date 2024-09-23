@@ -233,6 +233,15 @@
       fetch("switcher.php?"+text);
   }  
   
+  function settime(){
+    var currentdate = new Date();
+    var rtc = "rtc="+ currentdate.getFullYear()+","+(currentdate.getMonth()+1)
+                    +","+currentdate.getDate()+",1,"+ currentdate.getHours() +","
+                    + currentdate.getMinutes() + "," + currentdate.getSeconds();
+    add2Log("setRTC: "+rtc);
+    switcher(rtc);
+  }  
+  
   function ch_refresh(){
       add2Id("log","refresh:");
       r=parseInt(document.getElementById("refresh").value);
@@ -375,6 +384,7 @@ if(isset($_SESSION["user"])) {
   echo '<br><br>Show variables: <button onclick=switcher("globs?")>Globals</button></a>';
   echo ' &nbsp;&nbsp;<button onclick=switcher("cfg?=?")>Config</button></a>';
   echo ' &nbsp;&nbsp;<button onclick=switcher("m1=?")>Motor</button></a>';
+  echo '<br>&nbsp;&nbsp;<button onclick=settime()>Set Time</button></a>';
 }else{
   echo '<a href="login.php"><button>Login</button></a><hr>';
 }
