@@ -49,7 +49,7 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
         if len(p)>1:
             # todo: check value for validity
             value = "=" +p[1]
-        if p0 in ("w1","w2","w3","w4","m1","m2","manually","globs?","globs","cfg","cfg?",
+        if p0 in ("w1","w2","w3","w4","m1","m2","manually","globs?","globs","cfg","cfg?","rtc",
                   "wasser1","wasser2","motor1","motor2","d1","d2"):
             # remove this, if fw updated
             if p0=="w1": p0="wasser1"
