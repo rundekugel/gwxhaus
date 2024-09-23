@@ -267,7 +267,7 @@
     
 <h1>Technik Gew&auml;chshaus Unter&ouml;d</h1>
 <hr>
-Test Version 0.2.1
+Test Version 0.2.2
 <hr>
 <!--label for="refresh">HTML Update Interval:</label-->
 HTML Update Interval:
