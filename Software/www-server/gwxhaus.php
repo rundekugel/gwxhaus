@@ -68,7 +68,13 @@
                 if(k=="sp") {
                     write2Id("wind", Math.round(val*10)/10);
                     add2Id("wind", " m/s = "+Math.round(val*36)/10+" km/h");
+                    if(val > 9) {
+                        write2Id("windtext", "Sturm");
+                    }else{
+                        write2Id("windtext", "Ruhig");
+                    }
                 }
+                if(k=="Sturm") add2Id("windtext", ". Sturm-modus! Wert:"+val);
                 if(k=="T1") write2Id("T1", val+" &deg;C");
                 if(k=="T2") write2Id("T2", val+" &deg;C");
                 if(k=="H1") write2Id("H1", val+" %rel.");
@@ -230,7 +236,7 @@
     
 <h1>Gew&auml;chshaus Unter&ouml;d</h1>
 <hr>
-Test Version 0.6.1
+Version 0.6.2 (unvollendet)
 <?php
 if(isset($_SESSION["user"])) {
   echo "<hr>Angemeldet als: ".$_SESSION["user"];
@@ -245,7 +251,7 @@ if(isset($_SESSION["user"])) {
 <h3>Gew&auml;chshaus Sensoren</h3>
 <pre id="hbs">Lade Daten...</pre>
 <table>
-<tr><td>Wind: </td><td id="wind">-</td></tr></tr>
+<tr><td>Wind: </td><td id="wind">-</td><td id="windtext">Still</td></tr></tr>
 <tr><td>Haus1: </td><td id="T1">-</td><td id="H1">-</td></tr>
 <tr><td>Haus2: </td><td id="T2">-</td><td id="H2">-</td></tr>
 
