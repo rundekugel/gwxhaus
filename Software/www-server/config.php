@@ -89,7 +89,7 @@
 </script>
 </head>    
 
-<body onload=makeTable("table1",12,24)>
+<body onload='makeTable("table1",12,24);makeTable("table2",12,24);'>
     
 <h1>Konfiguration Gew&auml;chshaus Unter&ouml;d</h1>
 <hr>
@@ -109,10 +109,14 @@ if(isset($_SESSION["user"])) {
 }
 ?>
 <hr>
-<button onclick=makeTable("table1",60,24)>test 60x24</button>&nbsp;&nbsp;&nbsp;
+<button onclick=makeTable("table1",60,24);makeTable("table2",60,24);>test 60x24</button>&nbsp;&nbsp;&nbsp;
 <button onclick=settime()>Setzte Uhrzeit auf aktuelle Zeit</button>
 <h3>Gew&auml;chshaus Wasser Zeiten</h3>
-<div id="table1">-</div>
+. = Aus / x = An<br>
+<table><td>
+<h4>Wasserventil1</h4><div id="table1">-</div></td><td></td><td>
+<h4>Wasserventil2</h4><div id="table2">-</div></td>
+</table>
 <br>
 <hr>
 <div id="log">-</div>
