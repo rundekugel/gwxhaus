@@ -493,10 +493,10 @@ def checkTemp(hausnum):
         setMotor(hausnum,"u")
     if s.temperature < cfg["tmin"]:
         setMotor(hausnum,"d")
-        
-    if s.humidity > cfg["hmax"]:
-        setMotor(hausnum,"u")
-        setWater(hausnum, 0)
+    else:        
+        if s.humidity > cfg["hmax"]:
+            setMotor(hausnum,"u")
+            setWater(hausnum, 0)
     if s.humidity < cfg["hmin"]:
         if getWater(hausnum) == 0:
             setWater(hausnum,1)
