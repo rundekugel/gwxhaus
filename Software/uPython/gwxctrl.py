@@ -15,7 +15,7 @@ import HYT221
 import comu
 import docrypt
 
-__version__ = "0.4.2"
+__version__ = "0.4.3"
 
 MODE_CBC = 2
 # pinning for esp32-lite
@@ -216,6 +216,13 @@ def readConfig(filename="gwxctrl.cfg"):
     msg = "Einstellungen geladen"
     if "verbosity" in cfg:
         globs.verbosity = cfg["verbosity"]
+    if globs.verbosity is None:
+        globs.verbosity = 0
+    if isinstance(globs.verbosity, str):
+        try:
+            globs.verbosity = int(globs.verbosity)
+        except:
+            globs.verbosity = 0
     if globs.verbosity:
         msg += str(pubconfig(cfg))
         print(msg)
@@ -595,34 +602,23 @@ def checkWind():
         pass
         
 def checkEndSwitch():
-    #if not hasattr(checkEndSwitch, "lastTime"):
-    #    checkEndSwitch.setattr("lastTime", time.time())
     timedelta = time.time() - globs.checkEndSwitch_lastTime
     checkEndSwitch_lastTime = time.time()
-    try:
-        step = timedelta * float(globs.cfg["mot_openpersec1"])
-        if getMotor(1) == "d":
-            globs.motor1_virtual_open -= step
-            if PIN_END1DOWN.value ==0:
-                globs.motor1_virtual_open = 0
-                setMotor(1,0)
-        if getMotor(1) == "u":
-            globs.motor1_virtual_open += step
-    except Exception as e:
-        print(str(e))
-        
-    try:
-        step = timedelta * float(globs.cfg["mot_openpersec2"])
-        if getMotor(2) == "d":
-            globs.motor1_virtual_open -= step
-            if PIN_END2DOWN.value ==0:
-                globs.motor2_virtual_open = 0
-                setMotor(2,0)
-        if getMotor(2) == "u":
-            globs.motor1_virtual_open += step
-    except Exception as e:
-        print(str(e))
-        
+    
+    motorNVirtual = (globs.window_virtual_open1, globs.window_virtual_open1)
+    PIN_END_DOWN = (PIN_END1DOWN, PIN_END2DOWN)
+    for housenum in range(1,3):
+        try:
+            step = timedelta * float(globs.cfg["mot_openpersec1"])
+            if getMotor(housenum) == "d":
+                motorNVirtual[housenum-1] -= step
+                if PIN_END_DOWN[housenum-1].value ==0:
+                    motorNVirtual[housenum-1] = 0
+                    setMotor(housenum,0)
+            if getMotor(housenum) == "u":
+                motorNVirtual[housenum-1] += step
+        except Exception as e:
+            print(str(e))
     return        
 
 def formTime(text):
