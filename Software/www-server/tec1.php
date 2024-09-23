@@ -293,6 +293,7 @@ if(isset($_SESSION["user"])) {
   echo " &nbsp;&nbsp;<a href='logout.php'><button>Logout</button></a>";
   echo ' &nbsp;&nbsp;<button onclick="manually(600)">Manuell 10min</button></a>';
   echo ' &nbsp;&nbsp;<button onclick="manually(0)">Manuell off</button></a>';
+  echo ' &nbsp;&nbsp;Rechte: '.$_SESSION['rights'];
 }
 ?>
 <div id="manu"></div>
@@ -390,7 +391,10 @@ if(isset($_SESSION["user"])) {
   echo '<br><br>Show variables: <button onclick=switcher("globs?")>Globals</button></a>';
   echo ' &nbsp;&nbsp;<button onclick=switcher("cfg?=?")>Config</button></a>';
   echo ' &nbsp;&nbsp;<button onclick=switcher("m1=?")>Motor</button></a>';
-  echo '<br>&nbsp;&nbsp;<button onclick=settime()>Set Time</button></a>';
+  echo '<br>&nbsp;&nbsp;<button onclick=settime()>Set Time</button></a> ';
+  if(isset($_SESSION['rights']) && str_contains($_SESSION['rights'], "c")){
+    echo ' &nbsp;&nbsp; <a href="config.php">Einstellungen</a><hr>';    
+  }  
 }else{
   echo '<a href="login.php"><button>Login</button></a><hr>';
 }

@@ -352,6 +352,9 @@ Haus2 Fenster: <button onclick="motor(2,\'u\')" >Auf</button> &nbsp;
 if(!isset($_SESSION["user"])) {
 echo '<a href="login.php"><button>Login</button></a><hr>';
 }
+if(isset($_SESSION['rights']) && str_contains($_SESSION['rights'], "-c,")){
+echo '<a href="config.php"><button>Einstellungen</button></a><hr>';    
+}
 ?>
 <pre id="log">-</pre>
 <a href="tec1.php">Techn. Details</a>
