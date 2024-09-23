@@ -295,6 +295,8 @@ if(isset($_SESSION["user"])) {
 <button onclick="wasseran(2,15)" ><s>Wasser an 15min</button>&nbsp;
 <button onclick="wasseran(2,120)">Wasser an 2h</s></button>
 ';}?>
+<h4>Wasserstand Zisterne</h4>
+<table><tr><td>Zisterne</td><td id="zistm">?</td><td>m =</td><td id="zistl">?</td><td>Liter</td></tr></table>
 <hr>
 
 <h3>Bodenfeuchte</h3>
