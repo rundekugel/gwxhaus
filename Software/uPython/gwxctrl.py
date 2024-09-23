@@ -15,7 +15,7 @@ import HYT221
 import comu
 import docrypt
 
-__version__ = "0.3.1"
+__version__ = "0.4.2"
 
 MODE_CBC = 2
 # pinning for esp32-lite
@@ -41,8 +41,8 @@ PIN_END1DOWN = Pin(23, Pin.IN)
 PIN_END2UP = Pin(35, Pin.IN)    # pin35 can only be input
 PIN_END2DOWN = Pin(19, Pin.IN)
 
-DOSE1 = Pin(13, Pin.OUT)
-DOSE2 = Pin(13, Pin.OUT)
+DOSE1 = Pin(18, Pin.OUT)
+DOSE2 = Pin(18, Pin.OUT)
 
 # PIN_POWER_GOOD = Pin(13, Pin.IN, Pin.PULL_DOWN)
 ADC_BATT = machine.ADC(39)      # VN
@@ -54,7 +54,7 @@ ADC_POWER = machine.ADC(PINNUM_POWER)     # VP
 
 # ALLOWED_UART_VARS_W = ("loop_sleep","verbosity")
 # ALLOWED_UART_VARS_R = ("loop_sleep","verbosity","globs","cfg","todos")
-SECRET_GLOBS = ("ak")   # don't display this value to public
+SECRET_GLOBS = ("ak", "watertables")   # don't display this value to public
 
 class globs:
     verbosity = 2
@@ -196,7 +196,7 @@ def pubconfig(cfg):
     cfg_tmp = dict(cfg)
     for c in SECRET_GLOBS:
         cfg_tmp.pop(c ,None)  # remove secrets before show cfg
-    return cfg
+    return cfg_tmp
 
 def readConfig(filename="gwxctrl.cfg"):
     cfg = None
@@ -545,7 +545,7 @@ def checkTimer():
     mi = int(minute/8)
     for wt in range(1,5):
         try:
-            byte = globs.watertables[wt][mi]
+            byte = globs.watertables[wt-1][mi]
             m = (byte & bitmask)
             if m:
                 setWater(wt, 1)
