@@ -101,14 +101,12 @@ def main():
           globs.verbosity = int(p[3:],10)
         if p[:2]=="-s":
           server = p[3:]
-        if p[:2]=="-p":
-          pwd = p[3:]
-        if p[:2]=="-u":
-          user = p[3:]
-        if p[:2]=="-k":
-          key = p[3:]
-        if p[:2]=="-d":
-          data = p[3:]
+        if p0=="-p":          pwd = p1
+        if p0=="-u":          user = p1
+        if p0=="-k":          key = p1
+        if p0=="-d":           data = p1
+        if p0=="-ttx":   globs.topicTx = p1
+        if p0=="-trx":   globs.topicRx = p1
 
     if ":" in server:
       sp=server.split(":")
