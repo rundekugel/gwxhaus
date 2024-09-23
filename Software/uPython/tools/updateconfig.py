@@ -37,23 +37,28 @@ def wait_for_rx(timeout=20):
             return True
     return False
     
-def send(client, dic):
+def send(client, text):
     """    send the dictionary as text    """
     start = "modcfgs"
     add = "modcfga"
     end = "modcfg."
     blocksize = 20
-    text = str(dic)
     p=0
     if isinstance(text, bytes):
         text=text.decode()
-    client.publish(globs.topicTx, start+"="+text[:blocksize], globs.qos, 0)
+    m = start+"="+text[:blocksize]
+    if globs.verbosity:
+        print("mqtt: "+globs.topicTx+" ["+m+"]")
+    client.publish(globs.topicTx, m, globs.qos, 0)
     time.sleep(10)
     while 1:
         p += blocksize
         if p>= len(text):
             break
-        client.publish(globs.topicTx, add+"="+text[p:p+blocksize], globs.qos, 0)
+        m = add+"="+text[p:p+blocksize]
+        if globs.verbosity:
+            print("mqtt: " + globs.topicTx + " [" + m + "]")
+        client.publish(globs.topicTx, m, globs.qos, 0)
         time.sleep(10)
     client.publish(globs.topicTx, end, globs.qos, 0)
     return
@@ -66,6 +71,8 @@ def main():
       print("-s=<server>  set servername")
       print("-k=<key>     change/add this key")
       print("-d=<data>    set data")
+      print("-dn=<number> set data as number, without quotes.")
+      print("-t=<text>    send this text")
       print("-u=<user>   ")
       print("-p=<passwd> ")
       print("-ttx=<topic to send> ")
@@ -82,6 +89,8 @@ def main():
       data=av[3]
     else:
       data=None
+    type = "s"
+    text = None
 
     if len(av)>1:
       for p in av[1:]:
@@ -101,10 +110,13 @@ def main():
           globs.verbosity = int(p[3:],10)
         if p[:2]=="-s":
           server = p[3:]
-        if p0=="-p":          pwd = p1
-        if p0=="-u":          user = p1
-        if p0=="-k":          key = p1
-        if p0=="-d":           data = p1
+        if p0=="-p":     pwd = p1
+        if p0=="-u":     user = p1
+        if p0=="-k":     key = p1
+        if p0=="-d":     data,type = p1,"s"
+        if p0=="-dn":    data,type = p1,"n"
+        if p0=="-df":    data = float(p1)
+        if p0=="-t":     text = p1
         if p0=="-ttx":   globs.topicTx = p1
         if p0=="-trx":   globs.topicRx = p1
 
@@ -128,7 +140,10 @@ def main():
     client.loop_start()
 
     rep-=1
-    send(client, {key:data})
+    if text is None:
+        if type == 's': data = '"'+ data + '"'
+        text = '{"'+ key +'":'+data+'}'
+    send(client, text)
     time.sleep(.5)
     print("done.")
     return 0

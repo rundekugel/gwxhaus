@@ -457,7 +457,7 @@ def parseMsg():
             globs.modcfg += val
         if b"modcfg." in cmd:
             globs.modcfg += val
-            globs.modcfg = globs.modcfg.decode()
+            globs.modcfg = globs.modcfg.decode().replace("'", '"')
             if globs.verbosity: print(globs.modcfg)
             j=json.loads(globs.modcfg)
             if globs.verbosity: print(str(j))
