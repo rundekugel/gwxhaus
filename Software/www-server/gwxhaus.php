@@ -235,8 +235,8 @@ Test Version 0.6.1
 if(isset($_SESSION["user"])) {
   echo "<hr>Angemeldet als: ".$_SESSION["user"];
   echo " &nbsp;&nbsp;<a href='logout.php'><button>Logout</button></a>";
-  echo ' &nbsp;&nbsp;<button onclick="manually(60)">Manuell 1min</button></a>';
-  echo ' &nbsp;&nbsp;<button onclick="manually(0)">Manuell off</button></a>';
+  echo ' &nbsp;&nbsp;<button onclick=switcher("manually=60")>Manuell 1min</button></a>';
+  echo ' &nbsp;&nbsp;<button onclick=switcher("manually=0")>Manuell off</button></a>';
 }
 ?>
 <div id="manu"></div>
