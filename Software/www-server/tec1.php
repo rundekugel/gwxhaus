@@ -392,7 +392,8 @@ if(isset($_SESSION["user"])) {
   echo ' &nbsp;&nbsp;<button onclick=switcher("cfg?=?")>Config</button></a>';
   echo ' &nbsp;&nbsp;<button onclick=switcher("m1=?")>Motor</button></a>';
   echo '<br>&nbsp;&nbsp;<button onclick=settime()>Set Time</button></a> ';
-  if(isset($_SESSION['rights']) && str_contains($_SESSION['rights'], "c")){
+  //changed for php7:
+  if(isset($_SESSION["rights"]) && strpos($_SESSION["rights"], "c")){
     echo ' &nbsp;&nbsp; <a href="config.php">Einstellungen</a><hr>';    
   }  
 }else{
