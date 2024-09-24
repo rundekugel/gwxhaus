@@ -15,7 +15,7 @@ import HYT221
 import comu
 import docrypt
 
-__version__ = "0.4.3"
+__version__ = "0.4.4"
 
 MODE_CBC = 2
 # pinning for esp32-lite
@@ -37,23 +37,21 @@ PIN_MOTOR2 = Pin(12, Pin.OUT)
 PIN_MOTOR2D = Pin(14, Pin.OUT)
 
 PIN_END1UP = Pin(34, Pin.IN)
-PIN_END1DOWN = Pin(23, Pin.IN)
+PIN_END1DOWN = Pin(23, Pin.IN, pull=Pin.PULL_UP)
 PIN_END2UP = Pin(35, Pin.IN)    # pin35 can only be input
-PIN_END2DOWN = Pin(19, Pin.IN)
+PIN_END2DOWN = Pin(19, Pin.IN, pull=Pin.PULL_UP)
 
 DOSE1 = Pin(18, Pin.OUT)
 DOSE2 = Pin(18, Pin.OUT)
-
-# PIN_POWER_GOOD = Pin(13, Pin.IN, Pin.PULL_DOWN)
+)
 ADC_BATT = machine.ADC(39)      # VN
-PINNUM_POWER = 36
+PINNUM_POWER = 36   # needed for wakeup
 ADC_POWER = machine.ADC(PINNUM_POWER)     # VP
 # pins 32+33 are xtal32
 # 22,21: scl/sda esp8266?
 # esp32: scl/sda: 25/26 ; 18/19
 
 # ALLOWED_UART_VARS_W = ("loop_sleep","verbosity")
-# ALLOWED_UART_VARS_R = ("loop_sleep","verbosity","globs","cfg","todos")
 SECRET_GLOBS = ("ak", "watertables")   # don't display this value to public
 
 class globs:
@@ -62,10 +60,7 @@ class globs:
     ws, hy1, hy2 = None, None, None
     serv = None
     inited=False
-    # uart = None
     rx = []
-    # last_motorstate = [b"0",b"0"]   # possible: "u","d","0" // up, down, off
-    # last_waterstate = [0,0]     # possible: 0,1
     port = 80
     dorun = True
     cfg = {"vccok":[4,30e3], "dsonbat":[[3.5,60e3],[3.3,300e3]], 
@@ -78,8 +73,6 @@ class globs:
     sturmdelay_off = 30
     deepsleep_ms = 0
     lightsleep_ms = 0
-    encoder = None
-    decoder = None
     iv = b""
     modcfg = ""
     wdttime = 20
@@ -113,7 +106,6 @@ def setMotor(num, direction):
     pm.value(0)
     pd.value(sw2[1])     # direction 1=up
     pm.value(sw2[0])     # motor on/off
-    # globs.last_motorstate[num-1] = sw.encode()
 
 def setWater(num, onOff=None):
     num = int(num)
@@ -125,8 +117,6 @@ def setWater(num, onOff=None):
         onOff = int(str(onOff).replace("'","")[-1])
     p=[PIN_WATER1, PIN_WATER2, PIN_WATER3, PIN_WATER4][num-1]
     p.value(onOff)
-    # globs.last_waterstate[num-1] = onOff
-
 
 def setDose(num, onOff=None):
     num = int(num)
@@ -138,7 +128,6 @@ def setDose(num, onOff=None):
         onOff = int(str(onOff).replace("'","")[-1])
     p=[DOSE1, DOSE2][num-1]
     p.value(onOff)
-    # globs.last_waterstate[num-1] = onOff
 
 def getMotor(num, lang=""):
     num=int(num)
@@ -153,7 +142,7 @@ def getMotor(num, lang=""):
     return status
 
 def getWater(num, lang=""):
-    p=[PIN_WATER1, PIN_WATER2][num-1]
+    p=[PIN_WATER1, PIN_WATER2, PIN_WATER3, PIN_WATER4][num-1]
     v=p.value()
     if lang == "de":
         return ["Zu", "Auf"][v]
@@ -248,30 +237,29 @@ def init():
     print("GwxControl version:" + str(__version__))
     globs.checkEndSwitch_lastTime = time.time()
     readConfig(globs.cfgfile)
+
     globs.ws = windsensor.Windsensor(PIN_WIND, 
                     diameter=globs.cfg.get("windsensordia",None))
     globs.ws.verbosity = globs.verbosity
+
     addr1 = globs.cfg.get("sensoraddr1")      # this is None, if not given
-    #freq = 50
     f=globs.cfg.get("sensf1")
-    #if f: freq=f
     globs.hy1 = HYT221.HYT221(PIN_SCL1, PIN_SDA1, addr1, freq=f)    # if addr1 is None, default is used
     addr2 = globs.cfg.get("sensoraddr2")
-    #freq = 50
     f=globs.cfg.get("sensf2")
-    #if f: freq=f
     globs.hy2 = HYT221.HYT221(PIN_SCL2, PIN_SDA2, addr2, freq=f)
     globs.hy1.verbosity = globs.verbosity
     globs.hy2.verbosity = globs.verbosity
+
     comu.globs.callbackRx = servCB
     comu.globs.verbosity = globs.verbosity
     ADC_BATT.atten(machine.ADC.ATTN_11DB)    # set to 3.3V range
     ADC_POWER.atten(machine.ADC.ATTN_11DB)
     esp32.wake_on_ext0(pin=PINNUM_POWER, level=esp32.WAKEUP_ANY_HIGH)
-    ak = globs.cfg.get("ak")
+
+    ak = globs.cfg.get("ak")  # this key used for updates over the air, or critical config-values
     if ak:
         docrypt.init(ak = ak)
-    # globs.uart = comu
     comu.init(2, globs.cfg.get("baudrate"))
     rc = machine.reset_cause()
     comu.addTx("resetcause:"+str(rc))
@@ -319,6 +307,8 @@ def init():
 def pinsReset():
     PIN_WATER1.value(0)
     PIN_WATER2.value(0)
+    PIN_WATER3.value(0)
+    PIN_WATER4.value(0)
     PIN_MOTOR1.value(0)
     PIN_MOTOR1D.value(0)
     PIN_MOTOR2.value(0)
@@ -358,7 +348,7 @@ def parseMsg():
             num = cmd[-1:]
             direction = val
             if direction == b"?":
-                msg = "Motor1:"+getMotor(1)+". Motor2:"+getMotor(2)
+                msg = "M1:"+getMotor(1)+". M2:"+getMotor(2)
                 if globs.verbosity:
                     print(msg)
                 comu.addTx(msg)
@@ -605,11 +595,11 @@ def checkEndSwitch():
     timedelta = time.time() - globs.checkEndSwitch_lastTime
     checkEndSwitch_lastTime = time.time()
     
-    motorNVirtual = (globs.window_virtual_open1, globs.window_virtual_open1)
+    motorNVirtual = (globs.window_virtual_open1, globs.window_virtual_open2)
     PIN_END_DOWN = (PIN_END1DOWN, PIN_END2DOWN)
     for housenum in range(1,3):
         try:
-            step = timedelta * float(globs.cfg["mot_openpersec1"])
+            step = timedelta * float(globs.cfg["mot_openpersec"+str(housenum)])
             if getMotor(housenum) == "d":
                 motorNVirtual[housenum-1] -= step
                 if PIN_END_DOWN[housenum-1].value ==0:
