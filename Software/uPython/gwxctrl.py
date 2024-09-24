@@ -43,7 +43,7 @@ PIN_END2DOWN = Pin(19, Pin.IN, pull=Pin.PULL_UP)
 
 DOSE1 = Pin(18, Pin.OUT)
 DOSE2 = Pin(18, Pin.OUT)
-)
+
 ADC_BATT = machine.ADC(39)      # VN
 PINNUM_POWER = 36   # needed for wakeup
 ADC_POWER = machine.ADC(PINNUM_POWER)     # VP
