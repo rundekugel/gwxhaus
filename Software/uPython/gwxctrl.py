@@ -336,7 +336,7 @@ def parseMsg():
                 print("pM:"+str(msg))
         if not msg:
             return
-        cmd, val = msg, ""
+        cmd, val = msg, b""
         if isinstance(cmd, str):
             cmd = cmd.encode()
         if b"=" in cmd:
@@ -387,8 +387,8 @@ def parseMsg():
         if b"todos?" in msg:
             comu.addTx(str(globs.todos))
         elif b"todo" in msg:
-            if "grfx" in val:
-                val = val.replace("grfx","")
+            if b"grfx" in val:
+                val = val.replace(b"grfx",b"")
                 if globs.verbosity: print("todo:"+str(val))
                 globs.todo.append(val)
         if b"globs?" in msg:
@@ -570,8 +570,8 @@ def checkWind():
     if storm is over, wait some time, for really end of storm.
     """
     speed = globs.ws.getValue()
-    if not speed:
-        return
+    if speed is None:
+        print("Warning! No windspeed")
     try:
         if speed > globs.cfg["wind"]["max"]:
             globs.sturm +=1
