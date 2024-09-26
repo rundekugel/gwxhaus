@@ -118,7 +118,7 @@
                     }
                 }
                                 
-                if(k=="USB=") {
+                if(k=="USB") {
                     var s = parseFloat(val.split("=")[1]);
                     write2Id("cusb", val);
                     write2Id("cusb2", "ok");
