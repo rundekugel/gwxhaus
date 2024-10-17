@@ -1,0 +1,9 @@
+{
+"topictx":"test/cmnd/sserialsend",
+"topicrx":"test",
+"user":"user1",
+"server":"mqtt.eclipseprojects.io",
+"port":8883,
+// or:
+"server":"mqtt.eclipseprojects.io:8883",
+}

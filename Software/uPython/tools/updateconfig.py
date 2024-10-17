@@ -7,12 +7,12 @@ import time,os,sys
 import json
 import paho.mqtt.client as mqtt
 
-__version__ = "0.1.0"
+__version__ = "0.2.1"
 __author__ = "rundekugel@github"
 
 class globs:
-    topicRx = "x/tele/RESULT"
-    topicTx = "x/cmnd/SSerialSend"
+    topicRx = "slw/gwx/tele/RESULT"
+    topicTx = "slw/gwx/x/cmnd/SSerialSend"
     verbosity = 1
     key,data = None,None
     rx=0
@@ -65,7 +65,7 @@ def send(client, text):
 
 def main():
     av=sys.argv
-    if len(av)<3:
+    if len(av)<2:
       print("no args. use: mytt_tx.py server[:port] <key> [data] [options]")
       print("-q=<n>   qos=n")
       print("-s=<server>  set servername")
@@ -84,6 +84,7 @@ def main():
     key=av[2]
     rep=1
     retain = False
+    user,pwd=None,None
 
     if len(av)>3:
       data=av[3]
@@ -91,6 +92,7 @@ def main():
       data=None
     type = "s"
     text = None
+    cfgfile=None
 
     if len(av)>1:
       for p in av[1:]:
@@ -115,10 +117,29 @@ def main():
         if p0=="-k":     key = p1
         if p0=="-d":     data,type = p1,"s"
         if p0=="-dn":    data,type = p1,"n"
-        if p0=="-df":    data = float(p1)
+        if p0=="-df":    data,type = float(p1), "f"
         if p0=="-t":     text = p1
         if p0=="-ttx":   globs.topicTx = p1
         if p0=="-trx":   globs.topicRx = p1
+        if p0=="-cfg":   cfgfile=p1
+
+    # load config
+    if cfgfile:
+        with open(configfile, "r") as f:
+            cfg = f.read()
+            j = json.loads(cfg)
+            v = j.get("topictx")
+            if v: globs.topicTx= v
+            v = j.get("topicrx")
+            if v: globs.topicRx = v
+            v = j.get("user")
+            if v: user = v
+            v = j.get("server")
+            if v: server = v
+            v = j.get("port")
+            if v: port = v
+            v = j.get("password")
+            if v: pwd = v
 
     if ":" in server:
       sp=server.split(":")
@@ -136,16 +157,22 @@ def main():
     client.on_connect = on_connect
     client.on_message = on_message
     client.username_pw_set(user,pwd)
-    client.connect(server, port, 60)
+    r=client.connect(server, port, 60)
+    if r:
+        print("connection error:",r)
+        return r
     client.loop_start()
 
     rep-=1
     if text is None:
         if type == 's': data = '"'+ data + '"'
-        text = '{"'+ key +'":'+data+'}'
+        text = '{"'+ key +'":'+str(data)+'}'
     send(client, text)
     time.sleep(.5)
     print("done.")
+    if not r:
+        print("testwait")
+        time.sleep(20)
     return 0
 
 if __name__ == "__main__":
