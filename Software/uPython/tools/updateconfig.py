@@ -1,6 +1,17 @@
 #!/usr/bin/env python
 """
 gwxcontroller config updater
+usage: updateconfig.py server[:port] <key> [data] [options]
+      -q=<n>   qos=n
+      -s=<server>  set servername
+      -k=<key>     change/add this key
+      -d=<data>    set data
+      -dn=<number> set data as number, without quotes.
+      -t=<text>    send this text
+      -u=<user>   
+      -p=<passwd> 
+      -ttx=<topic to send> 
+      -trx=<topic to receive> 
 """
 
 import time,os,sys
@@ -65,19 +76,9 @@ def send(client, text):
 
 def main():
     av=sys.argv
-    if len(av)<2:
-      print("no args. use: mytt_tx.py server[:port] <key> [data] [options]")
-      print("-q=<n>   qos=n")
-      print("-s=<server>  set servername")
-      print("-k=<key>     change/add this key")
-      print("-d=<data>    set data")
-      print("-dn=<number> set data as number, without quotes.")
-      print("-t=<text>    send this text")
-      print("-u=<user>   ")
-      print("-p=<passwd> ")
-      print("-ttx=<topic to send> ")
-      print("-trx=<topic to receive> ")
-      sys.exit()
+    if len(av)<3:
+      print(__doc__)
+      return 0
 
     server=av[1]
     port=18883
@@ -92,7 +93,7 @@ def main():
       data=None
     type = "s"
     text = None
-    cfgfile=None
+    configfile = None
 
     if len(av)>1:
       for p in av[1:]:
@@ -118,15 +119,17 @@ def main():
         if p0=="-d":     data,type = p1,"s"
         if p0=="-dn":    data,type = p1,"n"
         if p0=="-df":    data,type = float(p1), "f"
+        if p0=="-dx":    data,type = float(p1), "f"
         if p0=="-t":     text = p1
         if p0=="-ttx":   globs.topicTx = p1
         if p0=="-trx":   globs.topicRx = p1
-        if p0=="-cfg":   cfgfile=p1
+        if p0=="-cfg":   configfile=p1
+        if p0 in ("-?","?","-h","--help"): print(__doc__) ; return 0
 
     # load config
-    if cfgfile:
+    if configfile:
         with open(configfile, "r") as f:
-            cfg = f.read()
+            cfg = f.read().replace('\n','').replace('\r','')
             j = json.loads(cfg)
             v = j.get("topictx")
             if v: globs.topicTx= v

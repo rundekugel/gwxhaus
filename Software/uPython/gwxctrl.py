@@ -15,7 +15,7 @@ import HYT221
 import comu
 import docrypt
 
-__version__ = "0.4.4"
+__version__ = "0.4.5"
 
 MODE_CBC = 2
 # pinning for esp32-lite
@@ -237,9 +237,11 @@ def init():
     print("GwxControl version:" + str(__version__))
     globs.checkEndSwitch_lastTime = time.time()
     readConfig(globs.cfgfile)
-
+    diameter=globs.cfg.get("windsensordia",None)
+    if diameter is not None:
+        diameter=float(diameter) 
     globs.ws = windsensor.Windsensor(PIN_WIND, 
-                    diameter=globs.cfg.get("windsensordia",None))
+                    diameter=diameter)
     globs.ws.verbosity = globs.verbosity
 
     addr1 = globs.cfg.get("sensoraddr1")      # this is None, if not given
