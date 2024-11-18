@@ -249,7 +249,7 @@
     
 <h1>Gew&auml;chshaus Unter&ouml;d</h1>
 <hr>
-Version 0.6.2 (unvollendet)
+Version 0.6.3 (unvollendet)
 <?php
 if(isset($_SESSION["user"])) {
   echo "<hr>Angemeldet als: ".$_SESSION["user"];
@@ -261,7 +261,7 @@ if(isset($_SESSION["user"])) {
 <div id="manu"></div>
 <hr>
 
-<h3>Gew&auml;chshaus Sensoren</h3>
+<h3 id="gwxsensoren">Gew&auml;chshaus Sensoren</h3>
 <pre id="hbs">Lade Daten...</pre>
 <table>
 <tr><td>Wind: </td><td id="wind">-</td><td id="windtext">Still</td></tr></tr>
@@ -274,7 +274,7 @@ Heartbeat: [<textbox id="hb">.</textbox>] <br>
 <tr><td>Letzte Nachricht: </td><td id="ts">-</td></tr>
 </table>
 <hr>
-<h3>Wasser</h3>
+<h3 id="wasser">Wasser</h3>
 <h4>Wasser Haus 1</h4>
 <table><tr><td>A:</td><td id="w1">-</td><td>B:</td><td id="w3">-</td></tr></table>
 <?php
@@ -295,18 +295,18 @@ if(isset($_SESSION["user"])) {
 <button onclick="wasseran(2,15)" ><s>Wasser an 15min</button>&nbsp;
 <button onclick="wasseran(2,120)">Wasser an 2h</s></button>
 ';}?>
-<h4>Wasserstand Zisterne</h4>
+<h4 id="zisterne">Wasserstand Zisterne</h4>
 <table><tr><td>Zisterne</td><td id="zistm">?</td><td>m =</td><td id="zistl">?</td><td>Liter</td></tr></table>
 <hr>
 
-<h3>Bodenfeuchte</h3>
+<h3 id="bodenfeuchte">Bodenfeuchte</h3>
 Haus1: ??% &nbsp;&nbsp;&nbsp;&nbsp; Haus2: ??%
 
 <h2>Fenster Status</h2>
 <table><tr><td>Haus1:</td><td id="fen1">-</td><td>Haus2:</td><td id="fen2">-</td></tr></table> 
 <hr>
 
-<h3>Controller</h3>
+<h3 id="controller">Controller</h3>
 <pre id="motinfo"></pre>
 <table>
 <tr><td>Haus1:</td><td id="md1">-</td><td>Haus2:</td><td id="md2">-</td></tr>
@@ -323,7 +323,7 @@ Haus2 Fenster: <button onclick="motor(2,\'u\')" >Auf</button> &nbsp;
 </s>
 <hr>
 
-<h3>Sensor im Sicherungskasten </h3>
+<h3 id="">Sensor im Sicherungskasten </h3>
 <pre id="hbc">Lade Daten...</pre>
 <div id="wifictrl">-</div>
 <table>
@@ -331,14 +331,14 @@ Haus2 Fenster: <button onclick="motor(2,\'u\')" >Auf</button> &nbsp;
 <tr><td>Letztes Lebenszeichen um:</td><td id="ctsa">-</td></tr>
 </table>
 <hr>
-<h3>Stromversorgung</h3>
+<h3 id="strom">Stromversorgung</h3>
 <h4>Verteilerkasten Links</h4>
 <table>
 <tr><td>Stromversorgung:</td><td id="vert1">-</td></tr>    
 <tr><td>Controllertemperatur: </td><td id="Lct">-</td><td>°C</td></tr>    
 <tr><td>Letztes Lebenszeichen um:</td><td id="Lts">-</td></tr>
 </table>
-<h4>Controller-wifi-Schaltkasten</h4>
+<h4 id="gwxcontroller">Controller-wifi-Schaltkasten</h4>
 <pre id="hbc">Lade Daten...</pre>
 <div id="wifictrl">-</div>
 <table>
