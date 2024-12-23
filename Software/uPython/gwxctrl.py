@@ -53,6 +53,7 @@ ADC_POWER = machine.ADC(PINNUM_POWER)     # VP
 
 # ALLOWED_UART_VARS_W = ("loop_sleep","verbosity")
 SECRET_GLOBS = ("ak", "watertables")   # don't display this value to public
+DURATION_PER_LOOP_MAX = 9
 
 class globs:
     verbosity = 2
@@ -327,7 +328,7 @@ def getTH(sensor,num):
     return f"T{num}:{t};H{num}:{h}"
 
 def parseMsg():
-    """execute all cmds in globs.rx"""
+    """execute cmds in globs.rx"""  # all or one
     try:
         msg=None
         if globs.verbosity > 1:
@@ -630,6 +631,7 @@ def main():
     
     while globs.dorun:     # do forever
         globs.wdt.feed()
+        loopstart = time.time()
         toggleLed()     # heartbeat
         try:
             speed = -1
@@ -683,6 +685,11 @@ def main():
                 continue
 
         checkWind()
+
+        if globs.rx and (time.time() -loopstart) < DURATION_PER_LOOP_MAX:
+            parseMsg() 
+
+
         globs.lasttime = getTime()  # this line must be after all checks !
 
         checkEndSwitch()

@@ -2,6 +2,7 @@
 """
 gwxcontroller config updater
 usage: updateconfig.py server[:port] <key> [data] [options]
+      -cfg=<cfg-file>
       -q=<n>   qos=n
       -s=<server>  set servername
       -k=<key>     change/add this key
@@ -72,11 +73,13 @@ def send(client, text):
         client.publish(globs.topicTx, m, globs.qos, 0)
         time.sleep(10)
     client.publish(globs.topicTx, end, globs.qos, 0)
+    if globs.verbosity:
+        client.publish(globs.topicTx, "cfg?", globs.qos, 0)
     return
 
 def main():
     av=sys.argv
-    if len(av)<3:
+    if len(av)<1:
       print(__doc__)
       return 0
 
@@ -91,7 +94,7 @@ def main():
       data=av[3]
     else:
       data=None
-    type = "s"
+    datatype = "s"
     text = None
     configfile = None
 
@@ -116,10 +119,10 @@ def main():
         if p0=="-p":     pwd = p1
         if p0=="-u":     user = p1
         if p0=="-k":     key = p1
-        if p0=="-d":     data,type = p1,"s"
-        if p0=="-dn":    data,type = p1,"n"
-        if p0=="-df":    data,type = float(p1), "f"
-        if p0=="-dx":    data,type = float(p1), "f"
+        if p0=="-d":     data,datatype = p1,"s"
+        if p0=="-dn":    data,datatype = p1,"n"
+        if p0=="-df":    data,datatype = float(p1), "f"
+        if p0=="-dx":    data,datatype = float(p1), "f"
         if p0=="-t":     text = p1
         if p0=="-ttx":   globs.topicTx = p1
         if p0=="-trx":   globs.topicRx = p1
@@ -141,7 +144,7 @@ def main():
             if v: server = v
             v = j.get("port")
             if v: port = v
-            v = j.get("password")
+            v = j.get("pwd")
             if v: pwd = v
 
     if ":" in server:
@@ -168,9 +171,11 @@ def main():
 
     rep-=1
     if text is None:
-        if type == 's': data = '"'+ data + '"'
+        if datatype == 's': data = '"'+ str(data) + '"'
         text = '{"'+ key +'":'+str(data)+'}'
     send(client, text)
+    time.sleep(.5)
+    #ssend(client, "cfg?")
     time.sleep(.5)
     print("done.")
     if not r:
