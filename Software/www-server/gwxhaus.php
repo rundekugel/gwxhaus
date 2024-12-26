@@ -253,7 +253,7 @@ Version 0.6.4
 <?php
 if(isset($_SESSION["user"])) {
   echo "<hr>Angemeldet als: ".$_SESSION["user"];
-  echo " &nbsp;&nbsp;<a href='logout.php'><button>Logout</button></a>";
+  echo " &nbsp;&nbsp;<a href='logout.php'><button>Logout</button></a><br><br>";
   echo ' &nbsp;&nbsp;<button onclick=switcher("manually=300")>Manuell 5min</button></a>';
   echo ' &nbsp;&nbsp;<button onclick="manually(15*60)">Manuell 15min</button></a>';
   echo ' &nbsp;&nbsp;<button onclick="manually(30*60)">Manuell 30min</button></a>';
@@ -354,7 +354,7 @@ Haus2 Fenster: <button onclick="motor(2,\'u\')" >Auf</button> &nbsp;
 <hr>
 <?php
 if(!isset($_SESSION["user"])) {
-echo '<a href="login.php"><button>Login</button></a><hr>';
+echo '<br><a href="login.php"><button>Login</button></a><hr>';
 }
 ?>
 <pre id="log">-</pre>
