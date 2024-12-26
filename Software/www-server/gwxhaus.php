@@ -250,6 +250,8 @@
 <h1>Gew&auml;chshaus Unter&ouml;d</h1>
 <hr>
 Version 0.6.4
+<br>
+<img src="gwxhaus1.png" width=10% height=10%>
 <?php
 if(isset($_SESSION["user"])) {
   echo "<hr>Angemeldet als: ".$_SESSION["user"];
@@ -275,6 +277,7 @@ Heartbeat: [<textbox id="hb">.</textbox>] <br>
 -->
 <tr><td>Letzte Nachricht: </td><td id="ts">-</td></tr>
 </table>
+<br>
 <a href="https://h14.qc9.de/slw/charts.php">Temperaturverläufe und mehr</a>
 
 <hr>
