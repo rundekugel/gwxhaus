@@ -249,12 +249,14 @@
     
 <h1>Gew&auml;chshaus Unter&ouml;d</h1>
 <hr>
-Version 0.6.3 
+Version 0.6.4
 <?php
 if(isset($_SESSION["user"])) {
   echo "<hr>Angemeldet als: ".$_SESSION["user"];
   echo " &nbsp;&nbsp;<a href='logout.php'><button>Logout</button></a>";
-  echo ' &nbsp;&nbsp;<button onclick=switcher("manually=60")>Manuell 1min</button></a>';
+  echo ' &nbsp;&nbsp;<button onclick=switcher("manually=300")>Manuell 5min</button></a>';
+  echo ' &nbsp;&nbsp;<button onclick="manually(15*60)">Manuell 15min</button></a>';
+  echo ' &nbsp;&nbsp;<button onclick="manually(30*60)">Manuell 30min</button></a>';
   echo ' &nbsp;&nbsp;<button onclick=switcher("manually=0")>Manuell off</button></a>';
 }
 ?>
