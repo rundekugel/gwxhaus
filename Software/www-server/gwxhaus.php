@@ -357,7 +357,9 @@ echo '<a href="config.php"><button>Einstellungen</button></a><hr>';
 }
 ?>
 <pre id="log">-</pre>
-<a href="tec1.php">Techn. Details</a>
+<a href="tec1.php">Techn. Details</a><br>
+<br>
+<a href="anleitung.htm">Anleitung</a>
 <hr>
 Daten werden bei der Übertragung verschlüsselt. Aktionen können nur nach Login durchgeführt werden.<br>
 Datenschutz: <a href="/Datenschutz.html">Hier klicken.</a><br>
