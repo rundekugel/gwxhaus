@@ -249,7 +249,7 @@
     
 <h1>Gew&auml;chshaus Unter&ouml;d</h1>
 <hr>
-Version 0.6.3 (unvollendet)
+Version 0.6.3 
 <?php
 if(isset($_SESSION["user"])) {
   echo "<hr>Angemeldet als: ".$_SESSION["user"];
@@ -273,6 +273,8 @@ Heartbeat: [<textbox id="hb">.</textbox>] <br>
 -->
 <tr><td>Letzte Nachricht: </td><td id="ts">-</td></tr>
 </table>
+<a href="https://h14.qc9.de/slw/charts.php">Temperaturverläufe und mehr</a>
+
 <hr>
 <h3 id="wasser">Wasser</h3>
 <h4>Wasser Haus 1</h4>
@@ -323,7 +325,7 @@ Haus2 Fenster: <button onclick="motor(2,\'u\')" >Auf</button> &nbsp;
 </s>
 <hr>
 
-<h3 id="">Sensor im Sicherungskasten </h3>
+<h3>Sensor im Sicherungskasten </h3>
 <pre id="hbc">Lade Daten...</pre>
 <div id="wifictrl">-</div>
 <table>
@@ -331,14 +333,14 @@ Haus2 Fenster: <button onclick="motor(2,\'u\')" >Auf</button> &nbsp;
 <tr><td>Letztes Lebenszeichen um:</td><td id="ctsa">-</td></tr>
 </table>
 <hr>
-<h3 id="strom">Stromversorgung</h3>
+<h3>Stromversorgung</h3>
 <h4>Verteilerkasten Links</h4>
 <table>
 <tr><td>Stromversorgung:</td><td id="vert1">-</td></tr>    
 <tr><td>Controllertemperatur: </td><td id="Lct">-</td><td>°C</td></tr>    
 <tr><td>Letztes Lebenszeichen um:</td><td id="Lts">-</td></tr>
 </table>
-<h4 id="gwxcontroller">Controller-wifi-Schaltkasten</h4>
+<h4>Controller-wifi-Schaltkasten</h4>
 <pre id="hbc">Lade Daten...</pre>
 <div id="wifictrl">-</div>
 <table>
@@ -351,9 +353,6 @@ Haus2 Fenster: <button onclick="motor(2,\'u\')" >Auf</button> &nbsp;
 <?php
 if(!isset($_SESSION["user"])) {
 echo '<a href="login.php"><button>Login</button></a><hr>';
-}
-if(isset($_SESSION['rights']) && str_contains($_SESSION['rights'], "-c,")){
-echo '<a href="config.php"><button>Einstellungen</button></a><hr>';    
 }
 ?>
 <pre id="log">-</pre>

@@ -19,6 +19,9 @@ def mqttbuf(name, user, pwd, topic, filename,sleep=1):
     while globs.doit:
         try:
             os.system("touch "+filename+".tmp")
+            # os.system("echo \<?php header\(\\\'Content-type: application/json\\\'\)\; ?\> >"+filename+".tmp" )
+            # os.system("echo \<?php header\(\\\'strict-transport-security: max-age=10\\\'\)\; ?\> >>"+filename+".tmp" )
+            
             cmd = "mosquitto_sub -h mq.qc9.de -p 18883 --tls-use-os-certs -u " + \
                user+" -P "+pwd+" -t "+topic+" -C 1 > "+filename+".tmp"
             os.system(cmd)

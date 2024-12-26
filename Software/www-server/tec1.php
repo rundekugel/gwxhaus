@@ -375,7 +375,7 @@ Haus2 Fenster: <button onclick="motor(2,\'u\')" >Auf</button> &nbsp;
 <tr><td>Controllertemperatur: </td><td id="Lct">-</td><td>°C</td></tr>    
 <tr><td>Letztes Lebenszeichen um:</td><td id="Lts">-</td></tr>
 </table>
-<h4 id="gwxcontroller">Controller-wifi-Schaltkasten</h4>
+<h4 id="wifikasten">Controller-wifi-Schaltkasten</h4>
 <pre id="hbc">Lade Daten...</pre>
 <div id="wifictrl">-</div>
 <table>
@@ -400,6 +400,8 @@ if(isset($_SESSION["user"])) {
   echo '<a href="login.php"><button>Login</button></a><hr>';
 }
 ?>
+<h3>Diagramme</h3>
+<a href="https://h14.qc9.de/slw/charts.php">Temperaturverläufe und mehr</a>
 <h4>Globs</h4>
 <div id="globs">-</div>
 <h4>Config</h4>
@@ -416,4 +418,3 @@ Daten werden bei der Übertragung verschlüsselt. Aktionen können nur nach Logi
 Datenschutz: <a href="/Datenschutz.html">Hier klicken.</a><br>
 20240118-2
 </body>
-
