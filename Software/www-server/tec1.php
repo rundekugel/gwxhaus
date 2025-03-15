@@ -220,6 +220,10 @@
       }
   }//--------------------------------------------     
   
+  function switcher(cmd,text){
+      write2Id("hbs",text);
+      fetch("switcher.php?"+cmd);
+  }
   function wasseraus(id){
       fetch("switcher.php?w"+id+"=0");
       write2Id("hbs","wasser aus!");
@@ -267,7 +271,7 @@
     
 <h1>Technik Gew&auml;chshaus Unter&ouml;d</h1>
 <hr>
-Test Version 0.2.3
+Test Version 0.3.0
 <hr>
 <!--label for="refresh">HTML Update Interval:</label-->
 HTML Update Interval:
@@ -327,6 +331,19 @@ Heartbeat: [<textbox id="hb">.</textbox>] <br>
 <button onclick="wasseran(2,15)" ><s>Wasser2 an 15min</button>&nbsp;
 <button onclick="wasseran(2,120)">Wasser2 an 2h</s></button>
 ';}?>
+<h3 id="dosen">Steckdosen</h3>
+<table><tr><td>1:</td><td id="d1">-</td><td>2:</td><td id="d2">-</td><td>3:</td><td id="d3">-</td><td>4:</td><td id="d4">-</td>
+</tr></table>
+<?php 
+//if(isset($_SESSION["user"])) { echo '
+if(1) { 
+  for($i=1;$i<=4;$i++){
+    echo "Dose".$i.":";
+    echo '<button onclick="switcher('.chr(39).'d'.$i."=0','dose".$i." aus')".chr(34).">aus</button> &nbsp";
+    echo '<button onclick="switcher('.chr(39).'d'.$i."=1','dose".$i." an')".chr(34).">an</button> &nbsp\r\n";
+  }
+}
+?>
 <hr>
 <!--
 Heartbeat: [<textbox id="hb">.</textbox>] <br>
