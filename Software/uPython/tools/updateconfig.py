@@ -9,7 +9,7 @@ usage: updateconfig.py server[:port] <key> [data] [options]
       -d=<data>    set data
       -dn=<number> set data as number, without quotes.
       -t=<text>    send this text. this must be json syntax!
-      -jf=<jsonfile>    send text from this file. file must contain json syntax!
+      -js=<jsonfile>    send text from this file. file must contain json syntax!
       -u=<user>   
       -p=<passwd> 
       -ttx=<topic to send> 
