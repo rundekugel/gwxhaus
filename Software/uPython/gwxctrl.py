@@ -271,6 +271,7 @@ def init():
     ak = globs.cfg.get("ak")  # this key used for updates over the air, or critical config-values
     if ak:
         docrypt.init(ak = ak)
+
     comu.init(2, globs.cfg.get("baudrate"))
     rc = machine.reset_cause()
     comu.addTx("resetcause:"+str(rc))
@@ -483,32 +484,35 @@ def sendAlarm(msg):
     comu.addTx("Alarm:"+str(msg))
 
 def checkTemp(hausnum):
-    sensor = [globs.hy1, globs.hy2][hausnum-1]
-    s = sensor.getValues(postdec=1)
-    if not s:
-        return
-    cfg = globs.cfg["haus"+str(hausnum)]
+    try:
+        sensor = [globs.hy1, globs.hy2][hausnum-1]
+        s = sensor.getValues(postdec=1)
+        if not s:
+            return
+        cfg = globs.cfg["haus"+str(hausnum)]
 
-    if s.temperature > cfg.get("talarm",40):
-        sendAlarm(f"Temperatur in Haus{hausnum}:{s.temperature}°C")
+        if s.temperature > cfg.get("talarm",40):
+            sendAlarm(f"Temperatur in Haus{hausnum}:{s.temperature}°C")
 
-    # 'manually control' set?
-    if globs.manually_timeend > time.time():
-        return
-    globs.manually_timeend = 0  # if RTC will be reset after power-loss. This helps. 
+        # 'manually control' set?
+        if globs.manually_timeend > time.time():
+            return
+        globs.manually_timeend = 0  # if RTC will be reset after power-loss. This helps.
 
-    if s.temperature > cfg["tmax"]:
-        setMotor(hausnum,"u")
-    if s.temperature < cfg["tmin"]:
-        setMotor(hausnum,"d")
-    else:        
-        if s.humidity > cfg["hmax"]:
+        if s.temperature > cfg["tmax"]:
             setMotor(hausnum,"u")
-            setWater(hausnum, 0)
-    if s.humidity < cfg["hmin"]:
-        if getWater(hausnum) == 0:
-            setWater(hausnum,1)
-            globs.todos.append((getTime(1), "wasser"+str(hausnum)+"=0"))
+        if s.temperature < cfg["tmin"]:
+            setMotor(hausnum,"d")
+        else:
+            if s.humidity > cfg["hmax"]:
+                setMotor(hausnum,"u")
+                setWater(hausnum, 0)
+        if s.humidity < cfg["hmin"]:
+            if getWater(hausnum) == 0:
+                setWater(hausnum,1)
+                globs.todos.append((getTime(1), "wasser"+str(hausnum)+"=0"))
+    except:
+        print("fehler in check temp")
 
 def checkTimer():
     """
@@ -751,4 +755,5 @@ if __name__ == "__main__":
     # test
     globs.rx.append(b"deepsleep=2")
     parseMsg()
+    main()
 # eof
