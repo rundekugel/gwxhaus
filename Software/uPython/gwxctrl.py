@@ -24,7 +24,7 @@ PIN_SCL1 = 5
 PIN_SDA1 = 4
 PIN_SCL2 = 2
 PIN_SDA2 = 15
-PIN_LED1 = Pin(22, Pin.OUT)	 # on bigger boards it's pin2
+PIN_LED1 = Pin(22, Pin.OUT)  # on bigger boards it's pin2
 
 PIN_WATER1 = Pin(27, Pin.OUT)
 PIN_WATER2 = Pin(33, Pin.OUT)
@@ -165,7 +165,7 @@ def getTime(offset_m=None):
     """param: offset in minutes"""
     d = RTC().datetime()
     if offset_m:
-        d = list(d)	
+        d = list(d) 
         if offset_m > 23*60:
             offset_m = 23 * 60
             print("Warnung! offset sehr gross:"+str(offset_m))
@@ -196,30 +196,36 @@ def readConfig(filename="gwxctrl.cfg"):
     if globs.verbosity:
         print(msg)
         comu.addTx(msg)
-    with open(filename,"r") as f:
-        cfg = json.load(f)
-    if not cfg:
-        msg = "Fehler! konnte config nicht laden!"
-        print(msg)
-        comu.addTx(msg)
-        return
-    dictLower(cfg)
-    globs.cfg.update(cfg)
-    msg = "Einstellungen geladen"
-    if "verbosity" in cfg:
-        globs.verbosity = cfg["verbosity"]
-    if globs.verbosity is None:
-        globs.verbosity = 0
-    if isinstance(globs.verbosity, str):
-        try:
-            globs.verbosity = int(globs.verbosity)
-        except:
+    try:
+        with open(filename,"r") as f:
+            cfg = json.load(f)
+        if not cfg:
+            msg = "Fehler! konnte config nicht laden!"
+            print(msg)
+            comu.addTx(msg)
+            return
+        dictLower(cfg)
+        globs.cfg.update(cfg)
+        msg = "Einstellungen geladen"
+        if "verbosity" in cfg:
+            globs.verbosity = cfg["verbosity"]
+        if globs.verbosity is None:
             globs.verbosity = 0
-    if globs.verbosity:
-        msg += str(pubconfig(cfg))
+        if isinstance(globs.verbosity, str):
+            try:
+                globs.verbosity = int(globs.verbosity)
+            except:
+                globs.verbosity = 0
+        if globs.verbosity:
+            msg += str(pubconfig(cfg))
+            print(msg)
+            comu.addTx(msg)
+    except:
+        msg = "Fehler in readConfig"
         print(msg)
         comu.addTx(msg)
-        
+    return 
+    
 def updateConfigFile(addcfg, filename="gwxctrl.cfg"):
     cfg = None
     with open(filename,"r") as f:
@@ -631,13 +637,13 @@ def main():
         init()
         a=10
         while a:
-			a-=1
-			time.sleep(.5)
-			# allow a cfg message before anything else can hang
-			if globs.rx:
-				parseMsg() 
+            a-=1
+            time.sleep(.5)
+            # allow a cfg message before anything else can hang
+            if globs.rx:
+                parseMsg() 
     if globs.wdttime <30:
-		globs.wdttime = 30    
+        globs.wdttime = 30    
     globs.wdt=WDT(timeout=int(globs.wdttime*1000))
        
     while globs.dorun:     # do forever
@@ -716,7 +722,7 @@ def main():
                 battV = getBatVolt()
                 sendAlarm(f"gwxctrl Spannung zu klein: USB={getVCCVolt()}V ; Batt={battV}V.")
                 globs.lightsleep_ms = int(vccVal[1])
-                batSets = globs.cfg.get("dsonbat")  	# deepsleep on low bat
+                batSets = globs.cfg.get("dsonbat")      # deepsleep on low bat
                 if batSets:
                     for setting in batSets:
                         if battV < setting[0]:
