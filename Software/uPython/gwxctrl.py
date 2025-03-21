@@ -78,7 +78,7 @@ class globs:
     lightsleep_ms = 0
     iv = b""
     modcfg = ""
-    wdttime = 20
+    wdttime = 90
     manually_timeend = 0
     checkEndSwitch_lastTime = 0
     window_virtual_open1 = 0 # value in percent
@@ -629,8 +629,17 @@ def main():
     if not globs.inited:
         # wdt.feed()
         init()
+        a=10
+        while a:
+			a-=1
+			time.sleep(.5)
+			# allow a cfg message before anything else can hang
+			if globs.rx:
+				parseMsg() 
+    if globs.wdttime <30:
+		globs.wdttime = 30    
     globs.wdt=WDT(timeout=int(globs.wdttime*1000))
-    
+       
     while globs.dorun:     # do forever
         globs.wdt.feed()
         loopstart = time.time()
