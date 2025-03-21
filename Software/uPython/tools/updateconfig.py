@@ -8,11 +8,13 @@ usage: updateconfig.py server[:port] <key> [data] [options]
       -k=<key>     change/add this key
       -d=<data>    set data
       -dn=<number> set data as number, without quotes.
-      -t=<text>    send this text
+      -t=<text>    send this text. this must be json syntax!
+      -jf=<jsonfile>    send text from this file. file must contain json syntax!
       -u=<user>   
       -p=<passwd> 
       -ttx=<topic to send> 
       -trx=<topic to receive> 
+      -r           read only
 """
 
 import time,os,sys
@@ -29,6 +31,7 @@ class globs:
     key,data = None,None
     rx=0
     qos=0
+    msg=None
 
 def on_connect(client, userdata, flags, rc):
     print("Connected with result code " + str(rc))
@@ -36,10 +39,12 @@ def on_connect(client, userdata, flags, rc):
 
 def on_message(client, userdata, msg):
     p = str(msg.payload)
-    print(msg.topic + " " + p)
+    if globs.verbosity:
+        print(msg.topic + " " + p)
     if "SSerialReceived" in p:
         globs.rx=1
         if globs.verbosity: print("rx")
+        globs.msg=msg.payload.decode()
         
 def wait_for_rx(timeout=20):
     end = time.time()+timeout
@@ -77,9 +82,25 @@ def send(client, text):
         client.publish(globs.topicTx, "cfg?", globs.qos, 0)
     return
 
+def getConfig(client, timeout=20):
+    client.publish(globs.topicTx, "cfg?", globs.qos, 0)    
+    end = time.time()+timeout
+    while time.time()< end:
+        if globs.msg:
+            if "baudrate" in globs.msg.lower():                
+                return globs.msg
+    return None
+    
+def getFile(filename):
+    with open(filename ,"r") as f:
+        ret = f.read()
+    # try json validity:
+    json.loads(ret)
+    return ret
+
 def main():
     av=sys.argv
-    if len(av)<1:
+    if len(av)<2:
       print(__doc__)
       return 0
 
@@ -97,6 +118,7 @@ def main():
     datatype = "s"
     text = None
     configfile = None
+    readonly=0
 
     if len(av)>1:
       for p in av[1:]:
@@ -127,6 +149,8 @@ def main():
         if p0=="-ttx":   globs.topicTx = p1
         if p0=="-trx":   globs.topicRx = p1
         if p0=="-cfg":   configfile=p1
+        if p0=="-r":     readonly=1
+        if p0=="-js":    text = getFile(p1).replace("\r",'').replace('\n','').strip()
         if p0 in ("-?","?","-h","--help"): print(__doc__) ; return 0
 
     # load config
@@ -168,6 +192,12 @@ def main():
         print("connection error:",r)
         return r
     client.loop_start()
+
+    if readonly:
+        print("Read config...")
+        r = getConfig(client)
+        print(r)
+        return 0
 
     rep-=1
     if text is None:

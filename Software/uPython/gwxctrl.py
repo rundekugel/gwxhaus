@@ -43,6 +43,8 @@ PIN_END2DOWN = Pin(19, Pin.IN, pull=Pin.PULL_UP)
 
 DOSE1 = Pin(18, Pin.OUT)
 DOSE2 = Pin(18, Pin.OUT)
+DOSE3 = Pin(18, Pin.OUT)
+DOSE4 = Pin(18, Pin.OUT)
 
 ADC_BATT = machine.ADC(39)      # VN
 PINNUM_POWER = 36   # needed for wakeup
@@ -127,7 +129,7 @@ def setDose(num, onOff=None):
         num = int(str(num).replace("'","")[-1])
     if not isinstance(onOff,int):
         onOff = int(str(onOff).replace("'","")[-1])
-    p=[DOSE1, DOSE2][num-1]
+    p=[DOSE1, DOSE2,DOSE3,DOSE4][num-1]
     p.value(onOff)
 
 def getMotor(num, lang=""):
@@ -150,7 +152,7 @@ def getWater(num, lang=""):
     return v
 
 def getDose(num, lang=""):
-    p=[DOSE1, DOSE2][num-1]
+    p=[DOSE1, DOSE2, DOSE3, DOSE4][num-1]
     v=p.value()
     if lang == "de":
         return ["Aus", "An"][v]
@@ -362,7 +364,7 @@ def parseMsg():
             num = cmd[-1:]
             direction = val
             if direction == "?":
-                comu.addTx(f"Wasser1:{getWater(1)}, Wasser2:{getWater(2)}")
+                comu.addTx(f"W1:{getWater(1)}, W2:{getWater(2)}, W3:{getWater(3)}, W4:{getWater(4)}")
             else:
                 setWater(num, direction)
             return
@@ -370,7 +372,7 @@ def parseMsg():
             num = cmd[-1:]
             direction = val
             if direction == "?":
-                comu.addTx(f"dose1:{getDose(1)}, dose:{getDose(2)}")
+                comu.addTx(f"D1:{getDose(1)}, D2:{getDose(2)}, D3:{getDose(3)}, D4:{getDose(4)}")
             else:
                 setDose(num, direction)
             return
@@ -648,10 +650,12 @@ def main():
             pass
         motors = "M1:"+getMotor(1, 'de')+"; M2:"+getMotor(2, 'de')
         motors += ";F1:"+str(globs.window_virtual_open1)+"; F2:"+str(globs.window_virtual_open2)
-        water = f"W1:{getWater(1, 'de')}; W2:{getWater(2, 'de')}"
+        water = f"W1:{getWater(1, 'de')}; W2:{getWater(2, 'de')}; W3:{getWater(3, 'de')}; W4:{getWater(4, 'de')}"
+        dosen = f"D1:{getDose(1, 'de')}; D2:{getDose(2, 'de')}; D3:{getDose(3, 'de')}; D4:{getWater(4, 'de')}"
         # fenster = "Fenster: ?\r\n"  # todo. need 8 gpios first.
         comu.addTx(motors)
         comu.addTx(water)
+        comu.addTx(dosen)
         if globs.sturm:
             comu.addTx(f"Sturm:{globs.sturm}")
         comu.addTx(f"USB={getVCCVolt()}V ; Bat.={getBatVolt(2)}V.")
