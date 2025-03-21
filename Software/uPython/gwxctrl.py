@@ -2,13 +2,16 @@
 
 import time
 import json
-
+import os
+if not "ESP" in os.uname().machine:
+    import sys
+    sys.path.append("upyemu")
 import machine, esp32
 from machine import Pin, RTC, deepsleep, WDT
-from ucryptolib import aes
-from os import urandom
+# from ucryptolib import aes
+# from os import urandom
 from binascii import hexlify
-from hashlib import sha256
+# from hashlib import sha256
 
 import windsensor
 import HYT221 
@@ -224,11 +227,12 @@ def readConfig(filename="gwxctrl.cfg"):
         msg = "Fehler in readConfig"
         print(msg)
         comu.addTx(msg)
-    return 
-    
+    return
+
+
 def updateConfigFile(addcfg, filename="gwxctrl.cfg"):
     cfg = None
-    with open(filename,"r") as f:
+    with open(filename, "r") as f:
         cfg = json.load(f)
     if not cfg:
         msg = "Fehler! konnte config nicht laden!"
@@ -238,6 +242,21 @@ def updateConfigFile(addcfg, filename="gwxctrl.cfg"):
     dictLower(cfg)
     dictLower(addcfg)
     cfg.update(addcfg)
+    with open(filename, "w") as f:
+        json.dump(cfg, f)
+    return
+
+def deleteFromConfigFile(key, filename="gwxctrl.cfg"):
+    cfg = None
+    with open(filename,"r") as f:
+        cfg = json.load(f)
+    if not cfg:
+        msg = "Fehler! konnte config nicht laden!"
+        print(msg)
+        comu.addTx(msg)
+        return
+    dictLower(cfg)
+    cfg.pop(key.lower())
     with open(filename,"w") as f:
         json.dump(cfg,f)
     return
@@ -348,18 +367,18 @@ def parseMsg():
                 print("pM:"+str(msg))
         if not msg:
             return
-        cmd, val = msg, b""
+        cmd, val = msg, ""
         if isinstance(cmd, str):
             cmd = cmd.encode()
         if b"=" in cmd:
-            cmd, val = cmd.split(b"=",1)
-            val=val.strip() ; cmd=cmd.strip()
+            cmd, val = cmd.split(b"=", 1)
+            val=val.decode().strip() ; cmd=cmd.strip()
         if globs.verbosity > 1:
             print("pM:", cmd, val)
         if b"motor" in cmd:
             num = cmd[-1:]
             direction = val
-            if direction == b"?":
+            if direction == "?":
                 msg = "M1:"+getMotor(1)+". M2:"+getMotor(2)
                 if globs.verbosity:
                     print(msg)
@@ -400,7 +419,7 @@ def parseMsg():
             comu.addTx(str(globs.todos))
         elif b"todo" in msg:
             if b"grfx" in val:
-                val = val.replace(b"grfx",b"")
+                val = val.replace("grfx","")
                 if globs.verbosity: print("todo:"+str(val))
                 globs.todo.append(val)
         if b"globs?" in msg:
@@ -416,7 +435,7 @@ def parseMsg():
             globs.loop_sleep = int(val)/10
             comu.addTx(f"loop sleep:{globs.loop_sleep}s")
         if b"rtc" == cmd:
-            ti = val.split(b',')
+            ti = val.split(',')
             tii=[]
             for t in ti:
                 tii.append(int(t))
@@ -460,19 +479,23 @@ def parseMsg():
                     print(m)
                 comu.addTx(m)
         if b"modcfgs" in cmd:
-            if not val: val=b""
+            if not val: val=""
             globs.modcfg = val
         if b"modcfga" in cmd:
             globs.modcfg += val
         if b"modcfg." in cmd:
             globs.modcfg += val
-            globs.modcfg = globs.modcfg.decode().replace("'", '"')
+            globs.modcfg = globs.modcfg.replace("'", '"')
             if globs.verbosity: print(globs.modcfg)
             j=json.loads(globs.modcfg)
             if globs.verbosity: print(str(j))
             updateConfigFile(j)
             globs.modcfg=""
             comu.addTx("updated: "+str(j))
+        if b"delcfg" in cmd:
+            if globs.verbosity: print("del:",val)
+            deleteFromConfigFile(val)
+            comu.addTx("deleted: "+str(j))
                 
     except Exception as e:
         if globs.verbosity:
@@ -627,7 +650,7 @@ def checkEndSwitch():
     return        
 
 def formTime(text):
-    h=text.split(":",1)
+    h=text.split(":",1)[0]
     if len(h)<2:
         text="0"+text
     return text
@@ -688,6 +711,8 @@ def main():
         while end >0:
             if globs.rx:
                 break
+            if not "ESP" in os.uname().machine: # this is for the emulator
+                PIN_LED1.doGuiupdate()  # this updates all pins
             time.sleep(.5)
             end -= .5
         parseMsg()
