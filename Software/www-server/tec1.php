@@ -22,11 +22,13 @@
   var m_ioGetGwxSens = "s2.php";
   var m_ioGetWifiController = "w2.php";
   var m_ioGetvsupplyhdl = "v1.php";
+  var m_ioGetFunkDosen = "fd.php";
   
   //cFileContent is the ajax callback
   oFileioSens = new cFileContent(iohdlSens);
   oFileioWifiCtrl = new cFileContent(wifihdl);
   oFileiovsupplyhdl = new cFileContent(vsupplyhdl);
+  oFileioFundDosenHdl = new cFileContent(vFDhdl);
   //--------------------------------------------
     
 
@@ -41,6 +43,7 @@
     oFileioSens.load(m_ioGetGwxSens); 
     oFileioWifiCtrl.load(m_ioGetWifiController);
     oFileiovsupplyhdl.load(m_ioGetvsupplyhdl);
+    oFileioFundDosenHdl.load(m_ioGetFunkDosen);
   }
 
   function timer1(){
@@ -113,6 +116,11 @@
                 if(k=="W3") write2Id("w3", val);
                 if(k=="W4") write2Id("w4", val);
                 
+                if(k=="D1") write2Id("d1", val);
+                if(k=="D2") write2Id("d2", val);
+                if(k=="D3") write2Id("d3", val);
+                if(k=="D4") write2Id("d4", val);
+                                
                 if(k=="M1") write2Id("md1", val);
                 if(k=="M2") write2Id("md2", val);
                 //Fenster
@@ -218,6 +226,28 @@
           console.error(error);  
           //write2Id("VSupply", "dauert länger...");
       }
+  }//--------------------------------------------    
+  function vFDhdl(text){
+      add2Log(text);
+      // text: slw/gwx/nous/3/stat/RESULT {"POWER":"ON"}
+      // version2: slw/gwx/nous/3/stat/POWER ON
+
+      if(text=="" || text.includes("<title>504 ")) {
+          return;
+      }
+      try {
+        if(text.includes("stat/POWER")) {
+            var s=text.split("/")
+            var id=s[3].trim();  
+            var v = text.split(" ")[1].trim();
+            //var jsn = JSON.parse(text);
+            //v=jsn.POWER
+            write2Id("fd"+id, v);
+        }
+      } catch (error) {
+          console.error(error);  
+          //write2Id("VSupply", "dauert länger...");
+      }
   }//--------------------------------------------     
   
   function switcher(cmd,text){
@@ -271,7 +301,7 @@
     
 <h1>Technik Gew&auml;chshaus Unter&ouml;d</h1>
 <hr>
-Test Version 0.3.0
+Test Version 0.3.1
 <hr>
 <!--label for="refresh">HTML Update Interval:</label-->
 HTML Update Interval:
@@ -341,6 +371,20 @@ if(1) {
     echo "Dose".$i.":";
     echo '<button onclick="switcher('.chr(39).'d'.$i."=0','dose".$i." aus')".chr(34).">aus</button> &nbsp";
     echo '<button onclick="switcher('.chr(39).'d'.$i."=1','dose".$i." an')".chr(34).">an</button> &nbsp\r\n";
+  }
+}
+?>
+<hr>
+<h3 id="nousdosen">FunkSteckdosen</h3>
+<table><tr><td>1:</td><td id="fd1">-</td><td>2:</td><td id="fd2">-</td><td>3:</td><td id="fd3">-</td><td>4:</td><td id="fd4">-</td>
+</tr></table>
+<?php 
+//if(isset($_SESSION["user"])) { echo '
+if(1) { 
+  for($i=1;$i<=4;$i++){
+    echo "FunkDose".$i.":";
+    echo '<button onclick="switcher('.chr(39).'n'.$i."=0','nous".$i." 0')".chr(34).">aus</button> &nbsp";
+    echo '<button onclick="switcher('.chr(39).'n'.$i."=1','nous".$i." 1')".chr(34).">an</button> &nbsp\r\n";
   }
 }
 ?>
