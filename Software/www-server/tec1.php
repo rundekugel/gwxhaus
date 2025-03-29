@@ -31,8 +31,8 @@
   oFileioWifiCtrl = new cFileContent(wifihdl);
   oFileiovsupplyhdl = new cFileContent(vsupplyhdl);
   oFileioFunkDosenHdl = new cFileContent(vFDhdl);
-  oFileioFDAHdl = new cFileContent(vFDAhdl);
-  oFileioFDPHdl = new cFileContent(vFDPhdl);
+  oFileioFDAHdl = new cFileContent(vFDhdl);
+  oFileioFDPHdl = new cFileContent(vFDhdl);
   //--------------------------------------------
     
 
@@ -233,30 +233,8 @@
           //write2Id("VSupply", "dauert länger...");
       }
   }//--------------------------------------------   
-  function vFDhdl(text){
-      add2Log(text);
-      // text: slw/gwx/nous/3/stat/RESULT {"POWER":"ON"}
-      // version2: slw/gwx/nous/3/stat/POWER ON
 
-      if(text=="" || text.includes("<title>504 ")) {
-          return;
-      }
-      try {
-        if(text.includes("stat/POWER")) {
-            var s=text.split("/")
-            var id=s[3].trim();  
-            var v = text.split(" ")[1].trim();
-            //var jsn = JSON.parse(text);
-            //v=jsn.POWER
-            write2Id("fd"+id, v);
-        }
-      } catch (error) {
-          console.error(error);  
-          //write2Id("VSupply", "dauert länger...");
-      }
-  }//--------------------------------------------     
-   
-  function vFDAhdl(text){
+  function vFDhdl(text){
       //slw/gwx/nous/3/tele/LWT Online
       add2Log(text);
       if(text=="" || text.includes("<title>504 ")) { return;  }
@@ -272,31 +250,30 @@
                 if(v=="Offline") v="f";
                 write2Id("fdd"+id, v);
             }
+             if(line.includes("/SENSOR")) {
+                var s=line.split("/")
+                var id=s[3].trim();  
+                var j = line.split(" ")[1].trim();
+                var jsn = JSON.parse(j);
+                p=jsn.ENERGY.Power
+                v=jsn.ENERGY.Voltage
+                //write2Id("fdp"+id, v);
+            }
+            if(line.includes("stat/POWER")) {
+                var s=line.split("/")
+                var id=s[3].trim();  
+                var v = line.split(" ")[1].trim();
+                //var jsn = JSON.parse(text);
+                //v=jsn.POWER
+                write2Id("fd"+id, v);
+            }            
           } catch (error) {
               console.error(error);  
           }
       })
   }//--------------------------------------------     
   
-  function vFDPhdl(text){
-      //slw/gwx/nous/3/tele/SENSOR {"Time":"2025-03-29T00:37:52","ENERGY":{"TotalStartTime":"2025-02-25T16:08:41","Total":0.000,"Yesterday":0.000,"Today":0.000,"Period":0.00,"Power":0.00,"ApparentPower":0.00,"ReactivePower":0.00,"Factor":0.00,"Voltage":228.30,"Current":0.00}}
-      add2Log(text);
-      if(text=="" || text.includes("<title>504 ")) { return;  }
-          try {
-            if(text.includes("/SENSOR")) {
-                var s=text.split("/")
-                var id=s[3].trim();  
-                var j = text.split(" ")[1].trim();
-                var jsn = JSON.parse(j);
-                p=jsn.ENERGY.Power
-                v=jsn.ENERGY.Voltage
-                //write2Id("fdp"+id, v);
-            }
-          } catch (error) {
-              console.error(error);  
-          }
-  }//--------------------------------------------     
-  
+
   function switcher(cmd,text){
       write2Id("hbs",text);
       fetch("switcher.php?"+cmd);
@@ -348,7 +325,7 @@
     
 <h1>Technik Gew&auml;chshaus Unter&ouml;d</h1>
 <hr>
-Test Version 0.3.2
+Test Version 0.4.0
 <hr>
 <!--label for="refresh">HTML Update Interval:</label-->
 HTML Update Interval:
