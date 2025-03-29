@@ -15,15 +15,19 @@ class globs:
     verbosity = 1
     
 
-def mqttbuf(name, user, pwd, topic, filename,sleep=1):
+def mqttbuf(name, user, pwd, topic, filename,sleep=1,count=1,timeout=0):
     print("start "+sys.argv[0]+" thread: "+ name +" / "+topic)
+    if timeout:
+        timeout=" -W "+str(timeout)
+    else:
+        timeout = ""
     while globs.doit:
         try:
             os.system("touch "+filename+".tmp")
             # os.system("echo \<?php header\(\\\'Content-type: application/json\\\'\)\; ?\> >"+filename+".tmp" )
             # os.system("echo \<?php header\(\\\'strict-transport-security: max-age=10\\\'\)\; ?\> >>"+filename+".tmp" )
             cmd = "mosquitto_sub -h mq.qc9.de -p 18883 --tls-use-os-certs -u " + \
-               user+" -P "+pwd+" -t "+topic+" -C 1 > "+filename+".tmp"
+               user+" -P "+pwd+" -t " +topic + timeout +" -C "+str(count)+" >"+filename+".tmp 2>&1"
             if globs.verbosity>2:
                     print(cmd)
             os.system(cmd)
@@ -42,13 +46,13 @@ def mqttbuf(name, user, pwd, topic, filename,sleep=1):
 def main():
     print("PID:",os.getpid())
     pw = ""
-    configfile = ""
+    configfile = "mqttbuf.cfg"
     path=""
     config = configparser.ConfigParser()
     threads=[]
     
     # args overrides config
-    for p in sys.argv:
+    for p in sys.argv[1:]:
         if p[0] != "-": configfile = p; continue
         if "=" in p:
             p0,p1 = p.split("=",1)
@@ -70,8 +74,9 @@ def main():
     for name in config.sections():
         try:
             c=config[name]
-            filename,user,pw,topic,sleep = c["file"],c["user"],c["pw"],c["topic"],c.getfloat("interval",1)
-            t = threading.Thread(target=mqttbuf, args=(name, user, pw, topic, filename, sleep))
+            filename,user,pw,topic,sleep,count,timeout = c["file"],c["user"],c["pw"],\
+                        c["topic"],c.getfloat("interval",1),c.getint("count",1),c.getint("timeout",0)
+            t = threading.Thread(target=mqttbuf, args=(name, user, pw, topic, filename, sleep, count, timeout))
             t.start()
             threads.append(t)
         except Exception as e:

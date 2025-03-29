@@ -23,12 +23,16 @@
   var m_ioGetWifiController = "w2.php";
   var m_ioGetvsupplyhdl = "v1.php";
   var m_ioGetFunkDosen = "fd.php";
+  var m_ioGetFunkDosenAvail = "fdd.php";
+  var m_ioGetFunkDosenPow = "fdp.php";
   
   //cFileContent is the ajax callback
   oFileioSens = new cFileContent(iohdlSens);
   oFileioWifiCtrl = new cFileContent(wifihdl);
   oFileiovsupplyhdl = new cFileContent(vsupplyhdl);
-  oFileioFundDosenHdl = new cFileContent(vFDhdl);
+  oFileioFunkDosenHdl = new cFileContent(vFDhdl);
+  oFileioFDAHdl = new cFileContent(vFDAhdl);
+  oFileioFDPHdl = new cFileContent(vFDPhdl);
   //--------------------------------------------
     
 
@@ -43,7 +47,9 @@
     oFileioSens.load(m_ioGetGwxSens); 
     oFileioWifiCtrl.load(m_ioGetWifiController);
     oFileiovsupplyhdl.load(m_ioGetvsupplyhdl);
-    oFileioFundDosenHdl.load(m_ioGetFunkDosen);
+    oFileioFunkDosenHdl.load(m_ioGetFunkDosen);
+    oFileioFDAHdl.load(m_ioGetFunkDosenAvail);
+    oFileioFDPHdl.load(m_ioGetFunkDosenPow);
   }
 
   function timer1(){
@@ -226,7 +232,7 @@
           console.error(error);  
           //write2Id("VSupply", "dauert länger...");
       }
-  }//--------------------------------------------    
+  }//--------------------------------------------   
   function vFDhdl(text){
       add2Log(text);
       // text: slw/gwx/nous/3/stat/RESULT {"POWER":"ON"}
@@ -248,6 +254,47 @@
           console.error(error);  
           //write2Id("VSupply", "dauert länger...");
       }
+  }//--------------------------------------------     
+   
+  function vFDAhdl(text){
+      //slw/gwx/nous/3/tele/LWT Online
+      add2Log(text);
+      if(text=="" || text.includes("<title>504 ")) { return;  }
+      lines = text.split(/\r?\n|\r|\n/g);
+      lines.forEach( line => 
+      {
+          try {
+            if(line.includes("/LWT")) {
+                var s=line.split("/")
+                var id=s[3].trim();  
+                var v = line.split(" ")[1].trim();
+                if(v=="Online") v="o";
+                if(v=="Offline") v="f";
+                write2Id("fdd"+id, v);
+            }
+          } catch (error) {
+              console.error(error);  
+          }
+      })
+  }//--------------------------------------------     
+  
+  function vFDPhdl(text){
+      //slw/gwx/nous/3/tele/SENSOR {"Time":"2025-03-29T00:37:52","ENERGY":{"TotalStartTime":"2025-02-25T16:08:41","Total":0.000,"Yesterday":0.000,"Today":0.000,"Period":0.00,"Power":0.00,"ApparentPower":0.00,"ReactivePower":0.00,"Factor":0.00,"Voltage":228.30,"Current":0.00}}
+      add2Log(text);
+      if(text=="" || text.includes("<title>504 ")) { return;  }
+          try {
+            if(text.includes("/SENSOR")) {
+                var s=text.split("/")
+                var id=s[3].trim();  
+                var j = text.split(" ")[1].trim();
+                var jsn = JSON.parse(j);
+                p=jsn.ENERGY.Power
+                v=jsn.ENERGY.Voltage
+                //write2Id("fdp"+id, v);
+            }
+          } catch (error) {
+              console.error(error);  
+          }
   }//--------------------------------------------     
   
   function switcher(cmd,text){
@@ -301,7 +348,7 @@
     
 <h1>Technik Gew&auml;chshaus Unter&ouml;d</h1>
 <hr>
-Test Version 0.3.1
+Test Version 0.3.2
 <hr>
 <!--label for="refresh">HTML Update Interval:</label-->
 HTML Update Interval:
@@ -365,8 +412,7 @@ Heartbeat: [<textbox id="hb">.</textbox>] <br>
 <table><tr><td>1:</td><td id="d1">-</td><td>2:</td><td id="d2">-</td><td>3:</td><td id="d3">-</td><td>4:</td><td id="d4">-</td>
 </tr></table>
 <?php 
-//if(isset($_SESSION["user"])) { echo '
-if(1) { 
+if(isset($_SESSION["user"])) {
   for($i=1;$i<=4;$i++){
     echo "Dose".$i.":";
     echo '<button onclick="switcher('.chr(39).'d'.$i."=0','dose".$i." aus')".chr(34).">aus</button> &nbsp";
@@ -376,13 +422,13 @@ if(1) {
 ?>
 <hr>
 <h3 id="nousdosen">FunkSteckdosen</h3>
+o=online / f=offline
 <table><tr><td>1:</td><td id="fd1">-</td><td>2:</td><td id="fd2">-</td><td>3:</td><td id="fd3">-</td><td>4:</td><td id="fd4">-</td>
 </tr></table>
 <?php 
-//if(isset($_SESSION["user"])) { echo '
-if(1) { 
+if(isset($_SESSION["user"])) { 
   for($i=1;$i<=4;$i++){
-    echo "FunkDose".$i.":";
+    echo "FunkDose<button id=fdd".$i.">.</button>".$i.":";
     echo '<button onclick="switcher('.chr(39).'n'.$i."=0','nous".$i." 0')".chr(34).">aus</button> &nbsp";
     echo '<button onclick="switcher('.chr(39).'n'.$i."=1','nous".$i." 1')".chr(34).">an</button> &nbsp\r\n";
   }

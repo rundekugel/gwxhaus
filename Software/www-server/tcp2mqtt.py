@@ -103,7 +103,7 @@ def main():
         if p0=="-cfg": configfile = p1
         
     if not config.read(configfile):
-        raise Exception("No configfile given! Provide a config file. See example mqttbuf.cfg")
+        raise Exception("No configfile given! Provide a config file. See example mqttbuf.cfg.template")
     
     if not path:
         path = config["DEFAULT"].get("destpath")
