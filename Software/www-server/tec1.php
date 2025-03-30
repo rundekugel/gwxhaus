@@ -5,7 +5,7 @@
 <title>Technik Unter&ouml;d Gew&auml;chshaus</title>
 <!-- gwxhaus GUI test -->
 
-<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" type="text/css" href="styles.css"/>
  
 <script type="text/javascript" src="js/tools.js"></script>
 <script type="text/javascript" src="js/timer.js"></script>
@@ -246,8 +246,23 @@
                 var s=line.split("/")
                 var id=s[3].trim();  
                 var v = line.split(" ")[1].trim();
-                if(v=="Online") v="o";
-                if(v=="Offline") v="f";
+                var e = document.getElementById("fddR"+id)
+                var e2 = document.getElementById("fdd"+id)
+                if(v=="Online") {
+                    v='===';
+                    e.style.color = 'White';
+                    e.style.backgroundColor = '#002200';
+                    e2.style.color = 'LightGreen';
+                    e2.style.backgroundColor = '#008200';
+                }
+                if(v=="Offline") {
+                    v="-//-";
+                    //e.style = ".offline";
+                    e.style.backgroundColor = '#606060';
+                    e.style.color = '#010101';
+                    e2.style.backgroundColor = '#606060';
+                    e2.style.color = '#010101';
+                }
                 write2Id("fdd"+id, v);
             }
              if(line.includes("/SENSOR")) {
@@ -398,19 +413,24 @@ if(isset($_SESSION["user"])) {
 }
 ?>
 <hr>
-<h3 id="nousdosen">FunkSteckdosen</h3>
-o=online / f=offline
-<table><tr><td>1:</td><td id="fd1">-</td><td>2:</td><td id="fd2">-</td><td>3:</td><td id="fd3">-</td><td>4:</td><td id="fd4">-</td>
-</tr></table>
+
+<h3 id="funkdosen">FunkSteckdosen</h3>
+=== online |  -//- offline
+<table>
 <?php 
-if(isset($_SESSION["user"])) { 
-  for($i=1;$i<=4;$i++){
-    echo "FunkDose<button id=fdd".$i.">.</button>".$i.":";
-    echo '<button onclick="switcher('.chr(39).'n'.$i."=0','nous".$i." 0')".chr(34).">aus</button> &nbsp";
-    echo '<button onclick="switcher('.chr(39).'n'.$i."=1','nous".$i." 1')".chr(34).">an</button> &nbsp\r\n";
-  }
+for($i=1;$i<=4;$i++){
+    echo "<tr id='fddR".$i."'><td>".$i.":</td><td id='fd".$i."'>?</td><td id='fdd".$i."'>?</td>";
+    if(isset($_SESSION["user"])) { 
+        echo "<td>";
+        echo '<button onclick="switcher('.chr(39).'n'.$i."=0','nous".$i." 0')".chr(34).">aus</button> &nbsp";
+        echo '<button onclick="switcher('.chr(39).'n'.$i."=1','nous".$i." 1')".chr(34).">an</button> &nbsp\r\n";
+        echo "</td>";
+    }    
+    echo "</tr>";
 }
 ?>
+</table>
+
 <hr>
 <!--
 Heartbeat: [<textbox id="hb">.</textbox>] <br>
