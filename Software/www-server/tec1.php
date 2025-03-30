@@ -5,9 +5,9 @@
 <title>Technik Unter&ouml;d Gew&auml;chshaus</title>
 <!-- gwxhaus GUI test -->
 
-<link rel="stylesheet" type="text/css" href="styles.css"/>
+<link rel="stylesheet" type="text/css" href="styles.css?v=1.4"/>
  
-<script type="text/javascript" src="js/tools.js"></script>
+<script type="text/javascript" src="js/tools.js?v=1.1"></script>
 <script type="text/javascript" src="js/timer.js"></script>
 <script type="text/javascript" src="js/gAjax.js"></script>
 
@@ -25,6 +25,7 @@
   var m_ioGetFunkDosen = "fd.php";
   var m_ioGetFunkDosenAvail = "fdd.php";
   var m_ioGetFunkDosenPow = "fdp.php";
+  var m_ioGetFunkDosenNamen = "fdn.php";
   
   //cFileContent is the ajax callback
   oFileioSens = new cFileContent(iohdlSens);
@@ -33,6 +34,7 @@
   oFileioFunkDosenHdl = new cFileContent(vFDhdl);
   oFileioFDAHdl = new cFileContent(vFDhdl);
   oFileioFDPHdl = new cFileContent(vFDhdl);
+  oFileioFDNamenHdl = new cFileContent(vFDhdl);
   //--------------------------------------------
     
 
@@ -50,6 +52,7 @@
     oFileioFunkDosenHdl.load(m_ioGetFunkDosen);
     oFileioFDAHdl.load(m_ioGetFunkDosenAvail);
     oFileioFDPHdl.load(m_ioGetFunkDosenPow);
+    oFileioFDNamenHdl.load(m_ioGetFunkDosenNamen);
   }
 
   function timer1(){
@@ -235,54 +238,60 @@
   }//--------------------------------------------   
 
   function vFDhdl(text){
-      //slw/gwx/nous/3/tele/LWT Online
+      // parse +/+/+/3/tele/LWT Online
       add2Log(text);
       if(text=="" || text.includes("<title>504 ")) { return;  }
       lines = text.split(/\r?\n|\r|\n/g);
       lines.forEach( line => 
       {
           try {
-            if(line.includes("/LWT")) {
-                var s=line.split("/")
-                var id=s[3].trim();  
-                var v = line.split(" ")[1].trim();
+            var s0 = splitOnce(line," ");
+            var key = s0[0].trim();
+            var v = s0[1].trim(); 
+            var s = key.split("/");
+            var id = s[3].trim();              
+            var online = (byId("fdd"+id).innerHTML == '===');  //this avoids flickering
+            
+            if(key.includes("/LWT")) {                
                 var e = document.getElementById("fddR"+id)
                 var e2 = document.getElementById("fdd"+id)
                 if(v=="Online") {
                     v= "===";
-                    e.classname = "online";
+                    e.classname = 'online';
                     e2.className = 'online';
                 }else if(v=="Offline") {
-                    v="-//-";
+                    v="=//=";
                     e.className = 'offline';
                     e2.className = 'offline';
-                }else{
-                    return;
-                }
+                    byId("fd"+id).className = 'offline';
+                }else{ return; }
                 write2Id("fdd"+id, v);
             }
-             if(line.includes("/SENSOR")) {
-                var s=line.split("/")
-                var id=s[3].trim();  
-                var j = line.split(" ")[1].trim();
-                var jsn = JSON.parse(j);
+            if(key.includes("/SENSOR")) { 
+                //var j = line.split(" ")[1].trim();
+                var jsn = JSON.parse(v);
                 p=jsn.ENERGY.Power
                 v=jsn.ENERGY.Voltage
                 write2Id("fdp"+id, p);
             }
-            if(line.includes("stat/POWER")) {
-                var s=line.split("/")
-                var id=s[3].trim();  
-                var v = line.split(" ")[1].trim();
-                //var jsn = JSON.parse(text);
-                //v=jsn.POWER
+            if(key.includes("stat/POWER")) {
+                if(v=="ON" || v=="An")
+                    v="An";
+                else
+                    v="Aus";
                 write2Id("fd"+id, v);
-                if(v=="ON"){
-                    if(document.getElementById("fdd"+id).innerHTML == '===')
-                        document.getElementById("fd"+id).className = 'on';
-                 }
-                if(v=="OFF") document.getElementById("fd"+id).className = 'off';
-            }            
+                if(online){
+                    if(v=="ON" || v=="An") {
+                        byId("fd"+id).className = 'on';
+                    }else{
+                        byId("fd"+id).className = 'off';
+                    }
+                }
+            }  
+            if(key.includes("/name")) { 
+                write2Id("fdname"+id, v);
+            }
+            
           } catch (error) {
               console.error(error);  
           }
@@ -341,7 +350,7 @@
     
 <h1>Technik Gew&auml;chshaus Unter&ouml;d</h1>
 <hr>
-Test Version 0.4.0
+Test Version 0.4.1
 <hr>
 <!--label for="refresh">HTML Update Interval:</label-->
 HTML Update Interval:
@@ -416,11 +425,10 @@ if(isset($_SESSION["user"])) {
 <hr>
 
 <h3 id="funkdosen">Nous-Steckdosen</h3>
-=== online |  -//- offline
 <table>
 <?php 
 for($i=1;$i<=4;$i++){
-    echo "<tr id='fddR".$i."'><td>".$i.":</td><td id='fd".$i."'>?</td><td id='fdd".$i."'>?</td>";
+    echo "<tr id='fddR".$i."'><td>".$i.":</td><td id='fdname".$i."'>Namenlos</td><td id='fd".$i."' >?</td><td id='fdd".$i."'>?</td>";
     echo "<td id='fdp".$i."'>?</td><td> Watt</td>";
     if(isset($_SESSION["user"])) { 
         echo "<td>";
@@ -432,7 +440,7 @@ for($i=1;$i<=4;$i++){
 }
 ?>
 </table>
-
+Erreichbarkeit: &nbsp; === online |  =//= offline
 <hr>
 <!--
 Heartbeat: [<textbox id="hb">.</textbox>] <br>

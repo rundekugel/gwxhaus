@@ -30,3 +30,11 @@ function zeitGmt(){
 const sleep_ms = (milliseconds) => { //use careful! problems on android.
   return new Promise(resolve => setTimeout(resolve, milliseconds))
 }
+
+function byId(id) { return document.getElementById(id); }
+
+function splitOnce(s, on) {
+   [first, ...rest] = s.split(on)
+   return [first, rest.length > 0? rest.join(on) : null]
+}
+//eof
