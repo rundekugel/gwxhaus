@@ -14,7 +14,7 @@
 <script type="text/javascript">
   //defaults
   var m_timerButton = 1;
-  var m_reloadTime = 900;
+  var m_reloadTime = 1900;
   var vIntervalId=0;
   
   //data stuff

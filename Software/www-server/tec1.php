@@ -7,7 +7,7 @@
 
 <link rel="stylesheet" type="text/css" href="styles.css?v=1.4"/>
  
-<script type="text/javascript" src="js/tools.js?v=1.1"></script>
+<script type="text/javascript" src="js/tools.js?v=1.2"></script>
 <script type="text/javascript" src="js/timer.js"></script>
 <script type="text/javascript" src="js/gAjax.js"></script>
 
@@ -301,6 +301,7 @@
 
   function switcher(cmd,text){
       write2Id("hbs",text);
+      alert("set ".cmd.":"text");
       fetch("switcher.php?"+cmd);
   }
   function wasseraus(id){
@@ -350,7 +351,7 @@
     
 <h1>Technik Gew&auml;chshaus Unter&ouml;d</h1>
 <hr>
-Test Version 0.4.1
+Test Version 0.5.1
 <hr>
 <!--label for="refresh">HTML Update Interval:</label-->
 HTML Update Interval:
@@ -425,6 +426,7 @@ if(isset($_SESSION["user"])) {
 <hr>
 
 <h3 id="funkdosen">Nous-Steckdosen</h3>
+<pre id="funkdoseninfo"></pre>
 <table>
 <?php 
 for($i=1;$i<=4;$i++){
@@ -462,10 +464,12 @@ Haus1: ??% &nbsp;&nbsp;&nbsp;&nbsp; Haus2: ??%
 </table>
 <?php if(isset($_SESSION["user"])) { echo '
 Haus1 Fenster: <button onclick="motor(1,\'u\')" >Auf</button> &nbsp;
+<button onclick="motor(1,\'h\')" >Halb</button> &nbsp;
 <button onclick="motor(1,\'0\')" >Stop</button> &nbsp;
 <button onclick="motor(1,\'d\')" >Zu</button> &nbsp;
 <br><br>
 Haus2 Fenster: <button onclick="motor(2,\'u\')" >Auf</button> &nbsp;
+<button onclick="motor(2,\'h\')" >Halb</button> &nbsp;
 <button onclick="motor(2,\'0\')" >Stop</button> &nbsp;
 <button onclick="motor(2,\'d\')" >Zu</button></s> &nbsp;<br>
 ';}?>
