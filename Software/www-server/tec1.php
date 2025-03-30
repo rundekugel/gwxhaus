@@ -249,19 +249,15 @@
                 var e = document.getElementById("fddR"+id)
                 var e2 = document.getElementById("fdd"+id)
                 if(v=="Online") {
-                    v='===';
-                    e.style.color = 'White';
-                    e.style.backgroundColor = '#002200';
-                    e2.style.color = 'LightGreen';
-                    e2.style.backgroundColor = '#008200';
-                }
-                if(v=="Offline") {
+                    v= "===";
+                    e.classname = "online";
+                    e2.className = 'online';
+                }else if(v=="Offline") {
                     v="-//-";
-                    //e.style = ".offline";
-                    e.style.backgroundColor = '#606060';
-                    e.style.color = '#010101';
-                    e2.style.backgroundColor = '#606060';
-                    e2.style.color = '#010101';
+                    e.className = 'offline';
+                    e2.className = 'offline';
+                }else{
+                    return;
                 }
                 write2Id("fdd"+id, v);
             }
@@ -272,7 +268,7 @@
                 var jsn = JSON.parse(j);
                 p=jsn.ENERGY.Power
                 v=jsn.ENERGY.Voltage
-                //write2Id("fdp"+id, v);
+                write2Id("fdp"+id, p);
             }
             if(line.includes("stat/POWER")) {
                 var s=line.split("/")
@@ -281,6 +277,11 @@
                 //var jsn = JSON.parse(text);
                 //v=jsn.POWER
                 write2Id("fd"+id, v);
+                if(v=="ON"){
+                    if(document.getElementById("fdd"+id).innerHTML == '===')
+                        document.getElementById("fd"+id).className = 'on';
+                 }
+                if(v=="OFF") document.getElementById("fd"+id).className = 'off';
             }            
           } catch (error) {
               console.error(error);  
@@ -414,12 +415,13 @@ if(isset($_SESSION["user"])) {
 ?>
 <hr>
 
-<h3 id="funkdosen">FunkSteckdosen</h3>
+<h3 id="funkdosen">Nous-Steckdosen</h3>
 === online |  -//- offline
 <table>
 <?php 
 for($i=1;$i<=4;$i++){
     echo "<tr id='fddR".$i."'><td>".$i.":</td><td id='fd".$i."'>?</td><td id='fdd".$i."'>?</td>";
+    echo "<td id='fdp".$i."'>?</td><td> Watt</td>";
     if(isset($_SESSION["user"])) { 
         echo "<td>";
         echo '<button onclick="switcher('.chr(39).'n'.$i."=0','nous".$i." 0')".chr(34).">aus</button> &nbsp";

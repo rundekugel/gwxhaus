@@ -21,3 +21,15 @@ tr.strikeout td:before {
 
 body {background-color:#007000 ; color:white}
 button{background-color: #80cf80; color:black; border-radius: 8px;}
+
+.redtext {background-color:#500000 ; color:red}
+
+.offline {background-color:#606060 ; color:#010101}
+.online {background-color:#008200 ; color:LightGreen}
+.off {color:white}
+.on { color:yellow}
+
+.wichtig {
+  color: red;
+  font-weight: bold;
+}
