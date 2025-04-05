@@ -72,12 +72,14 @@ class globs:
     port = 80
     dorun = True
     cfg = {"vccok":[4,30e3], "dsonbat":[[3.5,60e3],[3.3,300e3]], 
-        "sensf1":50,"sensf2":50, "mot_openpersec1":1.2, "mot_openpersec2":1.3}
+        "sensf1":50,"sensf2":50, "mot_openpersec1":1.2, "mot_openpersec2":1.3,
+        "sturm":10.1, "wind": {"max": 7.1}
+        }
     lasttime = 0
     todos = [("15:00","nop")]
     loop_sleep = 1 # we are slow enough. 1 sec. is enough.
     sturm = 0
-    sturmdelay_on = 10
+    sturmdelay_on = 3
     sturmdelay_off = 30
     deepsleep_ms = 0
     lightsleep_ms = 0
@@ -104,9 +106,6 @@ def doMotors():
         if globs.window_pos_dest[num] is None: #stop!
             setMotor(num + 1, "0")
             continue
-        # tol = globs.window_pos_toleranz
-        # if globs.window_pos_dest[num] in [0,100]:
-        #     tol = 0
         motordir = getMotor(num+1)
         if globs.window_pos_dest[num] > globs.window_virtual_open[num]:
             # too less open
@@ -128,7 +127,7 @@ def setMotor(num, direction):
     if not isinstance(num, int):
         num = int(str(num).replace("'", "")[-1])
     d = str(direction).strip().replace("'", "")[-1].lower()
-    if d == "u" and globs.sturm:
+    if d == "u" and globs.sturm >= globs.cfg.get("sturm",10):
         return
     sw = {"0": [0, 0], "d": [1, 0], "u": [1, 1], "o": [0, 0]}  # pinoutput for: motor,direction
     sw2 = sw.get(d, None)
@@ -164,8 +163,11 @@ def setDose(num, onOff=None):
     p.value(onOff)
 
 def getMotor(num, lang=""):
-    # num: 1|2
-    # retval: 0=aus, d=zu, u=auf
+    """
+     num: 1|2
+     lang: if 'de' then return german texts
+     retval: 0/aus, d/zu, u/auf
+    """
     num=int(num)
     pd=[PIN_MOTOR1D, PIN_MOTOR2D][num-1]
     pm=[PIN_MOTOR1, PIN_MOTOR2][num-1]
@@ -409,7 +411,7 @@ def parseMsg():
             val = val.decode().strip() ; cmd = cmd.strip()
         if globs.verbosity > 1:
             print("pM:", cmd, val)
-        if b"motor" in cmd:
+        if cmd[:-1] in (b"motor",b"fenster"):
             num = int(cmd[-1:])-1
             direction = val
             if direction == "?":
@@ -537,6 +539,9 @@ def parseMsg():
             if globs.verbosity: print("del:",val)
             deleteFromConfigFile(val)
             comu.addTx("deleted: "+str(j))
+        if b"ws" in cmd:
+            if globs.ws.testremotecontrol is not None:
+                globs.ws.testremotecontrol = float(val)
                 
     except Exception as e:
         if globs.verbosity:
@@ -650,46 +655,47 @@ def checkWind():
     if there is very strong wind, it's storm ==> close windows immediately
     if storm is over, wait some time, for really end of storm.
     """
+    # not used for now:  globs.sturmdelay_on
+    # for test: globs.ws.testremotecontrol=0
+
     speed = globs.ws.getValue()
     if speed is None:
         print("Warning! No windspeed")
     try:
         if speed > globs.cfg["wind"]["max"]:
-            globs.sturm +=1
-            if speed > globs.cfg["wind"]["max"] *2.5:
-                globs.sturm += globs.sturmdelay_on
-                if globs.verbosity:
-                    print("Wind > max! Offene Fenster werden etwas abgesenkt.")
-                for n in (0,1):
-                    if globs.window_virtual_open[n] > globs.windowpos_map[n].get('h',0):
-                        globs.window_pos_dest[n] = globs.windowpos_map[n].get('h',0)
-                        doMotors()
-            if globs.sturm > globs.cfg.get("sturm",10):
-                if globs.verbosity:
-                    print("Sturm. Alle Fenster werden geschlossen.")
-                globs.window_pos_dest[0]=0
-                globs.window_pos_dest[1]=0
-                doMotors()
+                globs.sturm = globs.sturmdelay_on
+        if globs.sturm >= globs.sturmdelay_on:
+            if globs.verbosity:
+                print("Wind > max! Offene Fenster werden etwas abgesenkt.")
+            for n in (0,1):
+                if globs.window_virtual_open[n] > globs.windowpos_map[n].get('h',0):
+                    globs.window_pos_dest[n] = globs.windowpos_map[n].get('h',0)
+                    doMotors()   # fast! no time to wait for next automatic cycle
+        if speed > globs.cfg.get("sturm",10):
+            globs.sturm += globs.sturmdelay_on
+            if globs.verbosity:
+                print("Sturm. Alle Fenster werden geschlossen.")
+            globs.window_pos_dest[0]=0
+            globs.window_pos_dest[1]=0
+            doMotors()   # fast! no time to wait for next automatic cycle
         else:
             if globs.sturm > globs.sturmdelay_off:
                 globs.sturm = globs.sturmdelay_off
             if globs.sturm:
                 globs.sturm -= 1
 
-    except:
-        pass
-        
+    except Exception as e:
+        print(str(e))
+
 def checkWindowPosition():
     this = checkWindowPosition
     if not hasattr(this, "checkWindowPosition_lastTime"):
         this.checkWindowPosition_lastTime = time.time()
-    # timedelta = time.time() - globs.checkWindowPosition_lastTime
-    # globs.checkWindowPosition_lastTime = time.time()
     timedelta = time.time() - this.checkWindowPosition_lastTime
     this.checkWindowPosition_lastTime = time.time()
 
     PIN_END_DOWN = (PIN_END1DOWN, PIN_END2DOWN)
-    for housenum in range(1,3):
+    for housenum in (1,2):
         try:
             step = timedelta * float(globs.cfg["mot_openpersec"+str(housenum)])
             if getMotor(housenum) == "d":
@@ -798,7 +804,6 @@ def main():
 
         if globs.rx and (time.time() -loopstart) < DURATION_PER_LOOP_MAX:
             parseMsg() 
-
 
         globs.lasttime = getTime()  # this line must be after all checks !
 
