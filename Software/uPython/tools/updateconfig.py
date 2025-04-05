@@ -32,6 +32,7 @@ class globs:
     rx=0
     qos=0
     msg=None
+    blocksize = 50
 
 def on_connect(client, userdata, flags, rc):
     print("Connected with result code " + str(rc))
@@ -59,7 +60,7 @@ def send(client, text):
     start = "modcfgs"
     add = "modcfga"
     end = "modcfg."
-    blocksize = 20
+    blocksize = globs.blocksize
     p=0
     if isinstance(text, bytes):
         text=text.decode()
@@ -150,6 +151,7 @@ def main():
         if p0=="-trx":   globs.topicRx = p1
         if p0=="-cfg":   configfile=p1
         if p0=="-r":     readonly=1
+        if p0=="-bs":    globs.blocksize = int(p1)
         if p0=="-js":    text = getFile(p1).replace("\r",'').replace('\n','').strip()
         if p0 in ("-?","?","-h","--help"): print(__doc__) ; return 0
 
