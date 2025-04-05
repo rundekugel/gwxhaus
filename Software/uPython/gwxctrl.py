@@ -18,7 +18,12 @@ import HYT221
 import comu
 import docrypt
 
-__version__ = "0.4.5"
+__version__ = "0.4.6"
+
+# ALLOWED_UART_VARS_W = ("loop_sleep","verbosity")
+SECRET_GLOBS = ("ak", "watertables")   # don't display this value to public
+DO_NOT_UPDATE = ("test_activated", "illegal")
+DURATION_PER_LOOP_MAX = 9
 
 MODE_CBC = 2
 # pinning for esp32-lite
@@ -56,9 +61,6 @@ ADC_POWER = machine.ADC(PINNUM_POWER)     # VP
 # 22,21: scl/sda esp8266?
 # esp32: scl/sda: 25/26 ; 18/19
 
-# ALLOWED_UART_VARS_W = ("loop_sleep","verbosity")
-SECRET_GLOBS = ("ak", "watertables")   # don't display this value to public
-DURATION_PER_LOOP_MAX = 9
 
 class globs:
     verbosity = 2
@@ -83,10 +85,13 @@ class globs:
     modcfg = ""
     wdttime = 90
     manually_timeend = 0
-    checkEndSwitch_lastTime = 0
-    window_virtual_open1 = 0 # value in percent
-    window_virtual_open2 = 0
+    checkFensterPosition_lastTime = time.time()
+    window_virtual_open = [0,0] # value in percent
+    # window_virtual_open2 = 0
     watertables = [180*b"\0"]*4
+    test_activated = False
+    fenster_pos_dest = [0,0]
+    motorpos_map["u"]
 
     
 def servCB(msg=None):
@@ -100,15 +105,15 @@ def setMotor(num, direction):
     if not isinstance(num, int):
         num = int(str(num).replace("'", "")[-1])
     d = str(direction).strip().replace("'", "")[-1].lower()
-    if d=="u" and globs.sturm:
+    if d == "u" and globs.sturm:
         return
     sw = {"0": [0, 0], "d": [1, 0], "u": [1, 1], "o": [0, 0]}  # pinoutput for: motor,direction
-    sw2=sw.get(d, None)
+    sw2 = sw.get(d, None)
     if not sw2 or num <1 or num >2:
         print("Warning: wrong values:", num, direction)
         return
-    pd=[PIN_MOTOR1D, PIN_MOTOR2D][num-1]
-    pm=[PIN_MOTOR1, PIN_MOTOR2][num-1]
+    pd = [PIN_MOTOR1D, PIN_MOTOR2D][num-1]
+    pm = [PIN_MOTOR1, PIN_MOTOR2][num-1]
     pm.value(0)
     pd.value(sw2[1])     # direction 1=up
     pm.value(sw2[0])     # motor on/off
@@ -223,8 +228,8 @@ def readConfig(filename="gwxctrl.cfg"):
             msg += str(pubconfig(cfg))
             print(msg)
             comu.addTx(msg)
-    except:
-        msg = "Fehler in readConfig"
+    except Exception as e:
+        msg = "!!! Fehler in readConfig !!!"+str(e)
         print(msg)
         comu.addTx(msg)
     return
@@ -238,13 +243,18 @@ def updateConfigFile(addcfg, filename="gwxctrl.cfg"):
         msg = "Fehler! konnte config nicht laden!"
         print(msg)
         comu.addTx(msg)
-        return
+        return False
     dictLower(cfg)
     dictLower(addcfg)
+    for k in DO_NOT_UPDATE:
+        addcfg.pop(k,0)
+    if not addcfg:
+        comu.addTx("empty cfg!")
+        return False
     cfg.update(addcfg)
     with open(filename, "w") as f:
         json.dump(cfg, f)
-    return
+    return True
 
 def deleteFromConfigFile(key, filename="gwxctrl.cfg"):
     cfg = None
@@ -263,7 +273,7 @@ def deleteFromConfigFile(key, filename="gwxctrl.cfg"):
 
 def init():
     print("GwxControl version:" + str(__version__))
-    globs.checkEndSwitch_lastTime = time.time()
+    globs.checkFensterPosition_lastTime = time.time()
     readConfig(globs.cfgfile)
     diameter=globs.cfg.get("windsensordia",None)
     if diameter is not None:
@@ -326,9 +336,8 @@ def init():
     
     pinsReset()
     
-    test_activated = 0
-    if test_activated:
-        globs.hy1.testremotecontrol=(0,40,20)
+    if globs.cfg.get("test_activated"):
+        globs.hy1.testremotecontrol=(0,41,21)
         globs.hy2.testremotecontrol=(0,42,22)
 
     if globs.verbosity:
@@ -371,8 +380,8 @@ def parseMsg():
         if isinstance(cmd, str):
             cmd = cmd.encode()
         if b"=" in cmd:
-            cmd, val = cmd.split(b"=", 1)
-            val=val.decode().strip() ; cmd=cmd.strip()
+            cmd, val = cmd.split(b"=", 1).strip()
+            val = val.decode().strip() ; cmd = cmd.strip()
         if globs.verbosity > 1:
             print("pM:", cmd, val)
         if b"motor" in cmd:
@@ -384,6 +393,7 @@ def parseMsg():
                     print(msg)
                 comu.addTx(msg)
             else:
+                globs.fenster_pos_dest[num] = motorpos_map.get(val,None)
                 setMotor(num, direction)
             return
         if b"wasser" in cmd:
@@ -490,8 +500,10 @@ def parseMsg():
                 if globs.verbosity: print(globs.modcfg)
                 j=json.loads(globs.modcfg)
                 if globs.verbosity: print(str(j))
-                updateConfigFile(j)
-                comu.addTx("updated: "+str(j))
+                if updateConfigFile(j):
+                    comu.addTx("updated: "+str(j))
+                else:
+                    comu.addTx("not updated")
             except Exception as e:
                 if globs.verbosity:
                     print("error in parseMsg:" + str(e))
@@ -601,6 +613,8 @@ def getBatVolt(rounded=2):
 
 def getVCCVolt(rounded=2):
     v, n = 0, 10
+    if globs.cfg.get("test_activated",0):
+        return 5.67
     for i in range(n):
        v += ADC_POWER.read_uv()*2/1e6
     return round(v / n, rounded)
@@ -633,25 +647,34 @@ def checkWind():
     except:
         pass
         
-def checkEndSwitch():
-    timedelta = time.time() - globs.checkEndSwitch_lastTime
-    checkEndSwitch_lastTime = time.time()
-    
-    motorNVirtual = (globs.window_virtual_open1, globs.window_virtual_open2)
+def checkFensterPosition():
+    this = checkFensterPosition
+    if not hasattr(this, "checkFensterPosition_lastTime"):
+        this.checkFensterPosition_lastTime = time.time()
+    # timedelta = time.time() - globs.checkFensterPosition_lastTime
+    # globs.checkFensterPosition_lastTime = time.time()
+    timedelta = time.time() - this.checkFensterPosition_lastTime
+    this.checkFensterPosition_lastTime = time.time()
+
+    #motorNVirtual = [globs.window_virtual_open1, globs.window_virtual_open2]
     PIN_END_DOWN = (PIN_END1DOWN, PIN_END2DOWN)
     for housenum in range(1,3):
         try:
             step = timedelta * float(globs.cfg["mot_openpersec"+str(housenum)])
             if getMotor(housenum) == "d":
-                motorNVirtual[housenum-1] -= step
+                globs.window_virtual_open[housenum-1] -= step
                 if PIN_END_DOWN[housenum-1].value ==0:
-                    motorNVirtual[housenum-1] = 0
+                    globs.window_virtual_open[housenum-1] = 0
                     setMotor(housenum,0)
-            if getMotor(housenum) == "u":
-                motorNVirtual[housenum-1] += step
+            if getMotor(housenum) in "u":
+                globs.window_virtual_open[housenum-1] += step
         except Exception as e:
             print(str(e))
-    return        
+        if globs.window_virtual_open[housenum - 1] < 0:
+            globs.window_virtual_open[housenum - 1] = 0
+        if globs.window_virtual_open[housenum - 1] > 100:
+            globs.window_virtual_open[housenum - 1] = 100
+    return
 
 def formTime(text):
     h=text.split(":",1)[0]
@@ -695,7 +718,7 @@ def main():
             # print(ths)
             pass
         motors = "M1:"+getMotor(1, 'de')+"; M2:"+getMotor(2, 'de')
-        motors += ";F1:"+str(globs.window_virtual_open1)+"; F2:"+str(globs.window_virtual_open2)
+        motors += ";F1:"+str(round(globs.window_virtual_open[0]))+"; F2:"+str(round(globs.window_virtual_open[1]))
         water = f"W1:{getWater(1, 'de')}; W2:{getWater(2, 'de')}; W3:{getWater(3, 'de')}; W4:{getWater(4, 'de')}"
         dosen = f"D1:{getDose(1, 'de')}; D2:{getDose(2, 'de')}; D3:{getDose(3, 'de')}; D4:{getWater(4, 'de')}"
         # fenster = "Fenster: ?\r\n"  # todo. need 8 gpios first.
@@ -744,7 +767,7 @@ def main():
 
         globs.lasttime = getTime()  # this line must be after all checks !
 
-        checkEndSwitch()
+        checkFensterPosition()
         
         # sleep on power loss
         vccVal = globs.cfg.get("vccok")
@@ -783,6 +806,8 @@ def main():
 if __name__ == "__main__":
     # test
     # globs.rx.append(b"deepsleep=2")
+    if "test_activated" in sys.argv:
+        globs.test_activated = True
     parseMsg()
     main()
 # eof
