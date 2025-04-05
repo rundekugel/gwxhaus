@@ -109,14 +109,14 @@ def doMotors():
         motordir = getMotor(num+1)
         if globs.window_pos_dest[num] > globs.window_virtual_open[num]:
             # too less open
-            if motordir == ('d'):
+            if motordir == 'd':
                 globs.window_pos_dest[num] = None
                 setMotor(num + 1, "0")
                 continue
             setMotor(num +1,"u")
         if globs.window_pos_dest[num] < globs.window_virtual_open[num]:
             # too wide open
-            if motordir in ('u'):
+            if motordir == 'u':
                 globs.window_pos_dest[num] = None
                 continue
             setMotor(num +1,"d")
@@ -708,10 +708,10 @@ def checkWindowPosition():
                 globs.window_virtual_open[housenum-1] += step
         except Exception as e:
             print(str(e))
-        if globs.window_virtual_open[housenum - 1] < -20:
+        if globs.window_virtual_open[housenum - 1] < 0:
             globs.window_virtual_open[housenum - 1] = 0
             globs.window_pos_dest[housenum - 1] = None
-        if globs.window_virtual_open[housenum - 1] > 150:
+        if globs.window_virtual_open[housenum - 1] > 100:
             globs.window_virtual_open[housenum - 1] = 100
             globs.window_pos_dest[housenum - 1] = None
     return
@@ -789,6 +789,9 @@ def main():
         checkTemp(2)
         checkTimer()
 
+        if not "ESP" in os.uname().machine:  # this is for the emulator
+            PIN_LED1.doGuiupdate()  # this updates all pins
+
         for todo in globs.todos:
             t=formTime(todo[0])
             if t<globs.lasttime:
@@ -801,7 +804,12 @@ def main():
 
         checkWindowPosition()
         doMotors()
+        if not "ESP" in os.uname().machine:  # this is for the emulator
+            PIN_LED1.doGuiupdate()  # this updates all pins
         checkWind()
+        if not "ESP" in os.uname().machine:  # this is for the emulator
+            PIN_LED1.doGuiupdate()  # this updates all pins
+
 
         if globs.rx and (time.time() -loopstart) < DURATION_PER_LOOP_MAX:
             parseMsg() 
