@@ -85,19 +85,42 @@ class globs:
     modcfg = ""
     wdttime = 90
     manually_timeend = 0
-    checkFensterPosition_lastTime = time.time()
+    # checkFensterPosition_lastTime = time.time()
     window_virtual_open = [0,0] # value in percent
     # window_virtual_open2 = 0
     watertables = [180*b"\0"]*4
     test_activated = False
-    fenster_pos_dest = [0,0]
-    motorpos_map["u"]
-
+    window_pos_dest = [None,None]
+    windowpos_map = [{"d":0, "u":100, "h":50},{"d":0, "u":100, "h":50}]
+    window_pos_toleranz = 10   # percent
     
 def servCB(msg=None):
     if globs.verbosity:
         print("m:"+str(msg))
     globs.rx.append(msg)
+
+def doMotors():
+    for num in (0,1):
+        if globs.window_pos_dest[num] is None: #stop!
+            setMotor(num + 1, "0")
+            continue
+        # tol = globs.window_pos_toleranz
+        # if globs.window_pos_dest[num] in [0,100]:
+        #     tol = 0
+        motordir = getMotor(num+1)
+        if globs.window_pos_dest[num] > globs.window_virtual_open[num]:
+            # too less open
+            if motordir == ('d'):
+                globs.window_pos_dest[num] = None
+                setMotor(num + 1, "0")
+                continue
+            setMotor(num +1,"u")
+        if globs.window_pos_dest[num] < globs.window_virtual_open[num]:
+            # too wide open
+            if motordir in ('u'):
+                globs.window_pos_dest[num] = None
+                continue
+            setMotor(num +1,"d")
 
 def setMotor(num, direction):
     if globs.verbosity:
@@ -141,6 +164,8 @@ def setDose(num, onOff=None):
     p.value(onOff)
 
 def getMotor(num, lang=""):
+    # num: 1|2
+    # retval: 0=aus, d=zu, u=auf
     num=int(num)
     pd=[PIN_MOTOR1D, PIN_MOTOR2D][num-1]
     pm=[PIN_MOTOR1, PIN_MOTOR2][num-1]
@@ -273,7 +298,7 @@ def deleteFromConfigFile(key, filename="gwxctrl.cfg"):
 
 def init():
     print("GwxControl version:" + str(__version__))
-    globs.checkFensterPosition_lastTime = time.time()
+    # globs.checkWindowPosition_lastTime = time.time()
     readConfig(globs.cfgfile)
     diameter=globs.cfg.get("windsensordia",None)
     if diameter is not None:
@@ -380,12 +405,12 @@ def parseMsg():
         if isinstance(cmd, str):
             cmd = cmd.encode()
         if b"=" in cmd:
-            cmd, val = cmd.split(b"=", 1).strip()
+            cmd, val = cmd.split(b"=", 1)
             val = val.decode().strip() ; cmd = cmd.strip()
         if globs.verbosity > 1:
             print("pM:", cmd, val)
         if b"motor" in cmd:
-            num = cmd[-1:]
+            num = int(cmd[-1:])-1
             direction = val
             if direction == "?":
                 msg = "M1:"+getMotor(1)+". M2:"+getMotor(2)
@@ -393,8 +418,8 @@ def parseMsg():
                     print(msg)
                 comu.addTx(msg)
             else:
-                globs.fenster_pos_dest[num] = motorpos_map.get(val,None)
-                setMotor(num, direction)
+                globs.window_pos_dest[num] = globs.windowpos_map[num].get(val,None)
+                # setMotor(num, direction)
             return
         if b"wasser" in cmd:
             num = cmd[-1:]
@@ -633,11 +658,18 @@ def checkWind():
             globs.sturm +=1
             if speed > globs.cfg["wind"]["max"] *2.5:
                 globs.sturm += globs.sturmdelay_on
-            if globs.sturm > globs.sturmdelay_on:
+                if globs.verbosity:
+                    print("Wind > max! Offene Fenster werden etwas abgesenkt.")
+                for n in (0,1):
+                    if globs.window_virtual_open[n] > globs.windowpos_map[n].get('h',0):
+                        globs.window_pos_dest[n] = globs.windowpos_map[n].get('h',0)
+                        doMotors()
+            if globs.sturm > globs.cfg.get("sturm",10):
                 if globs.verbosity:
                     print("Sturm. Alle Fenster werden geschlossen.")
-                setMotor(1,"d")
-                setMotor(2,"d")
+                globs.window_pos_dest[0]=0
+                globs.window_pos_dest[1]=0
+                doMotors()
         else:
             if globs.sturm > globs.sturmdelay_off:
                 globs.sturm = globs.sturmdelay_off
@@ -647,16 +679,15 @@ def checkWind():
     except:
         pass
         
-def checkFensterPosition():
-    this = checkFensterPosition
-    if not hasattr(this, "checkFensterPosition_lastTime"):
-        this.checkFensterPosition_lastTime = time.time()
-    # timedelta = time.time() - globs.checkFensterPosition_lastTime
-    # globs.checkFensterPosition_lastTime = time.time()
-    timedelta = time.time() - this.checkFensterPosition_lastTime
-    this.checkFensterPosition_lastTime = time.time()
+def checkWindowPosition():
+    this = checkWindowPosition
+    if not hasattr(this, "checkWindowPosition_lastTime"):
+        this.checkWindowPosition_lastTime = time.time()
+    # timedelta = time.time() - globs.checkWindowPosition_lastTime
+    # globs.checkWindowPosition_lastTime = time.time()
+    timedelta = time.time() - this.checkWindowPosition_lastTime
+    this.checkWindowPosition_lastTime = time.time()
 
-    #motorNVirtual = [globs.window_virtual_open1, globs.window_virtual_open2]
     PIN_END_DOWN = (PIN_END1DOWN, PIN_END2DOWN)
     for housenum in range(1,3):
         try:
@@ -670,10 +701,12 @@ def checkFensterPosition():
                 globs.window_virtual_open[housenum-1] += step
         except Exception as e:
             print(str(e))
-        if globs.window_virtual_open[housenum - 1] < 0:
+        if globs.window_virtual_open[housenum - 1] < -20:
             globs.window_virtual_open[housenum - 1] = 0
-        if globs.window_virtual_open[housenum - 1] > 100:
+            globs.window_pos_dest[housenum - 1] = None
+        if globs.window_virtual_open[housenum - 1] > 150:
             globs.window_virtual_open[housenum - 1] = 100
+            globs.window_pos_dest[housenum - 1] = None
     return
 
 def formTime(text):
@@ -759,6 +792,8 @@ def main():
                 globs.rx.append(m)  # will be done in parseMsg()
                 continue
 
+        checkWindowPosition()
+        doMotors()
         checkWind()
 
         if globs.rx and (time.time() -loopstart) < DURATION_PER_LOOP_MAX:
@@ -767,8 +802,6 @@ def main():
 
         globs.lasttime = getTime()  # this line must be after all checks !
 
-        checkFensterPosition()
-        
         # sleep on power loss
         vccVal = globs.cfg.get("vccok")
         if vccVal:
