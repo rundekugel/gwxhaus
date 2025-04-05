@@ -490,7 +490,7 @@ def parseMsg():
             j=json.loads(globs.modcfg)
             if globs.verbosity: print(str(j))
             updateConfigFile(j)
-            globs.modcfg=""
+            globs.modcfg=b""
             comu.addTx("updated: "+str(j))
         if b"delcfg" in cmd:
             if globs.verbosity: print("del:",val)

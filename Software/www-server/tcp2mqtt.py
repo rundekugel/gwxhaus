@@ -26,6 +26,7 @@ class globs:
         if isinstance(getattr(globs,key) ,float):
             value = float(value)
         setattr(globs, key, value)
+        
 class MyTCPHandler(socketserver.BaseRequestHandler):
     """
     The request handler class for our server.
@@ -49,8 +50,9 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
         if len(p)>1:
             # todo: check value for validity
             value = "=" +p[1]
+        topic = globs.config["global"]["topic"]
         if p0 in ("w1","w2","w3","w4","m1","m2","manually","globs?","globs","cfg","cfg?","rtc",
-                  "wasser1","wasser2","motor1","motor2","d1","d2"):
+                  "wasser1","wasser2","motor1","motor2","d1","d2","n1","n2","n3","n4"):
             # remove this, if fw updated
             if p0=="w1": p0="wasser1"
             if p0 == "w2": p0 = "wasser2"
@@ -58,9 +60,13 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
             if p0 == "m2": p0 = "motor2"
             if p0 == "d1": p0 = "dose1"
             if p0 == "d2": p0 = "dose2"
+            if p0 == "n1": topic = globs.config["nous"]["topic"]+"1/cmnd/power";p0="";value=p[1]
+            if p0 == "n2": topic = globs.config["nous"]["topic"]+"2/cmnd/power";p0="";value=p[1]
+            if p0 == "n3": topic = globs.config["nous"]["topic"]+"3/cmnd/power";p0="";value=p[1]
+            if p0 == "n4": topic = globs.config["nous"]["topic"]+"4/cmnd/power";p0="";value=p[1]
 
             mqtttx(globs.config["global"]["user"], globs.config["global"]["pw"],
-                   globs.config["global"]["topic"], p0 + value)
+                   topic, p0 + value)
         else:
             mqtttx(globs.config["debug"]["user"], globs.config["debug"]["pw"],
                    globs.config["debug"]["topic"], p0 + value)
@@ -80,13 +86,13 @@ def mqtttx(user, pwd, topic, msg, sleep=0.1):
 def main():
     print("PID:",os.getpid())
     pw = ""
-    configfile = ""
+    configfile = "tcp2mqtt.cfg"
     path=""
     config = configparser.ConfigParser()
     threads=[]
     
     # args overrides config
-    for p in sys.argv:
+    for p in sys.argv[1:]:
         if p[0] != "-": configfile = p; continue
         if "=" in p:
             p0,p1 = p.split("=",1)
@@ -97,7 +103,7 @@ def main():
         if p0=="-cfg": configfile = p1
         
     if not config.read(configfile):
-        raise Exception("No configfile given! Provide a config file. See example mqttbuf.cfg")
+        raise Exception("No configfile given! Provide a config file. See example mqttbuf.cfg.template")
     
     if not path:
         path = config["DEFAULT"].get("destpath")

@@ -166,3 +166,6 @@ cython_debug/
 /Software/www-server/v1.php
 /Software/www-server/w2.php
 /Software/www-server/wifiHaus2.tmp
+/Software/bak/*
+/Software/uPython/startrepl.sh
+/Software/www-server/fd.*

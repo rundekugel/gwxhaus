@@ -5,9 +5,9 @@
 <title>Technik Unter&ouml;d Gew&auml;chshaus</title>
 <!-- gwxhaus GUI test -->
 
-<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" type="text/css" href="styles.css?v=1.4"/>
  
-<script type="text/javascript" src="js/tools.js"></script>
+<script type="text/javascript" src="js/tools.js?v=1.2"></script>
 <script type="text/javascript" src="js/timer.js"></script>
 <script type="text/javascript" src="js/gAjax.js"></script>
 
@@ -22,11 +22,19 @@
   var m_ioGetGwxSens = "s2.php";
   var m_ioGetWifiController = "w2.php";
   var m_ioGetvsupplyhdl = "v1.php";
+  var m_ioGetFunkDosen = "fd.php";
+  var m_ioGetFunkDosenAvail = "fdd.php";
+  var m_ioGetFunkDosenPow = "fdp.php";
+  var m_ioGetFunkDosenNamen = "fdn.php";
   
   //cFileContent is the ajax callback
   oFileioSens = new cFileContent(iohdlSens);
   oFileioWifiCtrl = new cFileContent(wifihdl);
   oFileiovsupplyhdl = new cFileContent(vsupplyhdl);
+  oFileioFunkDosenHdl = new cFileContent(vFDhdl);
+  oFileioFDAHdl = new cFileContent(vFDhdl);
+  oFileioFDPHdl = new cFileContent(vFDhdl);
+  oFileioFDNamenHdl = new cFileContent(vFDhdl);
   //--------------------------------------------
     
 
@@ -41,6 +49,10 @@
     oFileioSens.load(m_ioGetGwxSens); 
     oFileioWifiCtrl.load(m_ioGetWifiController);
     oFileiovsupplyhdl.load(m_ioGetvsupplyhdl);
+    oFileioFunkDosenHdl.load(m_ioGetFunkDosen);
+    oFileioFDAHdl.load(m_ioGetFunkDosenAvail);
+    oFileioFDPHdl.load(m_ioGetFunkDosenPow);
+    oFileioFDNamenHdl.load(m_ioGetFunkDosenNamen);
   }
 
   function timer1(){
@@ -113,6 +125,11 @@
                 if(k=="W3") write2Id("w3", val);
                 if(k=="W4") write2Id("w4", val);
                 
+                if(k=="D1") write2Id("d1", val);
+                if(k=="D2") write2Id("d2", val);
+                if(k=="D3") write2Id("d3", val);
+                if(k=="D4") write2Id("d4", val);
+                                
                 if(k=="M1") write2Id("md1", val);
                 if(k=="M2") write2Id("md2", val);
                 //Fenster
@@ -218,10 +235,73 @@
           console.error(error);  
           //write2Id("VSupply", "dauert länger...");
       }
+  }//--------------------------------------------   
+
+  function vFDhdl(text){
+      // parse +/+/+/3/tele/LWT Online
+      add2Log(text);
+      if(text=="" || text.includes("<title>504 ")) { return;  }
+      lines = text.split(/\r?\n|\r|\n/g);
+      lines.forEach( line => 
+      {
+          try {
+            var s0 = splitOnce(line," ");
+            var key = s0[0].trim();
+            var v = s0[1].trim(); 
+            var s = key.split("/");
+            var id = s[3].trim();              
+            var online = (byId("fdd"+id).innerHTML == '===');  //this avoids flickering
+            
+            if(key.includes("/LWT")) {                
+                var e = document.getElementById("fddR"+id)
+                var e2 = document.getElementById("fdd"+id)
+                if(v=="Online") {
+                    v= "===";
+                    e.classname = 'online';
+                    e2.className = 'online';
+                }else if(v=="Offline") {
+                    v="=//=";
+                    e.className = 'offline';
+                    e2.className = 'offline';
+                    byId("fd"+id).className = 'offline';
+                }else{ return; }
+                write2Id("fdd"+id, v);
+            }
+            if(key.includes("/SENSOR")) { 
+                //var j = line.split(" ")[1].trim();
+                var jsn = JSON.parse(v);
+                p=jsn.ENERGY.Power
+                v=jsn.ENERGY.Voltage
+                write2Id("fdp"+id, p);
+            }
+            if(key.includes("stat/POWER")) {
+                if(v=="ON" || v=="An")
+                    v="An";
+                else
+                    v="Aus";
+                write2Id("fd"+id, v);
+                if(online){
+                    if(v=="ON" || v=="An") {
+                        byId("fd"+id).className = 'on';
+                    }else{
+                        byId("fd"+id).className = 'off';
+                    }
+                }
+            }  
+            if(key.includes("/name")) { 
+                write2Id("fdname"+id, v);
+            }
+            
+          } catch (error) {
+              console.error(error);  
+          }
+      })
   }//--------------------------------------------     
   
+
   function switcher(cmd,text){
       write2Id("hbs",text);
+      alert("set ".cmd.":"text");
       fetch("switcher.php?"+cmd);
   }
   function wasseraus(id){
@@ -271,7 +351,7 @@
     
 <h1>Technik Gew&auml;chshaus Unter&ouml;d</h1>
 <hr>
-Test Version 0.3.0
+Test Version 0.5.1
 <hr>
 <!--label for="refresh">HTML Update Interval:</label-->
 HTML Update Interval:
@@ -335,8 +415,7 @@ Heartbeat: [<textbox id="hb">.</textbox>] <br>
 <table><tr><td>1:</td><td id="d1">-</td><td>2:</td><td id="d2">-</td><td>3:</td><td id="d3">-</td><td>4:</td><td id="d4">-</td>
 </tr></table>
 <?php 
-//if(isset($_SESSION["user"])) { echo '
-if(1) { 
+if(isset($_SESSION["user"])) {
   for($i=1;$i<=4;$i++){
     echo "Dose".$i.":";
     echo '<button onclick="switcher('.chr(39).'d'.$i."=0','dose".$i." aus')".chr(34).">aus</button> &nbsp";
@@ -344,6 +423,26 @@ if(1) {
   }
 }
 ?>
+<hr>
+
+<h3 id="funkdosen">Nous-Steckdosen</h3>
+<pre id="funkdoseninfo"></pre>
+<table>
+<?php 
+for($i=1;$i<=4;$i++){
+    echo "<tr id='fddR".$i."'><td>".$i.":</td><td id='fdname".$i."'>Namenlos</td><td id='fd".$i."' >?</td><td id='fdd".$i."'>?</td>";
+    echo "<td id='fdp".$i."'>?</td><td> Watt</td>";
+    if(isset($_SESSION["user"])) { 
+        echo "<td>";
+        echo '<button onclick="switcher('.chr(39).'n'.$i."=0','nous".$i." 0')".chr(34).">aus</button> &nbsp";
+        echo '<button onclick="switcher('.chr(39).'n'.$i."=1','nous".$i." 1')".chr(34).">an</button> &nbsp\r\n";
+        echo "</td>";
+    }    
+    echo "</tr>";
+}
+?>
+</table>
+Erreichbarkeit: &nbsp; === online |  =//= offline
 <hr>
 <!--
 Heartbeat: [<textbox id="hb">.</textbox>] <br>
@@ -365,10 +464,12 @@ Haus1: ??% &nbsp;&nbsp;&nbsp;&nbsp; Haus2: ??%
 </table>
 <?php if(isset($_SESSION["user"])) { echo '
 Haus1 Fenster: <button onclick="motor(1,\'u\')" >Auf</button> &nbsp;
+<button onclick="motor(1,\'h\')" >Halb</button> &nbsp;
 <button onclick="motor(1,\'0\')" >Stop</button> &nbsp;
 <button onclick="motor(1,\'d\')" >Zu</button> &nbsp;
 <br><br>
 Haus2 Fenster: <button onclick="motor(2,\'u\')" >Auf</button> &nbsp;
+<button onclick="motor(2,\'h\')" >Halb</button> &nbsp;
 <button onclick="motor(2,\'0\')" >Stop</button> &nbsp;
 <button onclick="motor(2,\'d\')" >Zu</button></s> &nbsp;<br>
 ';}?>
