@@ -73,7 +73,7 @@ class globs:
         "sensf1":50,"sensf2":50, "mot_openpersec1":1.2, "mot_openpersec2":1.3}
     lasttime = 0
     todos = [("15:00","nop")]
-    loop_sleep = 2.5
+    loop_sleep = 1 # we are slow enough. 1 sec. is enough.
     sturm = 0
     sturmdelay_on = 10
     sturmdelay_off = 30
@@ -486,12 +486,16 @@ def parseMsg():
         if b"modcfg." in cmd:
             globs.modcfg += val
             globs.modcfg = globs.modcfg.replace("'", '"')
-            if globs.verbosity: print(globs.modcfg)
-            j=json.loads(globs.modcfg)
-            if globs.verbosity: print(str(j))
-            updateConfigFile(j)
-            globs.modcfg=b""
-            comu.addTx("updated: "+str(j))
+            try:
+                if globs.verbosity: print(globs.modcfg)
+                j=json.loads(globs.modcfg)
+                if globs.verbosity: print(str(j))
+                updateConfigFile(j)
+                comu.addTx("updated: "+str(j))
+            except Exception as e:
+                if globs.verbosity:
+                    print("error in parseMsg:" + str(e))
+            globs.modcfg = ""
         if b"delcfg" in cmd:
             if globs.verbosity: print("del:",val)
             deleteFromConfigFile(val)
@@ -778,7 +782,7 @@ def main():
 
 if __name__ == "__main__":
     # test
-    globs.rx.append(b"deepsleep=2")
+    # globs.rx.append(b"deepsleep=2")
     parseMsg()
     main()
 # eof
