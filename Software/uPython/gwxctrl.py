@@ -569,12 +569,13 @@ def checkTemp(hausnum):
         globs.manually_timeend = 0  # if RTC will be reset after power-loss. This helps.
 
         if s.temperature > cfg["tmax"]:
-            setMotor(hausnum,"u")
+            #setMotor(hausnum,"u")
+            globs.window_pos_dest[hausnum-1] = 100
         if s.temperature < cfg["tmin"]:
-            setMotor(hausnum,"d")
+            globs.window_pos_dest[hausnum-1] = 0
         else:
             if s.humidity > cfg["hmax"]:
-                setMotor(hausnum,"u")
+                globs.window_pos_dest[hausnum-1] = 100
                 setWater(hausnum, 0)
         if s.humidity < cfg["hmin"]:
             if getWater(hausnum) == 0:
