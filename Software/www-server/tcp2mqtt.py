@@ -101,6 +101,7 @@ def main():
         if p0=="-pw": pw=p1
         if p0=="-path": path=p1
         if p0=="-cfg": configfile = p1
+        if p0=="-v": globs.verbosity= int(p1)
         
     if not config.read(configfile):
         raise Exception("No configfile given! Provide a config file. See example mqttbuf.cfg.template")
