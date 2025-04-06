@@ -92,9 +92,9 @@ class globs:
     window_virtual_open = [0,0] # value in percent
     # window_virtual_open2 = 0
     watertables = [180*b"\0"]*4
-    test_activated = False
+    test_activated = False  # for debug don't change here, but in config-file!
     window_pos_dest = [None,None]
-    windowpos_map = [{"d":0, "u":100, "h":50},{"d":0, "u":100, "h":50}]
+    windowpos_map = [{"d":0, "u":100, "h":50,"s":None},{"d":0, "u":100, "h":50,"s":None}]
     window_pos_toleranz = 10   # percent
     motor_delay = [0,0]
     
@@ -436,7 +436,11 @@ def parseMsg():
                     print(msg)
                 comu.addTx(msg)
             else:
-                globs.window_pos_dest[num] = globs.windowpos_map[num].get(val,None)
+                if val in ('u','d','h',"s"):
+                    val = globs.windowpos_map[num].get(val,None)
+                else:
+                    val = int(val)
+                globs.window_pos_dest[num] = val
                 # setMotor(num, direction)
             return
         if b"wasser" in cmd:
