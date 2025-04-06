@@ -24,8 +24,9 @@ __version__ = "0.4.6"
 SECRET_GLOBS = ("ak", "watertables")   # don't display this value to public
 DO_NOT_UPDATE = ("test_activated", "illegal")
 DURATION_PER_LOOP_MAX = 9
-
 MODE_CBC = 2
+MOTOR_END_DELAY = 2  # delay motor switch off, if pos0 reached
+
 # pinning for esp32-lite
 PIN_WIND = 13   # Pin(35, Pin.IN, pull=Pin.PULL_UP)    # pin35 is also ADC1_7
 PIN_SCL1 = 5
@@ -39,10 +40,10 @@ PIN_WATER2 = Pin(33, Pin.OUT)
 PIN_WATER3 = Pin(32, Pin.OUT)
 PIN_WATER4 = Pin(18, Pin.OUT)
 
-PIN_MOTOR1 = Pin(25, Pin.OUT)
-PIN_MOTOR1D = Pin(26, Pin.OUT)
-PIN_MOTOR2 = Pin(12, Pin.OUT)
-PIN_MOTOR2D = Pin(14, Pin.OUT)
+PIN_MOTOR1 = Pin(25, Pin.OUT)   # hi=on
+PIN_MOTOR1D = Pin(26, Pin.OUT)  # hi=up
+PIN_MOTOR2 = Pin(12, Pin.OUT)   # hi=on
+PIN_MOTOR2D = Pin(14, Pin.OUT)  # hi=up
 
 PIN_END1UP = Pin(34, Pin.IN)
 PIN_END1DOWN = Pin(23, Pin.IN, pull=Pin.PULL_UP)
@@ -95,6 +96,7 @@ class globs:
     window_pos_dest = [None,None]
     windowpos_map = [{"d":0, "u":100, "h":50},{"d":0, "u":100, "h":50}]
     window_pos_toleranz = 10   # percent
+    motor_delay = [0,0]
     
 def servCB(msg=None):
     if globs.verbosity:
@@ -109,17 +111,27 @@ def doMotors():
         motordir = getMotor(num+1)
         if globs.window_pos_dest[num] > globs.window_virtual_open[num]:
             # too less open
-            if motordir == 'd':
+            if motordir == 'd' and globs.window_pos_dest[num] <100:
+                # destination is somewhere in the middle. stop.
                 globs.window_pos_dest[num] = None
                 setMotor(num + 1, "0")
                 continue
-            setMotor(num +1,"u")
+            setMotor(num +1, "u")
+            globs.motor_delay[num] = MOTOR_END_DELAY
         if globs.window_pos_dest[num] < globs.window_virtual_open[num]:
             # too wide open
-            if motordir == 'u':
+            if motordir == 'u' and globs.window_pos_dest[num] >0:
+                # destination is somewhere in the middle. stop.
                 globs.window_pos_dest[num] = None
                 continue
-            setMotor(num +1,"d")
+            setMotor(num +1, "d")
+            globs.motor_delay[num] = MOTOR_END_DELAY
+        if globs.window_pos_dest[num] == globs.window_virtual_open[num]:
+            if globs.motor_delay[num]:
+                globs.motor_delay[num] -=1
+            else:
+                globs.window_pos_dest[num] = None
+
 
 def setMotor(num, direction):
     if globs.verbosity:
@@ -366,6 +378,10 @@ def init():
     if globs.cfg.get("test_activated"):
         globs.hy1.testremotecontrol=(0,41,21)
         globs.hy2.testremotecontrol=(0,42,22)
+        PIN_END1UP.on()  # for simulator only
+        PIN_END1DOWN.on()
+        PIN_END2UP.on()
+        PIN_END2DOWN.on()
 
     if globs.verbosity:
         print("init done.")
@@ -696,21 +712,21 @@ def checkWindowPosition():
     this.checkWindowPosition_lastTime = time.time()
 
     PIN_END_DOWN = (PIN_END1DOWN, PIN_END2DOWN)
+    # PIN_END_UP = (PIN_END1UP, PIN_END2UP)
     for housenum in (1,2):
         try:
             step = timedelta * float(globs.cfg["mot_openpersec"+str(housenum)])
             if getMotor(housenum) == "d":
                 globs.window_virtual_open[housenum-1] -= step
-                if PIN_END_DOWN[housenum-1].value ==0:
+                if PIN_END_DOWN[housenum-1].value() ==0:
                     globs.window_virtual_open[housenum-1] = 0
-                    setMotor(housenum,0)
+                    # setMotor(housenum,0)
             if getMotor(housenum) in "u":
                 globs.window_virtual_open[housenum-1] += step
         except Exception as e:
             print(str(e))
         if globs.window_virtual_open[housenum - 1] < 0:
             globs.window_virtual_open[housenum - 1] = 0
-            globs.window_pos_dest[housenum - 1] = None
         if globs.window_virtual_open[housenum - 1] > 100:
             globs.window_virtual_open[housenum - 1] = 100
             globs.window_pos_dest[housenum - 1] = None
