@@ -1,11 +1,20 @@
 # gwxcontroller main core
 """
 this code is intended to run on a esp32light with 2x13 pins
+
+used pins:
 pins 12,14,25,26,27,33 are all output and go to a buffer ic
 pins 4,5 are for i2c1
 pins 2.15 are for i2c2
 pins 16,17 are for UART to wifi-esp32
 pins 18,19,23 are for future usage (water-valves / heating / general purpose usage)
+pin 13 windsensor
+pin 22 on board led, used for heartbeat
+pin 39 is used to measure battery voltage
+pin 36 is used to measure power supply
+
+unused:
+pin 0,34,35
 """
 
 import time
@@ -21,6 +30,7 @@ from machine import Pin, RTC, deepsleep, WDT
 from binascii import hexlify
 # from hashlib import sha256
 
+# local libs:
 import windsensor
 import HYT221 
 import comu
@@ -62,6 +72,7 @@ DOSE1 = Pin(18, Pin.OUT)
 DOSE2 = Pin(18, Pin.OUT)
 DOSE3 = Pin(18, Pin.OUT)
 DOSE4 = Pin(18, Pin.OUT)
+DOSEN = [DOSE1, DOSE2, DOSE3, DOSE4]
 
 ADC_BATT = machine.ADC(39)      # VN
 PINNUM_POWER = 36   # needed for wakeup
@@ -72,6 +83,7 @@ ADC_POWER = machine.ADC(PINNUM_POWER)     # VP
 
 
 class globs:
+    """global variables"""
     verbosity = 2
     cfgfile = "gwxctrl.cfg"
     ws, hy1, hy2 = None, None, None
@@ -108,11 +120,20 @@ class globs:
     motor_delay = [0,0]
     
 def servCB(msg=None):
+    """this is called for incoming data"""
     if globs.verbosity:
         print("m:"+str(msg))
     globs.rx.append(msg)
 
 def doMotors():
+    """
+    switch motors,
+    depending on globs.window_pos_dest and globs.window_virtual_open.
+    
+    globs.motor_delay is used to drive the motors to end-position, for the case, if
+    virtual motor position is at the end, but not the physical position.
+    until now, it's only used to close the windows properly.
+    """
     for num in (0,1):
         if globs.window_pos_dest[num] is None: #stop!
             setMotor(num + 1, "0")
@@ -143,6 +164,7 @@ def doMotors():
 
 
 def setMotor(num, direction):
+    """set the pins to control the motors"""
     if globs.verbosity:
         print("m:", num, direction)
     if not isinstance(num, int):
@@ -162,6 +184,7 @@ def setMotor(num, direction):
     pm.value(sw2[0])     # motor on/off
 
 def setWater(num, onOff=None):
+    """set the pins to control the water valves"""
     num = int(num)
     if globs.verbosity:
         print("w:",num,onOff)
@@ -173,6 +196,7 @@ def setWater(num, onOff=None):
     p.value(onOff)
 
 def setDose(num, onOff=None):
+    """set the pins to control general purpose output"""
     num = int(num)
     if globs.verbosity:
         print("d:",num,onOff)
@@ -180,7 +204,7 @@ def setDose(num, onOff=None):
         num = int(str(num).replace("'","")[-1])
     if not isinstance(onOff,int):
         onOff = int(str(onOff).replace("'","")[-1])
-    p=[DOSE1, DOSE2,DOSE3,DOSE4][num-1]
+    p=DOSEN[num-1]
     p.value(onOff)
 
 def getMotor(num, lang=""):
@@ -201,6 +225,11 @@ def getMotor(num, lang=""):
     return status
 
 def getWater(num, lang=""):
+    """
+     num: 1|2
+     lang: if 'de' then return german texts
+     retval: 0/Zu, d/zu, u/Auf
+    """
     p=[PIN_WATER1, PIN_WATER2, PIN_WATER3, PIN_WATER4][num-1]
     v=p.value()
     if lang == "de":
@@ -208,17 +237,21 @@ def getWater(num, lang=""):
     return v
 
 def getDose(num, lang=""):
-    p=[DOSE1, DOSE2, DOSE3, DOSE4][num-1]
+    p=DOSEN[num-1]
     v=p.value()
     if lang == "de":
         return ["Aus", "An"][v]
     return v
 
 def toggleLed():
+    """toggle the on-board-led"""
     PIN_LED1.value(not PIN_LED1.value())
 
 def getTime(offset_m=None):
-    """param: offset in minutes"""
+    """
+    param: offset in minutes
+    returns: time as string in format HH:MM:SS
+    """
     d = RTC().datetime()
     if offset_m:
         d = list(d) 
@@ -234,6 +267,7 @@ def getTime(offset_m=None):
     return f"{d[4]:02}:{d[5]:02}:{d[6]:02}"
 
 def dictLower(d):
+    """change keys in dict to lower case ==> keys are not case sensitive"""
     for k in list(d):
         if isinstance(d[k], dict):
             dictLower(d[k])
@@ -241,12 +275,14 @@ def dictLower(d):
             d[k.lower()] = d.pop(k)
 
 def pubconfig(cfg):
+    """return only config values, which are not private"""
     cfg_tmp = dict(cfg)
     for c in SECRET_GLOBS:
         cfg_tmp.pop(c ,None)  # remove secrets before show cfg
     return cfg_tmp
 
 def readConfig(filename="gwxctrl.cfg"):
+    """read config file and update globs.cfg with the result"""
     cfg = None
     msg = "Lese Einstellungen von:"+filename
     if globs.verbosity:
@@ -284,6 +320,7 @@ def readConfig(filename="gwxctrl.cfg"):
 
 
 def updateConfigFile(addcfg, filename="gwxctrl.cfg"):
+    """update config file with new settings"""
     cfg = None
     with open(filename, "r") as f:
         cfg = json.load(f)
@@ -305,6 +342,7 @@ def updateConfigFile(addcfg, filename="gwxctrl.cfg"):
     return True
 
 def deleteFromConfigFile(key, filename="gwxctrl.cfg"):
+    """delete one entry from configfile"""
     cfg = None
     with open(filename,"r") as f:
         cfg = json.load(f)
@@ -401,6 +439,8 @@ def pinsReset():
     PIN_WATER2.value(0)
     PIN_WATER3.value(0)
     PIN_WATER4.value(0)
+    for d in DOSEN:
+        d.value(0)
     PIN_MOTOR1.value(0)
     PIN_MOTOR1D.value(0)
     PIN_MOTOR2.value(0)
