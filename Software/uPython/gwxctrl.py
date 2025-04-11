@@ -1,4 +1,12 @@
 # gwxcontroller main core
+"""
+this code is intended to run on a esp32light with 2x13 pins
+pins 12,14,25,26,27,33 are all output and go to a buffer ic
+pins 4,5 are for i2c1
+pins 2.15 are for i2c2
+pins 16,17 are for UART to wifi-esp32
+pins 18,19,23 are for future usage (water-valves / heating / general purpose usage)
+"""
 
 import time
 import json
