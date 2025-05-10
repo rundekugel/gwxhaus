@@ -11,8 +11,8 @@ import urllib
 import json
 
 topics_sub = [
-    # ("slw/gwx/v1/tele/LWT",0),("slw/gwx/2/tele/LWT",0),("slw/gwx/nous/+/tele/LWT",0),
-("slw/gwx/test/+/LWT",0)
+("slw/gwx/v1/tele/LWT",0),("slw/gwx/2/tele/LWT",0),("slw/gwx/nous/+/tele/LWT",0)
+#("slw/gwx/test/+/LWT",0)
     ]
 
 class Delayer:
