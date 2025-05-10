@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """
 gwxcontroller config updater
-usage: updateconfig.py server[:port] <key> [data] [options]
+usage: updateconfig.py -s=server[:port] -k=<key> -d=[data] [options]
       -cfg=<cfg-file>
       -q=<n>   qos=n
       -s=<server>  set servername
@@ -13,8 +13,9 @@ usage: updateconfig.py server[:port] <key> [data] [options]
       -u=<user>   
       -p=<passwd> 
       -ttx=<topic to send> 
-      -trx=<topic to receive> 
-      -r           read only
+      -trx=<topic to receive>
+      -rs=1         reset after cmd
+      -ro           read only
 """
 
 import time,os,sys
@@ -31,6 +32,7 @@ class globs:
     key,data = None,None
     rx=0
     qos=0
+    reset=0
     msg=None
     blocksize = 50
 
@@ -105,9 +107,9 @@ def main():
       print(__doc__)
       return 0
 
-    server=av[1]
+    server=None
     port=18883
-    key=av[2]
+    key=None
     rep=1
     retain = False
     user,pwd=None,None
@@ -118,7 +120,7 @@ def main():
       data=None
     datatype = "s"
     text = None
-    configfile = None
+    configfile = None  # "updateconfig.cfg"
     readonly=0
 
     if len(av)>1:
@@ -150,7 +152,8 @@ def main():
         if p0=="-ttx":   globs.topicTx = p1
         if p0=="-trx":   globs.topicRx = p1
         if p0=="-cfg":   configfile=p1
-        if p0=="-r":     readonly=1
+        if p0=="-rs":     globs.reset=p1
+        if p0=="-ro":     readonly=1
         if p0=="-bs":    globs.blocksize = int(p1)
         if p0=="-js":    text = getFile(p1).replace("\r",'').replace('\n','').strip()
         if p0 in ("-?","?","-h","--help"): print(__doc__) ; return 0
@@ -173,7 +176,7 @@ def main():
             v = j.get("pwd")
             if v: pwd = v
 
-    if ":" in server:
+    if server and ":" in server:
       sp=server.split(":")
       server=sp[0]
       p=int(sp[1],10)
@@ -202,10 +205,17 @@ def main():
         return 0
 
     rep-=1
-    if text is None:
-        if datatype == 's': data = '"'+ str(data) + '"'
-        text = '{"'+ key +'":'+str(data)+'}'
-    send(client, text)
+    if key:
+        if text is None:
+            if datatype == 's': data = '"'+ str(data) + '"'
+            text = '{"'+ key +'":'+str(data)+'}'
+        send(client, text)
+    else:
+        print("No key given ==> nothing to do.")
+    if globs.reset:
+        if globs.verbosity:
+            print("Init a reset...")
+        client.publish(globs.topicTx, "reset!", globs.qos, 0)
     time.sleep(.5)
     #ssend(client, "cfg?")
     time.sleep(.5)

@@ -18,7 +18,7 @@ import HYT221
 import comu
 import docrypt
 
-__version__ = "0.4.6"
+__version__ = "0.4.7"
 
 # ALLOWED_UART_VARS_W = ("loop_sleep","verbosity")
 SECRET_GLOBS = ("ak", "watertables")   # don't display this value to public
@@ -89,6 +89,7 @@ class globs:
     wdttime = 90
     manually_timeend = 0
     # checkFensterPosition_lastTime = time.time()
+    checkWindowPosition_lastTime = 0
     window_virtual_open = [0,0] # value in percent
     # window_virtual_open2 = 0
     watertables = [180*b"\0"]*4
@@ -709,11 +710,13 @@ def checkWind():
         print(str(e))
 
 def checkWindowPosition():
-    this = checkWindowPosition
-    if not hasattr(this, "checkWindowPosition_lastTime"):
-        this.checkWindowPosition_lastTime = time.time()
-    timedelta = time.time() - this.checkWindowPosition_lastTime
-    this.checkWindowPosition_lastTime = time.time()
+    # this = checkWindowPosition
+    #if not hasattr(this, "checkWindowPosition_lastTime"):
+    #    this.checkWindowPosition_lastTime = time.time()
+    if not globs.checkWindowPosition_lastTime:
+        checkWindowPosition_lastTime = time.time()
+    timedelta = time.time() - globs.checkWindowPosition_lastTime
+    globs.checkWindowPosition_lastTime = time.time()
 
     PIN_END_DOWN = (PIN_END1DOWN, PIN_END2DOWN)
     # PIN_END_UP = (PIN_END1UP, PIN_END2UP)
