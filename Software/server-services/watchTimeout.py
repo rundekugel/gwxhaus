@@ -40,6 +40,7 @@ class Globs:
   signalReceivers = []
   signalSender = ""
   signalAdmins = []
+  client = mclient.Client
 
 globs = Globs()
 
@@ -74,21 +75,21 @@ class Delayer:
         if globs.verbosity>1:
             print(self.__dict__)
             print(self.msg.timestamp)
-        if self.lwl == "Offline":
-            if lwl =="Online":
+        if self.lwl.lower() == "offline":
+            if lwl.upper() =="online":
                 if time.time() < self.startTime + globs.msgdelaytime:
                     self.startTime = self.DESTROY_ME
                     return
-        startTime = time.time()
+            startTime = time.time()
         self.lwl = lwl
-        self.info = self.getFullMsg()
-    def getFullMsg(self):
-        devicename = globs.topics_translator.get("self.topic")
+        self.generateFullMsg()
+    def generateFullMsg(self):
+        devicename = globs.topics_translator.get(self.topic)
         if not devicename:
             devicename = self.topic
-        since = int((time.time() -self.startTime)/60)
-        return devicename + " " + str(self.lwl) +"seit "+str(since)+" min."
-
+        since = time.time() -self.startTime
+        since = "%d min. %d sec." % (since//60, since % 60)
+        return devicename + " " + str(self.lwl) +" seit: "+str(since)
 
 
 def on_connect(client, userdata, flags, rc):
@@ -112,18 +113,25 @@ def on_message(client, userdata, msg):
         if cmd=="disable":
             if globs.topics_translator.get(msg.payload):
                 print("remove: "+msg.payload)
-                globs.topics_sub.remove((msg.payload,0))
+                try:
+                    globs.topics_sub.remove((msg.payload,0))
+                    globs.client.reconnect()
+                except:
+                    pass
         if cmd=="enable":
             if globs.topics_translator.get(msg.payload):
                 print("add: "+msg.payload)
                 globs.topics_sub.append((msg.payload,0))
+                globs.client.reconnect()
         if cmd == "info":
-            info=str(globs.topics_sub)+";"+str(globs.msgdelaytime) + str(globs.delayers)
+            info=str(globs.topics_sub)+";"+"delayTime:"+str(globs.msgdelaytime) + ";"+str(globs.delayers)
             signalTx(info, globs.signalAdmins)
         if cmd == "verbosity":
             globs.verbosity = int(msg.payload)
         if cmd == "reloadconfig":
             loadconfig()
+            globs.client.reconnect()
+        return
 
     r=1  # globs.delayers.get(msg.topic)
     delayer = delayer_find(msg.topic)
@@ -188,6 +196,9 @@ def loadconfig(filename=""):
                     globs.__setattr__(k, j[k])
     except Exception as e:
         print("Error in loadconfig:" +str(e))
+        signalTx("Error in loadconfig:" +str(e), globs.signalAdmins)
+    if globs.control_topic:
+        globs.topics_sub.append((globs.control_topic+"/#",0))
 
 #main
 av=sys.argv
@@ -227,13 +238,10 @@ loadconfig(globs.configfile)
 with open(credentialspath) as f:
   d=json.load(f)
   globs.cfg.update(d)
-if globs.control_topic:
-    globs.topics_sub.append((globs.control_topic+"/#",0))
-else:
-    print("warning! not control topic!")
 print("Server: %s:%d  Topics: %s User: %s"%(server, port, globs.topics_sub, user))
 ca_certificate_file = None
 client = mclient.Client()
+globs.client = client
 if user:
     if not passwd:
         passwd = getpass("Password for "+user+": ")
@@ -252,15 +260,10 @@ dorun = 1
 while dorun:
     if client.is_connected():
         dorun =2
-        try:
-            # client.loop(timeout=2)
-            pass
-        except Exception as e:
-            dorun = 1
-            print(e)
     else:
         if dorun==2:
-            dorun=0
+            dorun=1
+            print("disconnected!")
     if globs.verbosity>3:
         print("."+str(dorun), end="")
     delayer: Delayer
@@ -275,12 +278,12 @@ while dorun:
         if time.time() >= delayer.startTime +globs.msgdelaytime:
             # delayer.lwl = Delayer.DESTROY_ME
             try:
-                info = delayer.info
+                info = delayer.generateFullMsg()
                 globs.delayers.remove(delayer)
                 rx = globs.signalReceivers
                 if globs.verbosity:
-                    print("Alarm!",delayer.info, rx)
-                signalTx(delayer.info, rx)
+                    print("Alarm!",info, rx)
+                signalTx(info, rx)
             except Exception as e:
                 print(e)
     time.sleep(1)
