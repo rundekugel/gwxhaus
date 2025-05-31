@@ -29,7 +29,8 @@ __author__ = "rundekugel @ github"
 
 ALLOWED_KEYS = ("configname", "server", "verbosity","interval",
                 "signalReceivers","signalSender", "signalAdmins",
-                "topics_translator", "topics_sub", "control_topic")
+                "topics_translator", "topics_sub", "control_topic",
+                "msgdelaytime")
 
 class Globs:
   cfg = {"verbosity":3}
