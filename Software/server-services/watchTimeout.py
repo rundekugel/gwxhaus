@@ -27,6 +27,10 @@ __version__ = "1.0.0"
 __author__ = "rundekugel @ github"
 
 
+ALLOWED_KEYS = ("configname", "server", "verbosity","interval",
+                "signalReceivers","signalSender", "signalAdmins",
+                "topics_translator", "topics_sub", "control_topic")
+
 class Globs:
   cfg = {"verbosity":3}
   delayers=[]
@@ -41,7 +45,8 @@ class Globs:
   signalSender = ""
   signalAdmins = []
   client = mclient.Client
-
+  configname = "?"
+  interval=1
 globs = Globs()
 
 class Delayer:
@@ -76,11 +81,11 @@ class Delayer:
             print(self.__dict__)
             print(self.msg.timestamp)
         if self.lwl.lower() == "offline":
-            if lwl.upper() =="online":
+            if lwl.lower() =="online":
                 if time.time() < self.startTime + globs.msgdelaytime:
                     self.startTime = self.DESTROY_ME
                     return
-            startTime = time.time()
+        startTime = time.time()
         self.lwl = lwl
         self.generateFullMsg()
     def generateFullMsg(self):
@@ -124,7 +129,8 @@ def on_message(client, userdata, msg):
                 globs.topics_sub.append((msg.payload,0))
                 globs.client.reconnect()
         if cmd == "info":
-            info=str(globs.topics_sub)+";"+"delayTime:"+str(globs.msgdelaytime) + ";"+str(globs.delayers)
+            info=globs.configname +":"+str(globs.topics_sub)+";"+"delayTime:"+str(globs.msgdelaytime) + ";"+str(globs.delayers)
+            info +=";"+"dict:"+str(globs.topics_translator)
             signalTx(info, globs.signalAdmins)
         if cmd == "verbosity":
             globs.verbosity = int(msg.payload)
@@ -189,10 +195,8 @@ def loadconfig(filename=""):
     try:
         with open(filename,"r") as f:
             j = json.load(f)
-            allowed_keys=("server","signalReceivers","verbosity",
-                          "topics_translator", "topics_sub","control_topic")
             for k in j:
-                if k in allowed_keys:
+                if k in ALLOWED_KEYS:
                     globs.__setattr__(k, j[k])
     except Exception as e:
         print("Error in loadconfig:" +str(e))
@@ -272,11 +276,9 @@ while dorun:
         if globs.verbosity>4:
             print(delayer.__dict__)
         if delayer.startTime == Delayer.DESTROY_ME:
-            #globs.delayers.pop(i)
             globs.delayers.remove(delayer)
             continue
         if time.time() >= delayer.startTime +globs.msgdelaytime:
-            # delayer.lwl = Delayer.DESTROY_ME
             try:
                 info = delayer.generateFullMsg()
                 globs.delayers.remove(delayer)
@@ -286,6 +288,6 @@ while dorun:
                 signalTx(info, rx)
             except Exception as e:
                 print(e)
-    time.sleep(1)
+    time.sleep(globs.interval)
 client.loop_stop()
 print("fin.")
