@@ -5,6 +5,13 @@
 listen to mqtt topic(s)
 if one device is offline, store it in a list from type Delayer
 if device is offline for long time (msgdelaytime) then send alarm message via signal-service
+
+params:
+-cfg=<configfilename> default: watchTimeout.cfg
+-u=<username>
+-pw=password
+-t=topic
+
 '''
 
 import sys, os
@@ -19,24 +26,25 @@ import json
 __version__ = "1.0.0"
 __author__ = "rundekugel @ github"
 
-controll_topic = "slw/gwx/watcher/cmd"
 
-topics_sub = [
-    # ("slw/gwx/v1/tele/LWT",0)
-    ("slw/gwx/2/tele/LWT",0)
-    # ,("slw/gwx/nous/+/tele/LWT",0)
-    #("slw/gwx/test/+/LWT",0)
-    ,(controll_topic +"/#",0)
-    ]
+class Globs:
+  cfg = {"verbosity":3}
+  delayers=[]
+  msgdelaytime = 20
+  verbosity = 1
+  configfile = "watchTimeout.cfg"
+  server = ""
+  topics_sub = [ ]
+  topics_translator = { }
+  control_topic = ""
+  signalReceivers = []
+  signalSender = ""
+  signalAdmins = []
 
-topics_translator = {
-    "slw/gwx/v1/tele/LWT":"Verteiler1",
-    "slw/gwx/2/tele/LWT":"Hauptcontroller",
-    "slw/gwx/nous/1/tele/LWT":"Nous1",
-    "slw/gwx/nous/2/tele/LWT":"Nous2"
-    }
+globs = Globs()
 
 class Delayer:
+    '''contains info about devices, sent LWT'''
     topic=""
     humanreadable_name = ""
     lwl=""
@@ -58,7 +66,7 @@ class Delayer:
             self.info = info
         else:
             self.info = self.topic + " " + str(self.lwl)
-            devicename = topics_translator.get("self.topic")
+            devicename = globs.topics_translator.get("self.topic")
             if devicename:
                 self.info = devicename + " " + str(self.lwl)
 
@@ -75,49 +83,43 @@ class Delayer:
         self.lwl = lwl
         self.info = self.getFullMsg()
     def getFullMsg(self):
-        devicename = topics_translator.get("self.topic")
+        devicename = globs.topics_translator.get("self.topic")
         if not devicename:
             devicename = self.topic
         since = int((time.time() -self.startTime)/60)
         return devicename + " " + str(self.lwl) +"seit "+str(since)+" min."
 
 
-class globs:
-  cfg = {"verbosity":3}
-  delayers=[]
-  msgdelaytime = 20
-  verbosity = 1
-  configfile = "watchTimeout.cfg"
 
 def on_connect(client, userdata, flags, rc):
     res=["ok","?","?","?","?","Auth error"]
     print("Connected with result code " + str(rc) +" "+str(res[rc]))
-    client.subscribe(topics_sub)
+    client.subscribe(globs.topics_sub)
 
 def on_message(client, userdata, msg):
     if sys.version_info[0]==3:
         msg.payload = msg.payload.decode()
     info = msg.topic + " " + str(msg.payload)
     print(info)
-    if msg.topic.startswith(controll_topic):
+    if msg.topic.startswith(globs.control_topic):
         cmd = msg.topic.rsplit('/',1)[-1]
         if cmd=="msgdelaytime":
             globs.msgdelaytime = int(msg.payload)
             if globs.msgdelaytime > 60*60:
                 signalTx(f"Alarmdelay ist auf groesser 1 Stunde eingestellt! "
                          f"({int(globs.msgdelaytime/60)}min.)",
-                         globs.cfg.get("signalreceivers"))
+                         globs.signalreceivers)
         if cmd=="disable":
-            if topics_translator.get(msg.payload):
+            if globs.topics_translator.get(msg.payload):
                 print("remove: "+msg.payload)
-                topics_sub.remove((msg.payload,0))
+                globs.topics_sub.remove((msg.payload,0))
         if cmd=="enable":
-            if topics_translator.get(msg.payload):
+            if globs.topics_translator.get(msg.payload):
                 print("add: "+msg.payload)
-                topics_sub.append((msg.payload,0))
+                globs.topics_sub.append((msg.payload,0))
         if cmd == "info":
-            print(topics_sub)
-            print(globs.msgdelaytime, globs.delayers)
+            info=str(globs.topics_sub)+";"+str(globs.msgdelaytime) + str(globs.delayers)
+            signalTx(info, globs.signalAdmins)
         if cmd == "verbosity":
             globs.verbosity = int(msg.payload)
         if cmd == "reloadconfig":
@@ -154,7 +156,7 @@ def telegramTx(info, chatid="112350312"):
 
 def signalTx(info, recipients, timeout=2):
     try:
-      sender = globs.cfg.get("signalSender")
+      sender = globs.signalSender
       data = {"message": info, "number": sender, "recipients": recipients}
       data = json.dumps(data).encode("utf-8")
       if globs.verbosity >1:
@@ -171,6 +173,7 @@ def signalTx(info, recipients, timeout=2):
        print("Error in signal tx: "+str(e))
 
 def loadconfig(filename=""):
+    '''using globs.<attribute> is so handy, I don't wanna miss it, and I want to configure it.'''
     if not filename:
         filename=globs.configfile
     if globs.verbosity:
@@ -178,7 +181,11 @@ def loadconfig(filename=""):
     try:
         with open(filename,"r") as f:
             j = json.load(f)
-            globs.cfg.update(j)
+            allowed_keys=("server","signalReceivers","verbosity",
+                          "topics_translator", "topics_sub","control_topic")
+            for k in j:
+                if k in allowed_keys:
+                    globs.__setattr__(k, j[k])
     except Exception as e:
         print("Error in loadconfig:" +str(e))
 
@@ -209,14 +216,22 @@ for p in av[1:]:
         p0, p1 = p, None
     if p0=="-u":    user = p1
     if p0=="-pw":   passwd = p1
-    if p0=="-t":    topic = p1
+    if p0=="-t":    globs.topics = p1
+    if p0=="-ct":   globs.controltopic = p1
     if p0=="-cfg":  globs.configfile = p1
+    if p0 in ("-h", "--help", "-?"):
+        print(__doc__)
+        sys.exit(0)
 
 loadconfig(globs.configfile)
 with open(credentialspath) as f:
   d=json.load(f)
   globs.cfg.update(d)
-print("Server: %s:%d  Topics: %s User: %s"%(server, port, topics_sub, user))
+if globs.control_topic:
+    globs.topics_sub.append((globs.control_topic+"/#",0))
+else:
+    print("warning! not control topic!")
+print("Server: %s:%d  Topics: %s User: %s"%(server, port, globs.topics_sub, user))
 ca_certificate_file = None
 client = mclient.Client()
 if user:
@@ -262,7 +277,7 @@ while dorun:
             try:
                 info = delayer.info
                 globs.delayers.remove(delayer)
-                rx = globs.cfg.get("signalReceivers")
+                rx = globs.signalReceivers
                 if globs.verbosity:
                     print("Alarm!",delayer.info, rx)
                 signalTx(delayer.info, rx)

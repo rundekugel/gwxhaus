@@ -1,0 +1,16 @@
+{
+"server":"mqttserver.org:8888", 
+"signalReceivers":["+49xxxxxx"], "signalSender":"+49xxxxxxxx",
+"verbosity":1,
+"topics_translator": {
+    "projectX/garage/flat3/device7/LWT":"Verteiler1",
+    "projectX/building1/flat3/deviceA/LWT":"VerteilerA",
+    },
+"topics_sub": [
+      ("projectX/garage/device7/LWT",0),
+      ("projectX/building1/flat3/deviceA/LWT",0)
+      ("projectX/building1/flat3/deviceC/LWT",0)
+    ],
+"control_topic":"projectX/watcher/cmd",
+"verbosity":1
+}
