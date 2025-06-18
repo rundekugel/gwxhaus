@@ -36,7 +36,16 @@ import HYT221
 import comu
 import docrypt
 
-__version__ = "0.4.7"
+try:
+    import revisionfile
+except:
+    class revisionfile:
+        revision = "0000000"
+        buildnumber = "0"
+
+__revision__ = revisionfile.revision
+__buildnumber__ = revisionfile.buildnumber
+__version__ = "0.5.0-" + __revision__ + "-Build:" + str(revisionfile.buildnumber)
 
 # ALLOWED_UART_VARS_W = ("loop_sleep","verbosity")
 SECRET_GLOBS = ("ak", "watertables")   # don't display this value to public
@@ -612,6 +621,8 @@ def parseMsg():
         if b"ws" in cmd:
             if globs.ws.testremotecontrol is not None:
                 globs.ws.testremotecontrol = float(val)
+        if b"version" in cmd:
+            comu.addTx("Version: "+str(__version__))
                 
     except Exception as e:
         if globs.verbosity:
