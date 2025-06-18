@@ -447,6 +447,7 @@ def pinsReset():
     PIN_MOTOR2D.value(0)
 
 def getTH(sensor,num):
+    """Sensor for temperature and humidity"""
     try:
         s=sensor.getValues(postdec=1)
         t,h = s.temperature, s.humidity
@@ -512,14 +513,14 @@ def parseMsg():
             sendAlarm("test:"+str(msg))
             return
         if b"fwupdate!!" in cmd:
-            sendAlarm("pause fÃ¼r fw-update:"+str(msg))
+            sendAlarm("pause für fw-update:"+str(msg))
             # globs.dorun = False
             for i in range(40):
                 toggleLed()
                 time.sleep(.5)
             print("back.")
         if b"fwmainstop!!" in cmd:
-            sendAlarm("stop fÃ¼r fw-update:"+str(msg))
+            sendAlarm("stop für fw-update:"+str(msg))
             globs.dorun = False
         if b"todos?" in msg:
             comu.addTx(str(globs.todos))
@@ -622,6 +623,10 @@ def sendAlarm(msg):
     comu.addTx("Alarm:"+str(msg))
 
 def checkTemp(hausnum):
+    """
+    check temperature and humidity and set window destination position
+    switch on water, if too dry
+    """
     try:
         sensor = [globs.hy1, globs.hy2][hausnum-1]
         s = sensor.getValues(postdec=1)
@@ -630,7 +635,7 @@ def checkTemp(hausnum):
         cfg = globs.cfg["haus"+str(hausnum)]
 
         if s.temperature > cfg.get("talarm",40):
-            sendAlarm(f"Temperatur in Haus{hausnum}:{s.temperature}Â°C")
+            sendAlarm(f"Temperatur in Haus{hausnum}:{s.temperature}°C")
 
         # 'manually control' set?
         if globs.manually_timeend > time.time():
@@ -706,12 +711,14 @@ def checkTimer():
             print(f"err in checkTimer.watertable{wt}: "+str(e))
             
 def getBatVolt(rounded=2):
+    """return battery voltage"""
     v, n = 0, 10
     for i in range(n):
        v += ADC_BATT.read_uv()*2/1e6
     return round(v / n, rounded)
 
 def getVCCVolt(rounded=2):
+    """return power input voltage"""
     v, n = 0, 10
     if globs.cfg.get("test_activated",0):
         return 5.67
@@ -758,9 +765,10 @@ def checkWind():
         print(str(e))
 
 def checkWindowPosition():
-    # this = checkWindowPosition
-    #if not hasattr(this, "checkWindowPosition_lastTime"):
-    #    this.checkWindowPosition_lastTime = time.time()
+    """
+    update the virtual model of window position,
+    depending on time and motor status
+    """
     if not globs.checkWindowPosition_lastTime:
         checkWindowPosition_lastTime = time.time()
     timedelta = time.time() - globs.checkWindowPosition_lastTime
@@ -781,19 +789,23 @@ def checkWindowPosition():
         except Exception as e:
             print(str(e))
         if globs.window_virtual_open[housenum - 1] < 0:
-            globs.window_virtual_open[housenum - 1] = 0
+       dic     globs.window_virtual_open[housenum - 1] = 0
         if globs.window_virtual_open[housenum - 1] > 100:
             globs.window_virtual_open[housenum - 1] = 100
             globs.window_pos_dest[housenum - 1] = None
     return
 
 def formTime(text):
+    """return well formated timestring from given text. format: HH:MM. adds a 0 as prefix, if neccessary"""
     h=text.split(":",1)[0]
     if len(h)<2:
         text="0"+text
     return text
 
 def main():
+    """
+    the main loop starts the watchdog and calls all used functions
+    """
     globs.wdt=None
     # wdt=WDT(timeout=globs.wdttime*1000)
     speed = -1
