@@ -513,14 +513,14 @@ def parseMsg():
             sendAlarm("test:"+str(msg))
             return
         if b"fwupdate!!" in cmd:
-            sendAlarm("pause für fw-update:"+str(msg))
+            sendAlarm("pause fÃ¼r fw-update:"+str(msg))
             # globs.dorun = False
             for i in range(40):
                 toggleLed()
                 time.sleep(.5)
             print("back.")
         if b"fwmainstop!!" in cmd:
-            sendAlarm("stop für fw-update:"+str(msg))
+            sendAlarm("stop fÃ¼r fw-update:"+str(msg))
             globs.dorun = False
         if b"todos?" in msg:
             comu.addTx(str(globs.todos))
@@ -635,7 +635,7 @@ def checkTemp(hausnum):
         cfg = globs.cfg["haus"+str(hausnum)]
 
         if s.temperature > cfg.get("talarm",40):
-            sendAlarm(f"Temperatur in Haus{hausnum}:{s.temperature}°C")
+            sendAlarm(f"Temperatur in Haus{hausnum}:{s.temperature}Â°C")
 
         # 'manually control' set?
         if globs.manually_timeend > time.time():
@@ -789,7 +789,7 @@ def checkWindowPosition():
         except Exception as e:
             print(str(e))
         if globs.window_virtual_open[housenum - 1] < 0:
-       dic     globs.window_virtual_open[housenum - 1] = 0
+            globs.window_virtual_open[housenum - 1] = 0
         if globs.window_virtual_open[housenum - 1] > 100:
             globs.window_virtual_open[housenum - 1] = 100
             globs.window_pos_dest[housenum - 1] = None
