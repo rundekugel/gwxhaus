@@ -104,7 +104,7 @@ if(isset($_SESSION["user"])) {
   echo " &nbsp;&nbsp;<a href='logout.php'><button>Logout</button></a>";
 
   if(isset($_SESSION['rights']) && !strpos($_SESSION['rights'], "c")){
-    die(" &nbsp;&nbsp;Du hast leider eine Rechte, Einstellungen zu &auml;ndern.<hr>");
+    die(" &nbsp;&nbsp;Du hast leider keine Rechte, Einstellungen zu &auml;ndern.<hr>");
   }
 }
 ?>

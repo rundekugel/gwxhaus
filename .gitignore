@@ -169,3 +169,5 @@ cython_debug/
 /Software/bak/*
 /Software/uPython/startrepl.sh
 /Software/www-server/fd.*
+/Software/uPython/revisionfile.py
+/Software/uPython/tools/updateconfig.cfg

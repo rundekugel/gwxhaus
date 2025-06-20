@@ -320,11 +320,13 @@ Haus1: ??% &nbsp;&nbsp;&nbsp;&nbsp; Haus2: ??%
 </table>
 <?php if(isset($_SESSION["user"])) { echo '
 Haus1 Fenster: <button onclick="motor(1,\'u\')" >Auf</button> &nbsp;
-<button onclick="motor(1,\'0\')" >Stop</button> &nbsp;
+<button onclick="motor(1,\'h\')" >Halb</button> &nbsp;
+<button onclick="motor(1,\'s\')" >Stop</button> &nbsp;
 <button onclick="motor(1,\'d\')" >Zu</button> &nbsp;
 <br><br>
 Haus2 Fenster: <button onclick="motor(2,\'u\')" >Auf</button> &nbsp;
-<button onclick="motor(2,\'0\')" >Stop</button> &nbsp;
+<button onclick="motor(2,\'h\')" >Halb</button> &nbsp;
+<button onclick="motor(2,\'s\')" >Stop</button> &nbsp;
 <button onclick="motor(2,\'d\')" >Zu</button></s> &nbsp;<br>
 ';}?>
 </s>
