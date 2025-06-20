@@ -85,6 +85,29 @@
       //add2Id("log","t:"+x+"/"+y);
       write2Id(id, xtable);
   }
+  
+  function getVal(id, x,y){
+       return 0;
+  }
+  
+  function readTable(id){
+      var x=12;
+      var y=24;
+      var data = "";
+      
+      for (var y1 = 0; y1 < y; y1++) {
+            for (var x1 = 0; x1 < x; x1++) {
+                var cid = id+"_"+x1+"_"+y1;
+                //console.info(cid);
+                var v = document.getElementById(cid).textContent;
+                //console.info(v);
+                data += v;
+            }
+            data +=";";
+      }
+      data += "<br>";
+      add2Id("log", id+":"+data);
+  }
   //--------------------
 </script>
 </head>    
@@ -141,6 +164,9 @@ Wasser 2b oeffnen unter <input type="text" id="h2hmin2" name="h2hmin2" value="15
 Heizung2 unter <input type="text" id="h2heizung" name="h2heizung" value="8" size="2"> °C<br>
 <hr>
 <button onclick='alert("Noch nicht moeglich!");'>Speichern</button>
+<hr>
+
+<button onclick='readTable("table1");readTable("table2");'>config to text</button>
 <div id="log">-</div>
 <hr>
 Daten werden bei der Übertragung verschlüsselt. Aktionen können nur nach Login durchgeführt werden.<br>
