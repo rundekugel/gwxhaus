@@ -23,7 +23,7 @@ import ssl
 import urllib
 import json
 
-__version__ = "1.0.0"
+__version__ = "1.0.1"
 __author__ = "rundekugel @ github"
 
 
@@ -207,24 +207,24 @@ def loadconfig(filename=""):
 
 #main
 av=sys.argv
-
-av=["self","mq.qc9.de:18883", "-u=g1", "-pw=msowAsq1!"]
-
-if len(av)<2:
-  print("no args. use: "+av[0]+" server[:port] <topic>")
-  sys.exit()
-server=av[1]
+server="localhost"
 port=1883
 user=None
 passwd=None
 credentialspath=os.path.dirname(os.path.realpath(__file__)) +"/credentials.dat"
 globs.configfile = os.path.dirname(os.path.realpath(__file__)) +"/watchTimeout.cfg"
 
-if  ":" in server:
-  sp=server.split(":")
-  server=sp[0]
-  port=int(sp[1])
-  
+if len(av)<2:
+  print("no args. use: "+av[0]+" server[:port] <topic>")
+  # sys.exit()
+else:
+    server=av[1]
+port=1883
+user=None
+passwd=None
+credentialspath=os.path.dirname(os.path.realpath(__file__)) +"/credentials.dat"
+globs.configfile = os.path.dirname(os.path.realpath(__file__)) +"/watchTimeout.cfg"
+
 for p in av[1:]:
     if "=" in p:
         p0, p1 = p.split("=", 1)
@@ -243,7 +243,13 @@ loadconfig(globs.configfile)
 with open(credentialspath) as f:
   d=json.load(f)
   globs.cfg.update(d)
+
+if  ":" in server:
+  sp=server.split(":")
+  server=sp[0]
+  port=int(sp[1])
 print("Server: %s:%d  Topics: %s User: %s"%(server, port, globs.topics_sub, user))
+
 ca_certificate_file = None
 client = mclient.Client()
 globs.client = client
