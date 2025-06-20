@@ -54,6 +54,8 @@ DURATION_PER_LOOP_MAX = 9
 MODE_CBC = 2
 MOTOR_END_DELAY = 2  # delay motor switch off, if pos0 reached
 
+USE_END_SWITCHES = 0
+
 # pinning for esp32-lite
 PIN_WIND = 13   # Pin(35, Pin.IN, pull=Pin.PULL_UP)    # pin35 is also ADC1_7
 PIN_SCL1 = 5
@@ -792,9 +794,9 @@ def checkWindowPosition():
             step = timedelta * float(globs.cfg["mot_openpersec"+str(housenum)])
             if getMotor(housenum) == "d":
                 globs.window_virtual_open[housenum-1] -= step
-                if PIN_END_DOWN[housenum-1].value() ==0:
-                    globs.window_virtual_open[housenum-1] = 0
-                    # setMotor(housenum,0)
+                if USE_END_SWITCHES:
+                    if PIN_END_DOWN[housenum-1].value() :
+                        globs.window_virtual_open[housenum-1] = 0
             if getMotor(housenum) in "u":
                 globs.window_virtual_open[housenum-1] += step
         except Exception as e:
