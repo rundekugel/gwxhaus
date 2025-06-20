@@ -109,13 +109,18 @@ if(isset($_SESSION["user"])) {
 }
 ?>
 <hr>
-<button onclick=makeTable("table1",60,24);makeTable("table2",60,24);>test 60x24</button>&nbsp;&nbsp;&nbsp;
+<button onclick=makeTable("table3",12,24);makeTable("table4",12,24);>test 3 + 4</button>&nbsp;&nbsp;&nbsp;
 <button onclick=settime()>Setzte Uhrzeit auf aktuelle Zeit</button>
 <h3>Gew&auml;chshaus Wasser Zeiten</h3>
 . = Aus / x = An<br>
 <table><td>
 <h4>Wasserventil1</h4><div id="table1">-</div></td><td></td><td>
 <h4>Wasserventil2</h4><div id="table2">-</div></td>
+</table>
+<br>
+<table><td>
+<h4>Wasserventil3</h4><div id="table3">-</div></td><td></td><td>
+<h4>Wasserventil4</h4><div id="table4">-</div></td>
 </table>
 <br>
 <hr>
@@ -135,6 +140,7 @@ Wasser 2a oeffnen unter <input type="text" id="h2hmin1" name="h2hmin1" value="15
 Wasser 2b oeffnen unter <input type="text" id="h2hmin2" name="h2hmin2" value="15" size="2"> % Luftfeuchte<br>
 Heizung2 unter <input type="text" id="h2heizung" name="h2heizung" value="8" size="2"> °C<br>
 <hr>
+<button onclick='alert("Noch nicht moeglich!");'>Speichern</button>
 <div id="log">-</div>
 <hr>
 Daten werden bei der Übertragung verschlüsselt. Aktionen können nur nach Login durchgeführt werden.<br>
