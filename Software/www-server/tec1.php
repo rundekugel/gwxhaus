@@ -301,7 +301,7 @@
 
   function switcher(cmd,text){
       write2Id("hbs",text);
-      alert("set ".cmd.":"text");
+      // alert("set ".cmd.":".text);
       fetch("switcher.php?"+cmd);
   }
   function wasseraus(id){
@@ -351,7 +351,7 @@
     
 <h1>Technik Gew&auml;chshaus Unter&ouml;d</h1>
 <hr>
-Test Version 0.5.1
+Test Version 0.5.1a
 <hr>
 <!--label for="refresh">HTML Update Interval:</label-->
 HTML Update Interval:
