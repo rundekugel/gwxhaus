@@ -244,6 +244,8 @@ with open(credentialspath) as f:
   d=json.load(f)
   globs.cfg.update(d)
 
+if globs.cfg.get("server"):
+    server = globs.cfg.get("server")
 if  ":" in server:
   sp=server.split(":")
   server=sp[0]
