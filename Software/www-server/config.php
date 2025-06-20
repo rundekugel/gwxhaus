@@ -120,18 +120,20 @@ if(isset($_SESSION["user"])) {
 <br>
 <hr>
 <H1>Haus1</H1>
-Fenster oeffnen ueber <input type="text" id="h1tmax" name="h1tmax" value="22" size="2"> °C ..  Umgekehrt, wenn draussen wärmer als drinnen: <input type="checkbox" id="h1R" name="h1R"/><br>
+Fenster oeffnen ueber <input type="text" id="h1tmax" name="h1tmax" value="22" size="2"> °C ..  Umgekehrt, wenn draussen wärmer als drinnen: <input type="checkbox" id="h1R" name="h1R" checked /><br>
 Fenster schliessen unter  <input type="text" id="h1tmin" name="h1tmax" value="22" size="2"> °C ..  Umgekehrt, wenn draussen wärmer als drinnen: <input type="checkbox" id="h1R2" name="h1R2"/><br>
 Fenster oeffnen ueber <input type="text" id="h1hmax" name="h1hmax" value="97" size="2"> % Luftfeuchte. Frostgrenze: <input type="text" id="h1frost" name="h1frost" value="4" size="2"> °C<br>
-Wasser 1 oeffnen unter <input type="text" id="h1hmin1" name="h1hmin1" value="15" size="2"> % Luftfeuchte<br>
-Wasser 2 oeffnen unter <input type="text" id="h1hmin2" name="h1hmin2" value="15" size="2"> % Luftfeuchte<br>
+Wasser 1a oeffnen unter <input type="text" id="h1hmin1" name="h1hmin1" value="15" size="2"> % Luftfeuchte<br>
+Wasser 1b oeffnen unter <input type="text" id="h1hmin2" name="h1hmin2" value="15" size="2"> % Luftfeuchte<br>
+Heizung1 unter <input type="text" id="h1heizung" name="h1heizung" value="8" size="2"> °C<br>
 
 <H1>Haus2</H1>
-Fenster oeffnen ueber <input type="text" id="h2tmax" name="h2tmax" value="22" size="2"> °C ..  Umgekehrt, wenn draussen wärmer als drinnen:<input type="checkbox" id="h2R" name="h2R"/> <br>
+Fenster oeffnen ueber <input type="text" id="h2tmax" name="h2tmax" value="22" size="2"> °C ..  Umgekehrt, wenn draussen wärmer als drinnen:<input type="checkbox" id="h2R" name="h2R" checked /> <br>
 Fenster schliessen unter  <input type="text" id="h2tmin" name="h2tmax" value="22" size="2"> °C ..  Umgekehrt, wenn draussen wärmer als drinnen:<input type="checkbox" id="h2R2" name="h2R2"/> <br>
 Fenster oeffnen ueber <input type="text" id="h2hmax" name="h2hmax" value="97" size="2"> % Luftfeuchte. Frostgrenze: <input type="text" id="h2frost" name="h2frost" value="4" size="2"> °C<br>
-Wasser 3 oeffnen unter <input type="text" id="h2hmin1" name="h2hmin1" value="15" size="2"> % Luftfeuchte<br>
-Wasser 4 oeffnen unter <input type="text" id="h2hmin2" name="h2hmin2" value="15" size="2"> % Luftfeuchte<br>
+Wasser 2a oeffnen unter <input type="text" id="h2hmin1" name="h2hmin1" value="15" size="2"> % Luftfeuchte<br>
+Wasser 2b oeffnen unter <input type="text" id="h2hmin2" name="h2hmin2" value="15" size="2"> % Luftfeuchte<br>
+Heizung2 unter <input type="text" id="h2heizung" name="h2heizung" value="8" size="2"> °C<br>
 <hr>
 <div id="log">-</div>
 <hr>
