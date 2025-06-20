@@ -249,7 +249,7 @@
     
 <h1>Gew&auml;chshaus Unter&ouml;d</h1>
 <hr>
-Version 0.6.4
+Version 0.6.5
 <br>
 <img src="gwxhaus1.png" width=10% height=10%>
 <?php

@@ -45,7 +45,7 @@ except:
 
 __revision__ = revisionfile.revision
 __buildnumber__ = revisionfile.buildnumber
-__version__ = "0.5.0-" + __revision__ + "-Build:" + str(revisionfile.buildnumber)
+__version__ = "0.5.1-" + __revision__ + "-Build:" + str(revisionfile.buildnumber)
 
 # ALLOWED_UART_VARS_W = ("loop_sleep","verbosity")
 SECRET_GLOBS = ("ak", "watertables")   # don't display this value to public
@@ -155,7 +155,7 @@ def doMotors():
             if motordir == 'd' and globs.window_pos_dest[num] <100:
                 # destination is somewhere in the middle. stop.
                 globs.window_pos_dest[num] = None
-                setMotor(num + 1, "0")
+                setMotor(num + 1, "s")
                 continue
             setMotor(num +1, "u")
             globs.motor_delay[num] = MOTOR_END_DELAY
@@ -175,7 +175,10 @@ def doMotors():
 
 
 def setMotor(num, direction):
-    """set the pins to control the motors"""
+    """
+    set the pins to control the motors
+    direction: u=up; d=down; s=stop; 0=stop
+    """
     if globs.verbosity:
         print("m:", num, direction)
     if not isinstance(num, int):
@@ -183,7 +186,7 @@ def setMotor(num, direction):
     d = str(direction).strip().replace("'", "")[-1].lower()
     if d == "u" and globs.sturm >= globs.cfg.get("sturm",10):
         return
-    sw = {"0": [0, 0], "d": [1, 0], "u": [1, 1], "o": [0, 0]}  # pinoutput for: motor,direction
+    sw = {"0": [0, 0], "d": [1, 0], "u": [1, 1], "o": [0, 0], "s": [0, 0]}  # pinoutput for: motor,direction
     sw2 = sw.get(d, None)
     if not sw2 or num <1 or num >2:
         print("Warning: wrong values:", num, direction)
@@ -195,8 +198,7 @@ def setMotor(num, direction):
     pm.value(sw2[0])     # motor on/off
 
 def setWater(num, onOff=None):
-    """set the pins to control the water valves"""
-    num = int(num)
+    """set the pins to control the water valves. onOff = 0|1"""
     if globs.verbosity:
         print("w:",num,onOff)
     if not isinstance(num,int):
@@ -207,8 +209,7 @@ def setWater(num, onOff=None):
     p.value(onOff)
 
 def setDose(num, onOff=None):
-    """set the pins to control general purpose output"""
-    num = int(num)
+    """set the pins to control general purpose output. onOff = 0|1"""
     if globs.verbosity:
         print("d:",num,onOff)
     if not isinstance(num,int):
