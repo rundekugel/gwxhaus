@@ -45,7 +45,7 @@ except:
 
 __revision__ = revisionfile.revision
 __buildnumber__ = revisionfile.buildnumber
-__version__ = "0.5.1-" + __revision__ + "-Build:" + str(revisionfile.buildnumber)
+__version__ = "0.5.2-" + __revision__ + "-Build:" + str(revisionfile.buildnumber)
 
 # ALLOWED_UART_VARS_W = ("loop_sleep","verbosity")
 SECRET_GLOBS = ("ak", "watertables")   # don't display this value to public
@@ -194,7 +194,9 @@ def setMotor(num, direction):
     pd = [PIN_MOTOR1D, PIN_MOTOR2D][num-1]
     pm = [PIN_MOTOR1, PIN_MOTOR2][num-1]
     pm.value(0)
+    time.time_ms(200)
     pd.value(sw2[1])     # direction 1=up
+    time.time_ms(200)
     pm.value(sw2[0])     # motor on/off
 
 def setWater(num, onOff=None):
