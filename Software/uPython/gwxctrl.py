@@ -55,6 +55,8 @@ MODE_CBC = 2
 MOTOR_END_DELAY = 2  # delay motor switch off, if pos0 reached
 
 USE_END_SWITCHES = 0
+DIRECTION_SWITCH_DELAY_MS = 200 # if direction switches, motorpower must be securely off
+POWER_SWITCH_DELAY_MS = 200
 
 # pinning for esp32-lite
 PIN_WIND = 13   # Pin(35, Pin.IN, pull=Pin.PULL_UP)    # pin35 is also ADC1_7
@@ -194,9 +196,9 @@ def setMotor(num, direction):
     pd = [PIN_MOTOR1D, PIN_MOTOR2D][num-1]
     pm = [PIN_MOTOR1, PIN_MOTOR2][num-1]
     pm.value(0)
-    time.time_ms(200)
+    time.time_ms(POWER_SWITCH_DELAY_MS)
     pd.value(sw2[1])     # direction 1=up
-    time.time_ms(200)
+    time.time_ms(DIRECTION_SWITCH_DELAY_MS)
     pm.value(sw2[0])     # motor on/off
 
 def setWater(num, onOff=None):

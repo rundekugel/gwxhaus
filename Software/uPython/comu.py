@@ -52,7 +52,8 @@ def init(portnum=None, baudrate=None):
         globs.baud = baudrate
     if portnum is not None:
         globs.portnum = portnum
-    globs.uart = UART(globs.uartport, globs.baud, timeout=globs.timeout_ms)
+    globs.uart = UART(globs.uartport, globs.baud, bits=8, parity=None, stop=1,
+        timeout=globs.timeout_ms, txbuf=1024)
     # globs.uart.irq(UART.RX_ANY, handler=irq_handler)
     globs.dorun = 1
 
@@ -62,6 +63,8 @@ def proc(msg=""):
             while globs.tx:
                 content += str(globs.tx.pop(0)) +"; "
             content += ";"+msg+";"
+            globs.uart.flush()
+            # todo: if esp8266, then wait for last character to be sents
             globs.uart.write(content.encode())
             content = ""
             # time.sleep(.1)
