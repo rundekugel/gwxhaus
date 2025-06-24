@@ -63,7 +63,10 @@ def proc(msg=""):
             while globs.tx:
                 content += str(globs.tx.pop(0)) +"; "
             content += ";"+msg+";"
-            globs.uart.flush()
+            try:
+                globs.uart.flush()
+            except:
+                pass
             # todo: if esp8266, then wait for last character to be sents
             globs.uart.write(content.encode())
             content = ""

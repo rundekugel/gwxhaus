@@ -136,6 +136,7 @@ class globs:
     windowpos_map = [{"d":0, "u":100, "h":50,"s":None},{"d":0, "u":100, "h":50,"s":None}]
     window_pos_toleranz = 10   # percent
     motor_delay = [0,0]
+    alarms = []
     
 def servCB(msg=None):
     """this is called for incoming data"""
@@ -657,8 +658,26 @@ def checkTemp(hausnum):
             return
         cfg = globs.cfg["haus"+str(hausnum)]
 
-        if s.temperature > cfg.get("talarm",40):
-            sendAlarm(f"Temperatur in Haus{hausnum}:{s.temperature}°C")
+        if cfg.get("talarm"):
+            tmaxFlag ="tmax"+str(hausnum)
+            if s.temperature > cfg.get("talarm",40):
+                if not tmaxFlag in globs.alarms:
+                    globs.alarms.append(tmaxFlag)
+                    sendAlarm(f"Temperatur in Haus{hausnum}:{s.temperature}°C")
+            else:
+                if tmaxFlag in globs.alarms:
+                    globs.alarms.remove(tmaxFlag)
+        
+        tm = cfg.get("tminalarm")
+        if tm:
+            tminFlag ="tmin"+str(hausnum)
+            if s.temperature < tm:
+                if not tminFlag in globs.alarms:
+                    globs.alarms.append("tmin"+str(hausnum))
+                    sendAlarm(f"Temperatur in Haus{hausnum}:{s.temperature}°C")
+            else:
+                if tminFlag in globs.alarms:
+                    globs.alarms.remove(tminFlag)
 
         # 'manually control' set?
         if globs.manually_timeend > time.time():
