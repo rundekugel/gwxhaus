@@ -15,6 +15,11 @@ pin 36 is used to measure power supply
 
 unused:
 pin 0,34,35
+
+explanation for config parameter 'mot_openpersec1' and 'mot_openpersec2' for haus1/haus2 
+ the value is, how far the window opens in one second. value in percent.
+ 
+}
 """
 
 import time

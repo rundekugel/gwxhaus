@@ -209,9 +209,10 @@ def main():
         if text is None:
             if datatype == 's': data = '"'+ str(data) + '"'
             text = '{"'+ key +'":'+str(data)+'}'
+    if text:
         send(client, text)
     else:
-        print("No key given ==> nothing to do.")
+        print("No config data given ==> nothing to do.")
     if globs.reset:
         if globs.verbosity:
             print("Init a reset...")
