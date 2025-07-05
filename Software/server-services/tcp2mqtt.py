@@ -51,15 +51,20 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
             # todo: check value for validity
             value = "=" +p[1]
         topic = globs.config["global"]["topic"]
+        # check whitelist
         if p0 in ("w1","w2","w3","w4","m1","m2","manually","globs?","globs","cfg","cfg?","rtc",
                   "wasser1","wasser2","motor1","motor2","d1","d2","n1","n2","n3","n4"):
             # remove this, if fw updated
-            if p0=="w1": p0="wasser1"
+            if p0 == "w1": p0 = "wasser1"
             if p0 == "w2": p0 = "wasser2"
+            if p0 == "w3": p0 = "wasser3"
+            if p0 == "w4": p0 = "wasser4"
             if p0 == "m1": p0 = "motor1"
             if p0 == "m2": p0 = "motor2"
             if p0 == "d1": p0 = "dose1"
             if p0 == "d2": p0 = "dose2"
+            if p0 == "d3": p0 = "dose3"
+            if p0 == "d4": p0 = "dose4"
             if p0 == "n1": topic = globs.config["nous"]["topic"]+"1/cmnd/power";p0="";value=p[1]
             if p0 == "n2": topic = globs.config["nous"]["topic"]+"2/cmnd/power";p0="";value=p[1]
             if p0 == "n3": topic = globs.config["nous"]["topic"]+"3/cmnd/power";p0="";value=p[1]
