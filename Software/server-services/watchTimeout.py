@@ -23,7 +23,7 @@ import ssl
 import urllib
 import json
 
-__version__ = "1.0.2"
+__version__ = "1.0.3"
 __author__ = "rundekugel @ github"
 
 
@@ -144,8 +144,9 @@ def on_message(client, userdata, msg):
                 globs.topics_sub.append((msg.payload,0))
                 globs.client.reconnect()
         if cmd == "info":
-            info=globs.configname +":"+str(globs.topics_sub)+";"+"delayTime:"+str(globs.msgdelaytime) + ";"+str(globs.delayers)
-            info +=";"+"dict:"+str(globs.topics_translator)
+            info = "Version:"+__version__+"\r\n"
+            info += globs.configname +":"+str(globs.topics_sub)+";"+"delayTime:"+str(globs.msgdelaytime) + ";"+str(globs.delayers)
+            info +=";\r\n"+"dict:"+str(globs.topics_translator)
             signalTx(info, globs.signalAdmins)
         if cmd == "verbosity":
             globs.verbosity = int(msg.payload)
