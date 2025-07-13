@@ -65,7 +65,8 @@ class Delayer:
     msg = mclient.MQTTMessage
     def __init__(self, mqttmsg :mclient.MQTTMessage, topic=None, lwl=None, info=None):
         self.startTime = time.time()
-        os.environ["TZ"]="Europe/Berlin"  
+        os.environ["TZ"]="Europe/Berlin" 
+        time.tzset()
         self.startTimeH = datetime.datetime.now().strftime("%H:%M:%S")
         if mqttmsg:
             self.msg = mqttmsg
@@ -100,8 +101,8 @@ class Delayer:
         devicename = globs.topics_translator.get(self.topic)
         if not devicename:
             devicename = self.topic
-        since = time.time() -self.startTime
-        since = "%d min. %d sec." % (since//60, since % 60)
+        #since = time.time() -self.startTime
+        #since = "%d min. %d sec." % (since//60, since % 60)
         since = self.startTimeH
         return devicename + " " + str(self.lwl) +" seit: "+str(since)
 
