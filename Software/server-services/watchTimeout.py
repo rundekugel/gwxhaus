@@ -150,9 +150,12 @@ def on_message(client, userdata, msg):
         if cmd == "verbosity":
             globs.verbosity = int(msg.payload)
         if cmd == "reloadconfig":
+            signalTx(cmd, globs.signalAdmins)
             loadconfig()
             loadconfig(globs.credentialspath)
+            signalTx("reconnect...", globs.signalAdmins)
             globs.client.reconnect()
+            signalTx("done.", globs.signalAdmins)
         return
 
     r=1  # globs.delayers.get(msg.topic)
