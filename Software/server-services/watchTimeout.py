@@ -118,9 +118,12 @@ def on_message(client, userdata, msg):
     if sys.version_info[0]==3:
         msg.payload = msg.payload.decode()
     info = msg.topic + " " + str(msg.payload)
-    print(info)
+    if globs.verbosity>1:
+        print(info)
     if msg.topic.startswith(globs.control_topic):
-        cmd = msg.topic.rsplit('/',1)[-1]
+        cmd = str(msg.payload) 
+        if globs.verbosity:
+             print("got cmd: "+str(cmd))
         if cmd=="msgdelaytime":
             globs.msgdelaytime = int(msg.payload)
             if globs.msgdelaytime > 60*60:
@@ -148,6 +151,7 @@ def on_message(client, userdata, msg):
             globs.verbosity = int(msg.payload)
         if cmd == "reloadconfig":
             loadconfig()
+            loadconfig(globs.credentialspath)
             globs.client.reconnect()
         return
 
@@ -233,6 +237,7 @@ port=1883
 #user=None
 #pwd=None
 credentialspath=os.path.dirname(os.path.realpath(__file__)) +"/credentials.dat"
+globs.credentialspath = credentialspath
 globs.configfile = os.path.dirname(os.path.realpath(__file__)) +"/watchTimeout.cfg"
  
 for p in av[1:]:
