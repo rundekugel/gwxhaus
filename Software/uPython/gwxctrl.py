@@ -19,15 +19,16 @@ pin 0,34,35
 explanation for config parameter 'mot_openpersec1' and 'mot_openpersec2' for haus1/haus2 
  the value is, how far the window opens in one second. value in percent.
  
-}
 """
 
 import time
 import json
 import os
+# this is for a simulator:
 if not "ESP" in os.uname().machine:
     import sys
     sys.path.append("upyemu")
+
 import machine, esp32
 from machine import Pin, RTC, deepsleep, WDT
 # from ucryptolib import aes
@@ -202,9 +203,9 @@ def setMotor(num, direction):
     pd = [PIN_MOTOR1D, PIN_MOTOR2D][num-1]
     pm = [PIN_MOTOR1, PIN_MOTOR2][num-1]
     pm.value(0)
-    time.time_ms(POWER_SWITCH_DELAY_MS)
+    time.sleep_ms(POWER_SWITCH_DELAY_MS)
     pd.value(sw2[1])     # direction 1=up
-    time.time_ms(DIRECTION_SWITCH_DELAY_MS)
+    time.sleep_ms(DIRECTION_SWITCH_DELAY_MS)
     pm.value(sw2[0])     # motor on/off
 
 def setWater(num, onOff=None):
