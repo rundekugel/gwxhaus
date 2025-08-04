@@ -491,15 +491,15 @@ def parseMsg():
                 print("pM:"+str(msg))
         if not msg:
             return
+        if isinstance(msg, bytes):
+            msg = msg.decode()
         cmd, val = msg, ""
-        if isinstance(cmd, str):
-            cmd = cmd.encode()
-        if b"=" in cmd:
-            cmd, val = cmd.split(b"=", 1)
-            val = val.decode().strip() ; cmd = cmd.strip()
+        if "=" in cmd:
+            cmd, val = cmd.split("=", 1)
+            val = val.strip() ; cmd = cmd.strip()
         if globs.verbosity > 1:
             print("pM:", cmd, val)
-        if cmd[:-1] in (b"motor",b"fenster"):
+        if cmd[:-1] in ("motor","fenster"):
             num = int(cmd[-1:])-1
             direction = val
             if direction == "?":
@@ -515,7 +515,7 @@ def parseMsg():
                 globs.window_pos_dest[num] = val
                 # setMotor(num, direction)
             return
-        if b"wasser" in cmd:
+        if "wasser" in cmd:
             num = cmd[-1:]
             direction = val
             if direction == "?":
@@ -523,7 +523,7 @@ def parseMsg():
             else:
                 setWater(num, direction)
             return
-        if b"dose" in cmd:
+        if "dose" in cmd:
             num = cmd[-1:]
             direction = val
             if direction == "?":
@@ -531,39 +531,39 @@ def parseMsg():
             else:
                 setDose(num, direction)
             return
-        if b"testalarm" in cmd:
+        if "testalarm" in cmd:
             sendAlarm("test:"+str(msg))
             return
-        if b"fwupdate!!" in cmd:
+        if "fwupdate!!" in cmd:
             sendAlarm("pause für fw-update:"+str(msg))
             # globs.dorun = False
             for i in range(40):
                 toggleLed()
                 time.sleep(.5)
             print("back.")
-        if b"fwmainstop!!" in cmd:
+        if "fwmainstop!!" in cmd:
             sendAlarm("stop für fw-update:"+str(msg))
             globs.dorun = False
-        if b"todos?" in msg:
+        if "todos?" in msg:
             comu.addTx(str(globs.todos))
-        elif b"todo" in msg:
-            if b"grfx" in val:
+        elif "todo" in msg:
+            if "grfx" in val:
                 val = val.replace("grfx","")
                 if globs.verbosity: print("todo:"+str(val))
                 globs.todo.append(val)
-        if b"globs?" in msg:
+        if "globs?" in msg:
             g = dict(globs.__dict__)    # make a copy
             g.pop("cfg", None)
             comu.addTx(str(pubconfig(g)))
-        if b"cfg?" in msg:
+        if "cfg?" in msg:
             comu.addTx(str(pubconfig(globs.cfg)))
-        if b"verbosity" in cmd:
+        if "verbosity" in cmd:
             globs.verbosity = int(val)
             comu.globs.verbosity = int(val)
-        if b"interval" in cmd:
+        if "interval" in cmd:
             globs.loop_sleep = int(val)/10
             comu.addTx(f"loop sleep:{globs.loop_sleep}s")
-        if b"rtc" == cmd:
+        if "rtc" == cmd:
             ti = val.split(',')
             tii=[]
             for t in ti:
@@ -571,48 +571,48 @@ def parseMsg():
             while len(tii)<8:
                 tii.append(0)
             RTC().init(tii)
-        if b"reset!" == cmd:
+        if "reset!" == cmd:
             machine.reset()
-        if b"deepsleep" in cmd:
+        if "deepsleep" in cmd:
             globs.deepsleep_ms = int(val)*1000
             if globs.verbosity:
                 print(f"deepsleep {globs.deepsleep_ms} sec.")
             return
-        if b"bat?" in cmd:
+        if "bat?" in cmd:
             m = f"Battery: {ADC_BATT.read_uv()*2/1e6} V."
             comu.addTx(m)
             if globs.verbosity:
                 print(m)
-        if b"power?" in cmd:
+        if "power?" in cmd:
             m = f"Power: {ADC_POWER.read_uv()*2/1e6} V."
             comu.addTx(m)
             if globs.verbosity:
                 print(m)
-        if b"iv?" in cmd:
+        if "iv?" in cmd:
             m = f"iv: {hexlify(globs.iv)}."
             comu.addTx(m)
             if globs.verbosity:
                 print(m)
-        if b"i2cscan" in cmd:
+        if "i2cscan" in cmd:
             hy = [globs.hy1, globs.hy2][int(val)]
             devs = hy.scan()
-            m= b"I2C devices found: "+str(devs).encode() +b" = "+hexlify(bytes(devs), " ")
+            m= "I2C devices found: "+str(devs).encode() +" = "+hexlify(bytes(devs), " ")
             if globs.verbosity: print(m)
             comu.addTx(m)
-        if b"manually" in cmd:
+        if "manually" in cmd:
             globs.manually_timeend = time.time() + int(val)
-        if b"am:" in cmd[:3]:
+        if "am:" in cmd[:3]:
                 encrypted = cmd[3:]
                 m = docrypt.parse(dec)
                 if globs.verbosity:
                     print(m)
                 comu.addTx(m)
-        if b"modcfgs" in cmd:
+        if "modcfgs" in cmd:
             if not val: val=""
             globs.modcfg = val
-        if b"modcfga" in cmd:
+        if "modcfga" in cmd:
             globs.modcfg += val
-        if b"modcfg." in cmd:
+        if "modcfg." in cmd:
             globs.modcfg += val
             globs.modcfg = globs.modcfg.replace("'", '"')
             try:
@@ -627,14 +627,14 @@ def parseMsg():
                 if globs.verbosity:
                     print("error in parseMsg:" + str(e))
             globs.modcfg = ""
-        if b"delcfg" in cmd:
+        if "delcfg" in cmd:
             if globs.verbosity: print("del:",val)
             deleteFromConfigFile(val)
             comu.addTx("deleted: "+str(j))
-        if b"ws" in cmd:
+        if "ws" in cmd:
             if globs.ws.testremotecontrol is not None:
                 globs.ws.testremotecontrol = float(val)
-        if b"version" in cmd:
+        if "version" in cmd:
             comu.addTx("Version: "+str(__version__))
                 
     except Exception as e:
@@ -977,7 +977,7 @@ def main():
 
 if __name__ == "__main__":
     # test
-    # globs.rx.append(b"deepsleep=2")
+    # globs.rx.append("deepsleep=2")
     if "test_activated" in sys.argv:
         globs.test_activated = True
     parseMsg()
