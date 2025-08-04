@@ -17,23 +17,24 @@ params:
 import sys, os
 import paho.mqtt as mqtt
 import paho.mqtt.client as mclient
-import time, sys
+import time, datetime
 from getpass import getpass
 import ssl
 import urllib
 import json
 
-__version__ = "1.0.1"
+__version__ = "1.0.3"
 __author__ = "rundekugel @ github"
 
 
 ALLOWED_KEYS = ("configname", "server", "verbosity","interval",
                 "signalReceivers","signalSender", "signalAdmins",
-                "topics_translator", "topics_sub", "control_topic",
-                "msgdelaytime")
+                "msgdelaytime", 
+                "topics_translator","topics_sub","control_topic",
+                "user","pwd","tgkey")
 
 class Globs:
-  cfg = {"verbosity":3}
+  # cfg = {"verbosity":3}
   delayers=[]
   msgdelaytime = 20
   verbosity = 1
@@ -48,6 +49,8 @@ class Globs:
   client = mclient.Client
   configname = "?"
   interval=1
+  user=None
+  pwd=None
 globs = Globs()
 
 class Delayer:
@@ -56,11 +59,14 @@ class Delayer:
     humanreadable_name = ""
     lwl=""
     startTime=None
+    startTimeH=None
     DESTROY_ME = -1
     info = ""
     msg = mclient.MQTTMessage
     def __init__(self, mqttmsg :mclient.MQTTMessage, topic=None, lwl=None, info=None):
         self.startTime = time.time()
+        os.environ["TZ"]="Europe/Berlin"  
+        self.startTimeH = datetime.datetime.now().strftime("%H:%M:%S")
         if mqttmsg:
             self.msg = mqttmsg
             self.topic = mqttmsg.topic
@@ -89,27 +95,35 @@ class Delayer:
         startTime = time.time()
         self.lwl = lwl
         self.generateFullMsg()
+        
     def generateFullMsg(self):
         devicename = globs.topics_translator.get(self.topic)
         if not devicename:
             devicename = self.topic
         since = time.time() -self.startTime
         since = "%d min. %d sec." % (since//60, since % 60)
+        since = self.startTimeH
         return devicename + " " + str(self.lwl) +" seit: "+str(since)
 
 
 def on_connect(client, userdata, flags, rc):
     res=["ok","?","?","?","?","Auth error"]
     print("Connected with result code " + str(rc) +" "+str(res[rc]))
-    client.subscribe(globs.topics_sub)
+    t=globs.topics_sub
+    if globs.verbosity:
+       print("topics:"+str(t))
+    client.subscribe(t)
 
 def on_message(client, userdata, msg):
     if sys.version_info[0]==3:
         msg.payload = msg.payload.decode()
     info = msg.topic + " " + str(msg.payload)
-    print(info)
+    if globs.verbosity>1:
+        print(info)
     if msg.topic.startswith(globs.control_topic):
-        cmd = msg.topic.rsplit('/',1)[-1]
+        cmd = str(msg.payload) 
+        if globs.verbosity:
+             print("got cmd: "+str(cmd))
         if cmd=="msgdelaytime":
             globs.msgdelaytime = int(msg.payload)
             if globs.msgdelaytime > 60*60:
@@ -130,14 +144,19 @@ def on_message(client, userdata, msg):
                 globs.topics_sub.append((msg.payload,0))
                 globs.client.reconnect()
         if cmd == "info":
-            info=globs.configname +":"+str(globs.topics_sub)+";"+"delayTime:"+str(globs.msgdelaytime) + ";"+str(globs.delayers)
-            info +=";"+"dict:"+str(globs.topics_translator)
+            info = "Version:"+__version__+"\r\n"
+            info += globs.configname +":"+str(globs.topics_sub)+";"+"delayTime:"+str(globs.msgdelaytime) + ";"+str(globs.delayers)
+            info +=";\r\n"+"dict:"+str(globs.topics_translator)
             signalTx(info, globs.signalAdmins)
         if cmd == "verbosity":
             globs.verbosity = int(msg.payload)
         if cmd == "reloadconfig":
+            signalTx(cmd, globs.signalAdmins)
             loadconfig()
+            loadconfig(globs.credentialspath)
+            signalTx("reconnect...", globs.signalAdmins)
             globs.client.reconnect()
+            signalTx("done.", globs.signalAdmins)
         return
 
     r=1  # globs.delayers.get(msg.topic)
@@ -157,15 +176,15 @@ def delayer_find(topic):
 
 def telegramTx(info, chatid="112350312"):    
   user="bot237720890"
-  telegramkey = globs.cfg.get("tgkey")
+  telegramkey = globs.tgkey
   param=urllib.parse.urlencode({"text":info})
   url="https://api.telegram.org/%s:%s/sendMessage?chat_id=%s&%s"%(
         str(user), str(telegramkey), str(chatid), str(param) )
-  if globs.cfg["verbosity"]>3:
+  if globs.verbosity >3:
     print("ttx-url:"+ str(url))
   r=urllib.request.urlopen(url,param.encode())
   r=r.msg
-  if globs.cfg["verbosity"]:
+  if globs.verbosity:
     print("ttx-rx: "+str(r))
   return r
 
@@ -181,7 +200,7 @@ def signalTx(info, recipients, timeout=2):
       req.add_header('Content-Type', 'application/json')
       r = urllib.request.urlopen(req, data=data, timeout=timeout)
 
-      if globs.cfg["verbosity"]:
+      if globs.verbosity:
         content = r.read()
         print("ttx-rx: "+str(content))
     except Exception as e:
@@ -198,67 +217,65 @@ def loadconfig(filename=""):
             j = json.load(f)
             for k in j:
                 if k in ALLOWED_KEYS:
+                    if globs.verbosity>10:
+                        print(f"cfg:{k,j[k]}")
                     globs.__setattr__(k, j[k])
+                else:
+                    print(f"Ignored: {k}")
     except Exception as e:
         print("Error in loadconfig:" +str(e))
         signalTx("Error in loadconfig:" +str(e), globs.signalAdmins)
     if globs.control_topic:
-        globs.topics_sub.append((globs.control_topic+"/#",0))
-
+        globs.topics_sub.append([globs.control_topic+"/#",0])
+    if globs.verbosity >9:
+        print(globs.__dict__)
 #main
 av=sys.argv
+
+#if len(av)<2:
+#  print("no args. use: -cfg=konfigfile or try -h")
+#  sys.exit()
+
 server="localhost"
 port=1883
-user=None
-passwd=None
+#user=None
+#pwd=None
 credentialspath=os.path.dirname(os.path.realpath(__file__)) +"/credentials.dat"
+globs.credentialspath = credentialspath
 globs.configfile = os.path.dirname(os.path.realpath(__file__)) +"/watchTimeout.cfg"
-
-if len(av)<2:
-  print("no args. use: "+av[0]+" server[:port] <topic>")
-  # sys.exit()
-else:
-    server=av[1]
-port=1883
-user=None
-passwd=None
-credentialspath=os.path.dirname(os.path.realpath(__file__)) +"/credentials.dat"
-globs.configfile = os.path.dirname(os.path.realpath(__file__)) +"/watchTimeout.cfg"
-
+ 
 for p in av[1:]:
     if "=" in p:
         p0, p1 = p.split("=", 1)
     else:
         p0, p1 = p, None
-    if p0=="-u":    user = p1
-    if p0=="-pw":   passwd = p1
+    if p0=="-u":    globs.user = p1
+    if p0=="-pw":   globs.pwd = p1
     if p0=="-t":    globs.topics = p1
     if p0=="-ct":   globs.controltopic = p1
     if p0=="-cfg":  globs.configfile = p1
+    if p0=="-v":    globs.verbosity = int(p1)
     if p0 in ("-h", "--help", "-?"):
         print(__doc__)
         sys.exit(0)
 
 loadconfig(globs.configfile)
-with open(credentialspath) as f:
-  d=json.load(f)
-  globs.cfg.update(d)
-
-if globs.cfg.get("server"):
-    server = globs.cfg.get("server")
+loadconfig(credentialspath)
+  
+if globs.server:
+    server = globs.server
 if  ":" in server:
   sp=server.split(":")
   server=sp[0]
   port=int(sp[1])
-print("Server: %s:%d  Topics: %s User: %s"%(server, port, globs.topics_sub, user))
-
+print("Server: %s:%d  Topics: %s User: %s"%(server, port, globs.topics_sub, globs.user))
 ca_certificate_file = None
 client = mclient.Client()
 globs.client = client
-if user:
-    if not passwd:
-        passwd = getpass("Password for "+user+": ")
-    client.username_pw_set(user, passwd)  
+if globs.user:
+    if not globs.pwd:
+        passwd = getpass("Password for "+globs.user+": ")
+    client.username_pw_set(globs.user, globs.pwd)  
 
 client.on_connect = on_connect
 client.on_message = on_message
