@@ -171,3 +171,4 @@ cython_debug/
 /Software/www-server/fd.*
 /Software/uPython/revisionfile.py
 /Software/uPython/tools/updateconfig.cfg
+/Software/server-services/tcp2mqtt.cfg
