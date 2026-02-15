@@ -120,7 +120,7 @@ def main():
       data=None
     datatype = "s"
     text = None
-    configfile = None  # "updateconfig.cfg"
+    configfile = "updateconfig.cfg"
     readonly=0
 
     if len(av)>1:
