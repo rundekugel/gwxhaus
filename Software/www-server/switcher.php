@@ -1,7 +1,7 @@
 <?php 
 session_start();
 ?>
-<h1>switcher</h1>
+<h1>switcher V0.0.3</h1>
 hi<br>
 
 <?php
@@ -32,7 +32,7 @@ if(isset($_SESSION["rights"])){
      echo $rights."<br>";
     $keys = array("w1","w2","w3","w4","m1","m2",
                 "cfg","rem","manually","globs","globs?","cfg?","rtc",
-                "d1","d2","li1","li2","n1","n2","n3","n4");
+                "d1","d2","li1","li2","n1","n2","n3","n4","version");
     foreach($keys as $k) {
         if(isset($_GET[$k])) {
             $v = $_GET[$k];

@@ -9,7 +9,7 @@ import json
 import configparser
 import socketserver
 
-__version__ = "0.0.2"
+__version__ = "0.0.3"
 
 class globs:
     doit = 1
@@ -53,7 +53,8 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
         topic = globs.config["global"]["topic"]
         # check whitelist
         if p0 in ("w1","w2","w3","w4","m1","m2","manually","globs?","globs","cfg","cfg?","rtc",
-                  "wasser1","wasser2","motor1","motor2","d1","d2","n1","n2","n3","n4"):
+                  "wasser1","wasser2","motor1","motor2","d1","d2","n1","n2","n3","n4",
+                  "version"):
             # remove this, if fw updated
             if p0 == "w1": p0 = "wasser1"
             if p0 == "w2": p0 = "wasser2"

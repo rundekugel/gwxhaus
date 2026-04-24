@@ -51,7 +51,7 @@ except:
 
 __revision__ = revisionfile.revision
 __buildnumber__ = revisionfile.buildnumber
-__version__ = "0.5.2-" + __revision__ + "-Build:" + str(revisionfile.buildnumber)
+__version__ = "0.5.2c-" + __revision__ + "-Build:" + str(revisionfile.buildnumber)
 
 # ALLOWED_UART_VARS_W = ("loop_sleep","verbosity")
 SECRET_GLOBS = ("ak", "watertables")   # don't display this value to public
@@ -205,6 +205,7 @@ def setMotor(num, direction):
     pm.value(0)
     time.sleep_ms(POWER_SWITCH_DELAY_MS)
     pd.value(sw2[1])     # direction 1=up
+    # important: switch off motor power, before switching direction! this is done before DIRECTION_SWITCH_DELAY_MS.
     time.sleep_ms(DIRECTION_SWITCH_DELAY_MS)
     pm.value(sw2[0])     # motor on/off
 

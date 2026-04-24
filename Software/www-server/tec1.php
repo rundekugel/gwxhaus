@@ -175,6 +175,12 @@
                 var t=document.getElementById("ts").innerHTML;
                 write2Id("cfg", t+"<br>"+line);
             }
+            if(line.includes("Version:")) {
+                var s = line.split("Version:")[1];
+                s=s.split(";")[0];
+                write2Id("fw1", s);
+             
+            }
           }  );
       }catch (error) {
           console.error(error);  
@@ -331,6 +337,9 @@
     add2Log("setRTC: "+rtc);
     switcher(rtc);
   }  
+   function getdetails(){
+    switcher("version");
+  }  
   
   function ch_refresh(){
       add2Id("log","refresh:");
@@ -351,7 +360,7 @@
     
 <h1>Technik Gew&auml;chshaus Unter&ouml;d</h1>
 <hr>
-Test Version 0.5.1a
+Test Version 0.5.2
 <hr>
 <!--label for="refresh">HTML Update Interval:</label-->
 HTML Update Interval:
@@ -501,6 +510,8 @@ Haus2 Fenster: <button onclick="motor(2,\'u\')" >Auf</button> &nbsp;
 <tr><td>Batterieladung: </td><td id="cbat">-</td><td>V</td></tr>
 <tr><td>Spannung: </td><td id="cusb">-</td><td id="cusb2"></td></tr>
 <tr><td>Letztes Lebenszeichen um:</td><td id="cts">-</td></tr>
+<tr><td>Hauptcontroller Firmware Version:</td><td id="fw1">-</td></tr>
+<tr><td>Wificontroller Firmware Version:</td><td id="fw2">-</td></tr>
 </table>
 <?php
 if(isset($_SESSION["user"])) {
@@ -510,9 +521,11 @@ if(isset($_SESSION["user"])) {
   echo ' &nbsp;&nbsp;<button onclick=switcher("cfg?=?")>Config</button></a>';
   echo ' &nbsp;&nbsp;<button onclick=switcher("m1=?")>Motor</button></a>';
   echo '<br>&nbsp;&nbsp;<button onclick=settime()>Set Time</button></a> ';
+  echo '<br>&nbsp;&nbsp;<button onclick=getdetails()>Details</button></a> ';
+  
   //changed for php7:
   if(isset($_SESSION["rights"]) && strpos($_SESSION["rights"], "c")){
-    echo ' &nbsp;&nbsp; <a href="config.php">Einstellungen</a><hr>';    
+    echo ' <hr>&nbsp;&nbsp; <a href="config.php">Einstellungen</a><hr>';    
   }  
 }else{
   echo '<a href="login.php"><button>Login</button></a><hr>';
