@@ -1,136 +1,207 @@
 <?php session_start(); ?>
+
 <!DOCTYPE html>
 <html><head>
 <meta http-equiv="content-type" content="text/html; charset=UTF-8">
 <title>Konfiguration Unter&ouml;d Gew&auml;chshaus</title>
 
 <link rel="stylesheet" href="styles.css">
- 
+
 <script type="text/javascript" src="js/tools.js"></script>
 <script type="text/javascript" src="js/timer.js"></script>
 <script type="text/javascript" src="js/gAjax.js"></script>
 
 <script type="text/javascript">
-  //defaults
-
-  function add2Log(text){
-    if(document.getElementById("cb_log").checked){
-        add2Id("log",text);
+function add2Log(text){
+    var cb = document.getElementById("cb_log");
+    if(cb && cb.checked){
+        add2Id("log", text);
     }
-  }
+}
 
-  function startAjax(){
+function startAjax(){
     add2Log("---------------------");
-    oFileioSens.load(m_ioGetGwxSens); 
+    oFileioSens.load(m_ioGetGwxSens);
     oFileioWifiCtrl.load(m_ioGetWifiController);
     oFileiovsupplyhdl.load(m_ioGetvsupplyhdl);
-  }
+}
 
-  function wasseraus(id){
-      fetch("switcher.php?w"+id+"=0");
-      write2Id("hbs","wasser aus!");
-  }
-  function wasseran(id,minuten){
-      fetch("switcher.php?w"+id+"="+minuten);
-      write2Id("hbs","wasser an fuer "+minuten+" min.");
-  }
-  function motor(id,richtung){
-      fetch("switcher.php?m"+id+"="+richtung);
-      write2Id("motinfo","Motor "+id+"="+richtung);
-  }  
-  function manually(seconds){
-      fetch("switcher.php?manually="+seconds);
-  }  
-  function switcher(text){
-      fetch("switcher.php?"+text);
-  }  
-  
-  function settime(){
+function wasseraus(id){
+    fetch("switcher.php?w"+id+"=0");
+    write2Id("hbs","wasser aus!");
+}
+
+function wasseran(id,minuten){
+    fetch("switcher.php?w"+id+"="+minuten);
+    write2Id("hbs","wasser an fuer "+minuten+" min.");
+}
+
+function motor(id,richtung){
+    fetch("switcher.php?m"+id+"="+richtung);
+    write2Id("motinfo","Motor "+id+"="+richtung);
+}
+
+function manually(seconds){
+    fetch("switcher.php?manually="+seconds);
+}
+
+function switcher(text){
+    fetch("switcher.php?"+text);
+}
+
+function settime(){
     var currentdate = new Date();
-    var rtc = "rtc="+ currentdate.getFullYear()+","+(currentdate.getMonth()+1)
-                    +","+currentdate.getDate()+",1,"+ currentdate.getHours() +","
-                    + currentdate.getMinutes() + "," + currentdate.getSeconds();
-    //add2Log("setRTC: "+rtc);
-    add2Id("log","setRTC: "+rtc);
-    //switcher(rtc);
-  }  
 
-  //-------------------------------------------- 
-  
-  function toggle(id){
-      old = document.getElementById(id).innerHTML;
-      if(old=="."){
-          write2Id(id, "x");
-      }else{
-          write2Id(id, ".");
-      }
-  }
-  function makeTable(id, x,y){
-      //id,x,y
-      var xtable = "<table><td>h\\m</td>";
-      for (var x1 = 0; x1 < x; x1++) {
-        xtable +="<td>"+x1*5+"</td>";
-      }      
-      for (var y1 = 0; y1 < y; y1++) {
-            xtable +='<tr><td>'+y1+'</td>';
-            for (var x1 = 0; x1 < x; x1++) {
-                var cid = id+"_"+x1+"_"+y1;
-                xtable +="<td id="+cid+' onclick=toggle("'+cid+'")>.</td>';
-            }
-            xtable +='</tr>';
-      }
-        
-  
-      xtable += "</table>";
-      //add2Id("log","t:"+x+"/"+y);
-      write2Id(id, xtable);
-  }
-  
-  function getVal(id, x,y){
-       return 0;
-  }
-  
-  function readTable(id){
-      var x=12;
-      var y=24;
-      var data = "";
-      
-      for (var y1 = 0; y1 < y; y1++) {
-            for (var x1 = 0; x1 < x; x1++) {
-                var cid = id+"_"+x1+"_"+y1;
-                //console.info(cid);
-                var v = document.getElementById(cid).textContent;
-                //console.info(v);
-                data += v;
-            }
-            data +=";";
-      }
-      data += "<br>";
-      add2Id("log", id+":"+data);
-  }
-  //--------------------
+    var rtc = "rtc="+ currentdate.getFullYear()+","+(currentdate.getMonth()+1)
+            +","+currentdate.getDate()+",1,"+ currentdate.getHours() +","
+            + currentdate.getMinutes() + "," + currentdate.getSeconds();
+
+    add2Id("log","setRTC: "+rtc);
+}
+
+function toggle(id){
+    var old = document.getElementById(id).innerHTML;
+
+    if(old=="."){
+        write2Id(id, "x");
+    }else{
+        write2Id(id, ".");
+    }
+}
+
+function makeTable(id, x,y){
+    var xtable = "<table><tr><td>h\\m</td>";
+
+    for (var x1 = 0; x1 < x; x1++) {
+        xtable += "<td>"+(x1*5)+"</td>";
+    }
+
+    xtable += "</tr>";
+
+    for (var y1 = 0; y1 < y; y1++) {
+        xtable += '<tr><td>'+y1+'</td>';
+
+        for (var x1 = 0; x1 < x; x1++) {
+            var cid = id+"_"+x1+"_"+y1;
+
+            xtable += '<td id="' + cid +
+                      '" onclick="toggle(\'' + cid +
+                      '\')">.</td>';
+        }
+
+        xtable += '</tr>';
+    }
+
+    xtable += "</table>";
+    write2Id(id, xtable);
+}
+
+function readTable(id){
+    var x=12;
+    var y=24;
+    var data = "";
+
+    for (var y1 = 0; y1 < y; y1++) {
+        for (var x1 = 0; x1 < x; x1++) {
+            var cid = id+"_"+x1+"_"+y1;
+            var v = document.getElementById(cid).textContent;
+
+            if(v != "x") v=".";
+            data += v;
+        }
+        data +=";";
+    }
+
+    data += "<br>";
+    add2Id("log", id+":"+data);
+}
+
+function getTable(id){
+    var x=12;
+    var y=24;
+    var data = "";
+
+    for (var y1 = 0; y1 < y; y1++) {
+        for (var x1 = 0; x1 < x; x1++) {
+            var cid = id+"_"+x1+"_"+y1;
+            var v = document.getElementById(cid).textContent;
+
+            if(v != "x") v=".";
+            data += v;
+        }
+        data +=";";
+    }
+
+    return data;
+}
+
+function download(filename, text) {
+    var element = document.createElement('a');
+
+    element.setAttribute(
+        'href',
+        'data:text/plain;charset=utf-8,' + encodeURIComponent(text)
+    );
+
+    element.setAttribute('download', filename);
+
+    element.style.display = 'none';
+    document.body.appendChild(element);
+    element.click();
+    document.body.removeChild(element);
+}
+
+function downloadConfig_1u2(){
+    var currentdate = new Date();
+
+    var timetext =
+        currentdate.getFullYear() +
+        ("0"+(currentdate.getMonth()+1)).slice(-2) +
+        ("0"+currentdate.getDate()).slice(-2) + "_" +
+        ("0"+currentdate.getHours()).slice(-2) +
+        ("0"+currentdate.getMinutes()).slice(-2) +
+        ("0"+currentdate.getSeconds()).slice(-2);
+
+    var data = "Gewaechshaus Wasserzeiten Konfiguration\r\n";
+    data += timetext + "\r\n";
+    data += "w1:" + getTable("table1") + "\r\n";
+    data += "w2:" + getTable("table2") + "\r\n";
+
+    download('gwxHausWasserKonfig_' + timetext + '.txt', data);
+}
 </script>
-</head>    
+</head>
 
 <body onload='makeTable("table1",12,24);makeTable("table2",12,24);'>
-    
+
 <h1>Konfiguration Gew&auml;chshaus Unter&ouml;d</h1>
 <hr>
-Test Version 0.0.1a
+Test Version 0.0.2
 <hr>
- &nbsp; &nbsp; 
-<a href="gwxhaus.php">Zurück</a> &nbsp; &nbsp; 
+
+<a href="gwxhaus.php">Zurück</a>
 
 <?php
 if(isset($_SESSION["user"])) {
-  echo "<hr>Angemeldet als: ".$_SESSION["user"];
-  echo " &nbsp;&nbsp;<a href='logout.php'><button>Logout</button></a>";
 
-  if(isset($_SESSION['rights']) && !strpos($_SESSION['rights'], "c")){
-    die(" &nbsp;&nbsp;Du hast leider keine Rechte, Einstellungen zu &auml;ndern.<hr>");
-  }
+    echo "<hr>Angemeldet als: "
+        . htmlspecialchars($_SESSION["user"], ENT_QUOTES, 'UTF-8');
+
+    echo " &nbsp;&nbsp;<a href='logout.php'><button>Logout</button></a>";
+
+    if(isset($_SESSION['rights'])) {
+
+        $rights = array_map('trim', explode(',', $_SESSION['rights']));
+
+        if (!in_array('c', $rights, true)) {
+            die(" &nbsp;&nbsp;Du hast leider keine Rechte, Einstellungen zu &auml;ndern.<hr>");
+        }
+
+        echo htmlspecialchars($_SESSION['rights'], ENT_QUOTES, 'UTF-8');
+    }
 }
 ?>
+
 <hr>
 <button onclick=makeTable("table3",12,24);makeTable("table4",12,24);>test 3 + 4</button>&nbsp;&nbsp;&nbsp;
 <button onclick=settime()>Setzte Uhrzeit auf aktuelle Zeit</button>
@@ -167,10 +238,20 @@ Heizung2 unter <input type="text" id="h2heizung" name="h2heizung" value="8" size
 <hr>
 
 <button onclick='readTable("table1");readTable("table2");'>config to text</button>
+<!--a href="data:application/octet-stream,field1%2Cfield2%0Afoo%2Cbar%0Agoo%2Cgai%0A">test</a-->
+<br>
+<button onclick='downloadConfig_1u2();'>Download Wasserzeiten</button><br>
+
+<form onsubmit="download(this['name'].value, this['text'].value)">
+  <input type="text" name="name" value="gwxHausWasserKonfig.txt" hidden="true">
+  <textarea name="text" hidden="true">leer</textarea>
+  <input type="submit" value="Download" hidden="true">
+</form>
+
 <div id="log">-</div>
 <hr>
 Daten werden bei der Übertragung verschlüsselt. Aktionen können nur nach Login durchgeführt werden.<br>
 Datenschutz: <a href="/Datenschutz.html">Hier klicken.</a><br>
-20240118-2
+20260604-1
 </body>
 
