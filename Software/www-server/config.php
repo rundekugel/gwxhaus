@@ -96,26 +96,6 @@ function makeTable(id, x,y){
     write2Id(id, xtable);
 }
 
-function readTable(id){
-    var x=12;
-    var y=24;
-    var data = "";
-
-    for (var y1 = 0; y1 < y; y1++) {
-        for (var x1 = 0; x1 < x; x1++) {
-            var cid = id+"_"+x1+"_"+y1;
-            var v = document.getElementById(cid).textContent;
-
-            if(v != "x") v=".";
-            data += v;
-        }
-        data +=";";
-    }
-
-    data += "<br>";
-    add2Id("log", id+":"+data);
-}
-
 function getTable(id){
 
     var test = document.getElementById(id + "_0_0");
@@ -158,25 +138,6 @@ function download(filename, text) {
     document.body.appendChild(element);
     element.click();
     document.body.removeChild(element);
-}
-
-function downloadConfig_1u2(){
-    var currentdate = new Date();
-
-    var timetext =
-        currentdate.getFullYear() +
-        ("0"+(currentdate.getMonth()+1)).slice(-2) +
-        ("0"+currentdate.getDate()).slice(-2) + "_" +
-        ("0"+currentdate.getHours()).slice(-2) +
-        ("0"+currentdate.getMinutes()).slice(-2) +
-        ("0"+currentdate.getSeconds()).slice(-2);
-
-    var data = "Gewaechshaus Wasserzeiten Konfiguration\r\n";
-    data += timetext + "\r\n";
-    data += "w1:" + getTable("table1") + "\r\n";
-    data += "w2:" + getTable("table2") + "\r\n";
-
-    download('gwxHausWasserKonfig_' + timetext + '.txt', data);
 }
 
 function setTable(id, data){
