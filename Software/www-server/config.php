@@ -388,19 +388,9 @@ Wasser 2b oeffnen unter <input type="text" id="h2hmin2" name="h2hmin2" value="15
 Heizung2 unter <input type="text" id="h2heizung" name="h2heizung" value="8" size="2"> °C<br>
 <hr>
 
-<br>
-
-<form onsubmit="download(this['name'].value, this['text'].value)">
-  <input type="hidden" name="name" value="gwxHausWasserKonfig.txt">
-  <textarea name="text" hidden="true">leer</textarea>
-  <input type="submit" value="Download" hidden="true">
-</form>
-
-<hr>
 <button onclick=makeTable("table3",12,24);makeTable("table4",12,24);>Zeige 3 + 4</button>&nbsp;&nbsp;&nbsp;
 <hr>
 <h3>Konfiguration Import / Export</h3>
-
 
 <button onclick="importConfigJSON()">
 Eine Konfiguration von Deinem Ger&auml;t laden
@@ -410,7 +400,11 @@ Eine Konfiguration von Deinem Ger&auml;t laden
 Diese Konfiguration auf Dein Ger&auml;t speichern
 </button>
 
-<br><br><hr>
+<br><br>
+Noch nicht implementiert: <button onclick="alert('Diese Funktion ist leider noch nicht implementiert!')">
+Diese Konfiguration auf die Steuerung &uuml;bertragen
+</button>
+<br><hr>
 <button onclick=settime()>Setze Uhrzeit auf aktuelle Zeit</button>
 <hr>
 <div id="log">-</div>
