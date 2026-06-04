@@ -384,7 +384,7 @@ if(isset($_SESSION["user"])) {
     // echo " &nbsp;&nbsp;<a href='logout.php'><button>Logout</button></a>";
 
     if(isset($_SESSION['rights'])) {
-		// echo $_SESSION['rights'];
+		//echo $_SESSION['rights'];
         $rights = array_map('trim', explode(',', $_SESSION['rights']));
 
         if (!in_array('-c', $rights, true)) {
@@ -399,10 +399,8 @@ if(isset($_SESSION["user"])) {
 ?>
 
 <hr>
-<button onclick=makeTable("table3",12,24);makeTable("table4",12,24);>test 3 + 4</button>&nbsp;&nbsp;&nbsp;
-<button onclick=settime()>Setze Uhrzeit auf aktuelle Zeit</button>
 <h3>Gew&auml;chshaus Wasser Zeiten</h3>
-. = Aus / x = An<br>
+. = Aus / x = An &nbsp; In die Tabelle klicken zum &Auml;ndern.<br>
 <table><tr><td>
 <h4>Wasserventil1</h4><div id="table1">-</div></td><td></td><td>
 <h4>Wasserventil2</h4><div id="table2">-</div></td></tr></table>
@@ -428,13 +426,8 @@ Wasser 2a oeffnen unter <input type="text" id="h2hmin1" name="h2hmin1" value="15
 Wasser 2b oeffnen unter <input type="text" id="h2hmin2" name="h2hmin2" value="15" size="2"> % Luftfeuchte<br>
 Heizung2 unter <input type="text" id="h2heizung" name="h2heizung" value="8" size="2"> °C<br>
 <hr>
-<button onclick='alert("Noch nicht moeglich!");'>Speichern</button>
-<hr>
 
-<button onclick='readTable("table1");readTable("table2");'>config to text</button>
-<!--a href="data:application/octet-stream,field1%2Cfield2%0Afoo%2Cbar%0Agoo%2Cgai%0A">test</a-->
 <br>
-<button onclick='downloadConfig_1u2();'>Download Wasserzeiten</button><br>
 
 <form onsubmit="download(this['name'].value, this['text'].value)">
   <input type="hidden" name="name" value="gwxHausWasserKonfig.txt">
@@ -443,20 +436,22 @@ Heizung2 unter <input type="text" id="h2heizung" name="h2heizung" value="8" size
 </form>
 
 <hr>
-
-<h3>JSON Import / Export</h3>
+<button onclick=makeTable("table3",12,24);makeTable("table4",12,24);>Zeige 3 + 4</button>&nbsp;&nbsp;&nbsp;
+<hr>
+<h3>Konfiguration Import / Export</h3>
 
 
 <button onclick="importConfigJSON()">
-Konfiguration laden
+Eine Konfiguration von Deinem Ger&auml;t laden
 </button>
 
 <button onclick="exportConfigJSON()">
-Konfiguration speichern
+Diese Konfiguration auf Dein Ger&auml;t speichern
 </button>
 
-<br><br>
-
+<br><br><hr>
+<button onclick=settime()>Setze Uhrzeit auf aktuelle Zeit</button>
+<hr>
 <div id="log">-</div>
 <hr>
 Daten werden bei der Übertragung verschlüsselt. Aktionen können nur nach Login durchgeführt werden.<br>
