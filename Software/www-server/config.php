@@ -370,7 +370,7 @@ function setChecked(id,value){
 
 <h1>Konfiguration Gew&auml;chshaus Unter&ouml;d</h1>
 <hr>
-Test Version 0.0.3
+Test Version 0.0.4
 <hr>
 
 <a href="gwxhaus.php">Zurück</a>
@@ -381,24 +381,26 @@ if(isset($_SESSION["user"])) {
     echo "<hr>Angemeldet als: "
         . htmlspecialchars($_SESSION["user"], ENT_QUOTES, 'UTF-8');
 
-    echo " &nbsp;&nbsp;<a href='logout.php'><button>Logout</button></a>";
+    // echo " &nbsp;&nbsp;<a href='logout.php'><button>Logout</button></a>";
 
     if(isset($_SESSION['rights'])) {
-
+		// echo $_SESSION['rights'];
         $rights = array_map('trim', explode(',', $_SESSION['rights']));
 
-        if (!in_array('c', $rights, true)) {
+        if (!in_array('-c', $rights, true)) {
             die(" &nbsp;&nbsp;Du hast leider keine Rechte, Einstellungen zu &auml;ndern.<hr>");
         }
 
         echo htmlspecialchars($_SESSION['rights'], ENT_QUOTES, 'UTF-8');
-    }
+    }else{
+		die(" &nbsp;&nbsp; Datenbankfehler.");
+	}
 }
 ?>
 
 <hr>
 <button onclick=makeTable("table3",12,24);makeTable("table4",12,24);>test 3 + 4</button>&nbsp;&nbsp;&nbsp;
-<button onclick=settime()>Setzte Uhrzeit auf aktuelle Zeit</button>
+<button onclick=settime()>Setze Uhrzeit auf aktuelle Zeit</button>
 <h3>Gew&auml;chshaus Wasser Zeiten</h3>
 . = Aus / x = An<br>
 <table><tr><td>
