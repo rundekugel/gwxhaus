@@ -36,6 +36,7 @@ class globs:
     msg=None
     blocksize = 50
 
+
 def on_connect(client, userdata, flags, rc):
     print("Connected with result code " + str(rc))
     client.subscribe(globs.topicRx)
@@ -103,7 +104,7 @@ def getFile(filename):
 
 def main():
     av=sys.argv
-    if len(av)<2:
+    if len(av)<3:
       print(__doc__)
       return 0
 
@@ -152,8 +153,8 @@ def main():
         if p0=="-ttx":   globs.topicTx = p1
         if p0=="-trx":   globs.topicRx = p1
         if p0=="-cfg":   configfile=p1
-        if p0=="-rs":     globs.reset=p1
-        if p0=="-ro":     readonly=1
+        if p0=="-rs":    globs.reset=p1
+        if p0=="-ro":    readonly=1
         if p0=="-bs":    globs.blocksize = int(p1)
         if p0=="-js":    text = getFile(p1).replace("\r",'').replace('\n','').strip()
         if p0 in ("-?","?","-h","--help"): print(__doc__) ; return 0
@@ -209,10 +210,14 @@ def main():
         if text is None:
             if datatype == 's': data = '"'+ str(data) + '"'
             text = '{"'+ key +'":'+str(data)+'}'
+        send(client, text)
+    else:
+        print("No key given ==> nothing to do.")
     if text:
         send(client, text)
     else:
         print("No config data given ==> nothing to do.")
+
     if globs.reset:
         if globs.verbosity:
             print("Init a reset...")
