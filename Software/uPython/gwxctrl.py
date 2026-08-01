@@ -113,7 +113,7 @@ class globs:
     dorun = True
     cfg = {"vccok":[4,30e3], "dsonbat":[[3.5,60e3],[3.3,300e3]], 
         "sensf1":50,"sensf2":50, "mot_openpersec1":1.2, "mot_openpersec2":1.3,
-        "sturm":10.1, "wind": {"max": 7.1}
+        "sturm":10.1, "wind": {"max": 7.1, "openmax":None}
         }
     lasttime = 0
     todos = [("15:00","nop")]
@@ -515,7 +515,6 @@ def parseMsg():
                 else:
                     val = int(val)
                 globs.window_pos_dest[num] = val
-                # setMotor(num, direction)
             return
         if "wasser" in cmd:
             num = cmd[-1:]
@@ -690,7 +689,6 @@ def checkTemp(hausnum):
         globs.manually_timeend = 0  # if RTC will be reset after power-loss. This helps.
 
         if s.temperature > cfg["tmax"]:
-            #setMotor(hausnum,"u")
             globs.window_pos_dest[hausnum-1] = 100
         if s.temperature < cfg["tmin"]:
             globs.window_pos_dest[hausnum-1] = 0
@@ -779,7 +777,6 @@ def checkWind():
     if there is very strong wind, it's storm ==> close windows immediately
     if storm is over, wait some time, for really end of storm.
     """
-    # not used for now:  globs.sturmdelay_on
     # for test: globs.ws.testremotecontrol=0
 
     speed = globs.ws.getValue()
@@ -793,7 +790,13 @@ def checkWind():
                 print("Wind > max! Offene Fenster werden etwas abgesenkt.")
             for n in (0,1):
                 if globs.window_virtual_open[n] > globs.windowpos_map[n].get('h',0):
-                    globs.window_pos_dest[n] = globs.windowpos_map[n].get('h',0)
+                    om = globs.cfg["wind"]["openmax"] 
+                    if om is not None:
+                        newval = int(om)
+                    else:
+                        newval = globs.windowpos_map[n].get('h',0)
+                    if globs.window_pos_dest[n] > newval:
+                        globs.window_pos_dest[n] = newval
                     doMotors()   # fast! no time to wait for next automatic cycle
         if speed > globs.cfg.get("sturm",10):
             globs.sturm += globs.sturmdelay_on
