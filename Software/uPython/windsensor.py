@@ -87,8 +87,9 @@ class Windsensor:
         """param: pinnumber for data input"""
         self.pin = Pin(pin, Pin.IN, pull=Pin.PULL_UP)
         self.lasttime = utime.ticks_ms()/1e3
-        self.pin.irq(trigger=Pin.IRQ_RISING, handler = self.pinhandler)
-        self.pin.irq(trigger=Pin.IRQ_FALLING, handler = self.pinhandler)
+        # self.pin.irq(trigger=Pin.IRQ_RISING, handler = self.pinhandler)
+        # self.pin.irq(trigger=Pin.IRQ_FALLING, handler = self.pinhandler)
+        self.pin.irq(trigger=Pin.IRQ_RISING|Pin.IRQ_FALLING, handler = self.pinhandler)
         if diameter:
             self.diameter = diameter
         self.circumference = self.diameter * PI
@@ -111,10 +112,11 @@ class Windsensor:
             return
         self.lastdelta = d
         self.lasttime = utime.ticks_ms()/1e3
-        self.speed = self.filter.feed(
-                                self.circumference /
-                                (self.lastdelta * self.proportionalityfactor)
-                            )
+        # speed is calculated from delta time, circumference and a proportionalityfactor
+        # because we get irq twice (for hi and lo) we devide the value by 2
+        speed = (self.circumference /
+                (self.lastdelta * self.proportionalityfactor)) /2
+        self.speed = self.filter.feed(speed)
         if self.verbosity>1:
             print("d:",self.lastdelta)
             print("m/s:",self.speed)

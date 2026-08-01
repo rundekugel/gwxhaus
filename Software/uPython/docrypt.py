@@ -60,7 +60,7 @@ def parse(text):
         c= text[0]
         t2=text[1:]
         if c=='w' and globs.filehandle:
-            filehandle.write(t2)
+            globs.filehandle.write(t2)
             return "ok."
         if c=='o':
             if globs.filehandle:

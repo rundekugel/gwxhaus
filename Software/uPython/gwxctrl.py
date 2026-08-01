@@ -51,7 +51,7 @@ except:
 
 __revision__ = revisionfile.revision
 __buildnumber__ = revisionfile.buildnumber
-__version__ = "0.5.2c-" + __revision__ + "-Build:" + str(revisionfile.buildnumber)
+__version__ = "0.5.3-" + __revision__ + "-Build:" + str(revisionfile.buildnumber)
 
 # ALLOWED_UART_VARS_W = ("loop_sleep","verbosity")
 SECRET_GLOBS = ("ak", "watertables")   # don't display this value to public
@@ -61,7 +61,7 @@ MODE_CBC = 2
 MOTOR_END_DELAY = 2  # delay motor switch off, if pos0 reached
 
 USE_END_SWITCHES = 0
-DIRECTION_SWITCH_DELAY_MS = 200 # if direction switches, motorpower must be securely off
+DIRECTION_SWITCH_DELAY_MS = 1000 # if direction switches, motorpower must be securely off
 POWER_SWITCH_DELAY_MS = 200
 
 # pinning for esp32-lite
@@ -193,8 +193,6 @@ def setMotor(num, direction):
     if not isinstance(num, int):
         num = int(str(num).replace("'", "")[-1])
     d = str(direction).strip().replace("'", "")[-1].lower()
-    if d == "u" and globs.sturm >= globs.cfg.get("sturm",10):
-        return
     sw = {"0": [0, 0], "d": [1, 0], "u": [1, 1], "o": [0, 0], "s": [0, 0]}  # pinoutput for: motor,direction
     sw2 = sw.get(d, None)
     if not sw2 or num <1 or num >2:
@@ -202,11 +200,13 @@ def setMotor(num, direction):
         return
     pd = [PIN_MOTOR1D, PIN_MOTOR2D][num-1]
     pm = [PIN_MOTOR1, PIN_MOTOR2][num-1]
-    pm.value(0)
+    old,new = pd.value(), sw2[1]
+    if old != new:   
+        # direction changed, wait for motor to stop
+        pm.value(0)
+        time.sleep_ms(DIRECTION_SWITCH_DELAY_MS)
+        pd.value(sw2[1])     # [1] =direction 0/1=down/up
     time.sleep_ms(POWER_SWITCH_DELAY_MS)
-    pd.value(sw2[1])     # direction 1=up
-    # important: switch off motor power, before switching direction! this is done before DIRECTION_SWITCH_DELAY_MS.
-    time.sleep_ms(DIRECTION_SWITCH_DELAY_MS)
     pm.value(sw2[0])     # motor on/off
 
 def setWater(num, onOff=None):
@@ -374,12 +374,12 @@ def deleteFromConfigFile(key, filename="gwxctrl.cfg"):
         msg = "Fehler! konnte config nicht laden!"
         print(msg)
         comu.addTx(msg)
-        return
+        return 1
     dictLower(cfg)
     cfg.pop(key.lower())
     with open(filename,"w") as f:
         json.dump(cfg,f)
-    return
+    return 0
 
 def init():
     print("GwxControl version:" + str(__version__))
@@ -598,14 +598,15 @@ def parseMsg():
         if "i2cscan" in cmd:
             hy = [globs.hy1, globs.hy2][int(val)]
             devs = hy.scan()
-            m= "I2C devices found: "+str(devs).encode() +" = "+hexlify(bytes(devs), " ")
+            m= "I2C devices found: "+hexlify(bytes(devs),' ').decode()+ \
+                "="+str(devs)
             if globs.verbosity: print(m)
             comu.addTx(m)
         if "manually" in cmd:
             globs.manually_timeend = time.time() + int(val)
         if "am:" in cmd[:3]:
                 encrypted = cmd[3:]
-                m = docrypt.parse(dec)
+                m = docrypt.parse(encrypted)
                 if globs.verbosity:
                     print(m)
                 comu.addTx(m)
@@ -631,8 +632,10 @@ def parseMsg():
             globs.modcfg = ""
         if "delcfg" in cmd:
             if globs.verbosity: print("del:",val)
-            deleteFromConfigFile(val)
-            comu.addTx("deleted: "+str(j))
+            if deleteFromConfigFile(val):
+                comu.addTx("delete error")
+            else:
+                comu.addTx("deleted: "+str(val))
         if "ws" in cmd:
             if globs.ws.testremotecontrol is not None:
                 globs.ws.testremotecontrol = float(val)
@@ -814,7 +817,7 @@ def checkWindowPosition():
     depending on time and motor status
     """
     if not globs.checkWindowPosition_lastTime:
-        checkWindowPosition_lastTime = time.time()
+        globs.checkWindowPosition_lastTime = time.time()
     timedelta = time.time() - globs.checkWindowPosition_lastTime
     globs.checkWindowPosition_lastTime = time.time()
 
@@ -887,7 +890,7 @@ def main():
         motors = "M1:"+getMotor(1, 'de')+"; M2:"+getMotor(2, 'de')
         motors += ";F1:"+str(round(globs.window_virtual_open[0]))+"; F2:"+str(round(globs.window_virtual_open[1]))
         water = f"W1:{getWater(1, 'de')}; W2:{getWater(2, 'de')}; W3:{getWater(3, 'de')}; W4:{getWater(4, 'de')}"
-        dosen = f"D1:{getDose(1, 'de')}; D2:{getDose(2, 'de')}; D3:{getDose(3, 'de')}; D4:{getWater(4, 'de')}"
+        dosen = f"D1:{getDose(1, 'de')}; D2:{getDose(2, 'de')}; D3:{getDose(3, 'de')}; D4:{getDose(4, 'de')}"
         # fenster = "Fenster: ?\r\n"  # todo. need 8 gpios first.
         comu.addTx(motors)
         comu.addTx(water)
