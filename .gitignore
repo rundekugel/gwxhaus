@@ -179,3 +179,4 @@ cython_debug/
 /Software/server-services/*.cfg
 /Software/*/*.tmp
 */*/*-backups/*
+*.kicad_prl

@@ -1933,6 +1933,189 @@
 			)
 			(embedded_fonts no)
 		)
+		(symbol "Device:LED"
+			(pin_numbers
+				(hide yes)
+			)
+			(pin_names
+				(offset 1.016)
+				(hide yes)
+			)
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(property "Reference" "D"
+				(at 0 2.54 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Value" "LED"
+				(at 0 -2.54 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Footprint" ""
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "Datasheet" "~"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "Description" "Light emitting diode"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "Sim.Pins" "1=K 2=A"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "ki_keywords" "LED diode"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "ki_fp_filters" "LED* LED_SMD:* LED_THT:*"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(symbol "LED_0_1"
+				(polyline
+					(pts
+						(xy -3.048 -0.762) (xy -4.572 -2.286) (xy -3.81 -2.286) (xy -4.572 -2.286) (xy -4.572 -1.524)
+					)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts
+						(xy -1.778 -0.762) (xy -3.302 -2.286) (xy -2.54 -2.286) (xy -3.302 -2.286) (xy -3.302 -1.524)
+					)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts
+						(xy -1.27 0) (xy 1.27 0)
+					)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts
+						(xy -1.27 -1.27) (xy -1.27 1.27)
+					)
+					(stroke
+						(width 0.254)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts
+						(xy 1.27 -1.27) (xy 1.27 1.27) (xy -1.27 0) (xy 1.27 -1.27)
+					)
+					(stroke
+						(width 0.254)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+			)
+			(symbol "LED_1_1"
+				(pin passive line
+					(at -3.81 0 0)
+					(length 2.54)
+					(name "K"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at 3.81 0 180)
+					(length 2.54)
+					(name "A"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "2"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+			)
+			(embedded_fonts no)
+		)
 		(symbol "gwx-control-eagle-import:-PNP-SOT23-BEC"
 			(exclude_from_sim no)
 			(in_bom yes)
@@ -3142,251 +3325,6 @@
 			)
 			(embedded_fonts no)
 		)
-		(symbol "gwx-control-eagle-import:LED_ESML0603"
-			(exclude_from_sim no)
-			(in_bom yes)
-			(on_board yes)
-			(property "Reference" "LED"
-				(at 3.556 -4.572 90)
-				(effects
-					(font
-						(size 1.778 1.5113)
-					)
-					(justify left bottom)
-				)
-			)
-			(property "Value" ""
-				(at 5.715 -4.572 90)
-				(effects
-					(font
-						(size 1.778 1.5113)
-					)
-					(justify left bottom)
-				)
-			)
-			(property "Footprint" "gwx-control:LED_SML0603"
-				(at 0 0 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-					(hide yes)
-				)
-			)
-			(property "Datasheet" ""
-				(at 0 0 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-					(hide yes)
-				)
-			)
-			(property "Description" "LED\n\nSource: http://www.osram.convergy.de\n\nSource: www.luxeon.com\n\nSource: www.kingbright.com"
-				(at 0 0 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-					(hide yes)
-				)
-			)
-			(property "ki_locked" ""
-				(at 0 0 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(symbol "LED_ESML0603_1_0"
-				(polyline
-					(pts
-						(xy -3.429 2.159) (xy -3.048 1.27) (xy -2.54 1.778)
-					)
-					(stroke
-						(width 0.1524)
-						(type solid)
-					)
-					(fill
-						(type outline)
-					)
-				)
-				(polyline
-					(pts
-						(xy -3.302 3.302) (xy -2.921 2.413) (xy -2.413 2.921)
-					)
-					(stroke
-						(width 0.1524)
-						(type solid)
-					)
-					(fill
-						(type outline)
-					)
-				)
-				(polyline
-					(pts
-						(xy -2.032 -0.762) (xy -3.429 -2.159)
-					)
-					(stroke
-						(width 0.1524)
-						(type solid)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(polyline
-					(pts
-						(xy -1.905 -1.905) (xy -3.302 -3.302)
-					)
-					(stroke
-						(width 0.1524)
-						(type solid)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(polyline
-					(pts
-						(xy 0 0) (xy -1.27 0)
-					)
-					(stroke
-						(width 0.254)
-						(type solid)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(polyline
-					(pts
-						(xy 0 0) (xy 0 -2.54)
-					)
-					(stroke
-						(width 0.1524)
-						(type solid)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(polyline
-					(pts
-						(xy 0 -2.54) (xy -1.27 0)
-					)
-					(stroke
-						(width 0.254)
-						(type solid)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(polyline
-					(pts
-						(xy 0 -2.54) (xy -1.27 -2.54)
-					)
-					(stroke
-						(width 0.254)
-						(type solid)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(polyline
-					(pts
-						(xy 1.27 0) (xy 0 0)
-					)
-					(stroke
-						(width 0.254)
-						(type solid)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(polyline
-					(pts
-						(xy 1.27 0) (xy 0 -2.54)
-					)
-					(stroke
-						(width 0.254)
-						(type solid)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(polyline
-					(pts
-						(xy 1.27 -2.54) (xy 0 -2.54)
-					)
-					(stroke
-						(width 0.254)
-						(type solid)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(text "SpiceOrder 1"
-					(at 0 2.54 0)
-					(effects
-						(font
-							(size 0.4064 0.3454)
-						)
-					)
-				)
-				(text "SpiceOrder 2"
-					(at 0 -5.08 0)
-					(effects
-						(font
-							(size 0.4064 0.3454)
-						)
-					)
-				)
-				(pin passive line
-					(at 0 2.54 270)
-					(length 2.54)
-					(name "A"
-						(effects
-							(font
-								(size 0 0)
-							)
-						)
-					)
-					(number "A"
-						(effects
-							(font
-								(size 0 0)
-							)
-						)
-					)
-				)
-				(pin passive line
-					(at 0 -5.08 90)
-					(length 2.54)
-					(name "C"
-						(effects
-							(font
-								(size 0 0)
-							)
-						)
-					)
-					(number "C"
-						(effects
-							(font
-								(size 0 0)
-							)
-						)
-					)
-				)
-			)
-			(embedded_fonts no)
-		)
 		(symbol "gwx-control-eagle-import:R-EU_R0603"
 			(exclude_from_sim no)
 			(in_bom yes)
@@ -3907,6 +3845,18 @@
 		(uuid "131b4826-c02b-419d-b6cf-c97b77d9b162")
 	)
 	(junction
+		(at 187.96 68.58)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "213667b1-313e-456f-a2bf-48cccfad601c")
+	)
+	(junction
+		(at 125.73 66.04)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "243c5dc8-08f9-4379-b9d8-a8681f2d3f3a")
+	)
+	(junction
 		(at 106.68 101.6)
 		(diameter 0)
 		(color 0 0 0 0)
@@ -3991,6 +3941,12 @@
 		(uuid "c9c10a6e-93af-4ca8-84c2-38df0915a17b")
 	)
 	(junction
+		(at 199.39 66.04)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "cba1578a-a9a9-4073-80e2-72c2ddd81f6d")
+	)
+	(junction
 		(at 101.6 96.52)
 		(diameter 0)
 		(color 0 0 0 0)
@@ -4013,6 +3969,16 @@
 		(diameter 0)
 		(color 0 0 0 0)
 		(uuid "fb66b74f-b24e-4565-aa48-28a439aa8423")
+	)
+	(wire
+		(pts
+			(xy 116.84 73.66) (xy 114.3 73.66)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "014a11a5-b5ac-41e1-bd9b-2f79478d5431")
 	)
 	(wire
 		(pts
@@ -4086,7 +4052,7 @@
 	)
 	(wire
 		(pts
-			(xy 127 66.04) (xy 124.46 66.04)
+			(xy 127 66.04) (xy 125.73 66.04)
 		)
 		(stroke
 			(width 0.1524)
@@ -4123,6 +4089,16 @@
 			(type solid)
 		)
 		(uuid "13442f94-6f8b-4a4a-a87f-923865d9c268")
+	)
+	(wire
+		(pts
+			(xy 125.73 73.66) (xy 125.73 66.04)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "1565b68e-5216-4818-9187-3f399a0db30a")
 	)
 	(wire
 		(pts
@@ -4263,6 +4239,16 @@
 			(type solid)
 		)
 		(uuid "39bbcef6-04cc-4eef-9f13-a6dd43f50b52")
+	)
+	(wire
+		(pts
+			(xy 114.3 73.66) (xy 114.3 68.58)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "3b890064-3457-47e7-ac37-d32c7f05193c")
 	)
 	(wire
 		(pts
@@ -4466,7 +4452,7 @@
 	)
 	(wire
 		(pts
-			(xy 200.66 66.04) (xy 198.12 66.04)
+			(xy 200.66 66.04) (xy 199.39 66.04)
 		)
 		(stroke
 			(width 0.1524)
@@ -4556,6 +4542,16 @@
 	)
 	(wire
 		(pts
+			(xy 125.73 66.04) (xy 124.46 66.04)
+		)
+		(stroke
+			(width 0.1524)
+			(type solid)
+		)
+		(uuid "6a7a5ad5-5713-4bf5-b7db-6aa57746fb18")
+	)
+	(wire
+		(pts
 			(xy 219.71 119.38) (xy 237.49 119.38)
 		)
 		(stroke
@@ -4616,7 +4612,7 @@
 	)
 	(wire
 		(pts
-			(xy 190.5 68.58) (xy 185.42 68.58)
+			(xy 190.5 68.58) (xy 187.96 68.58)
 		)
 		(stroke
 			(width 0.1524)
@@ -4704,6 +4700,16 @@
 		)
 		(uuid "8388491f-ab8b-48d1-8ec7-e4bafe8dc500")
 	)
+	(wire
+		(pts
+			(xy 187.96 68.58) (xy 185.42 68.58)
+		)
+		(stroke
+			(width 0.1524)
+			(type solid)
+		)
+		(uuid "84c60c48-1974-4752-90e4-5243f54adfe4")
+	)
 	(polyline
 		(pts
 			(xy 231.14 43.18) (xy 231.14 78.74)
@@ -4766,6 +4772,16 @@
 	)
 	(wire
 		(pts
+			(xy 187.96 73.66) (xy 187.96 68.58)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "8b982702-73be-446b-abf0-b9d227fd8bf6")
+	)
+	(wire
+		(pts
 			(xy 57.15 71.12) (xy 50.8 71.12)
 		)
 		(stroke
@@ -4773,6 +4789,26 @@
 			(type solid)
 		)
 		(uuid "8d92fae2-869b-4df9-bc89-165e861103d4")
+	)
+	(wire
+		(pts
+			(xy 199.39 73.66) (xy 199.39 66.04)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "8e15053c-5e3a-4960-81c3-bf9866a297fa")
+	)
+	(wire
+		(pts
+			(xy 199.39 66.04) (xy 198.12 66.04)
+		)
+		(stroke
+			(width 0.1524)
+			(type solid)
+		)
+		(uuid "8f34112d-eb1c-49f4-8a94-612e97f34a52")
 	)
 	(wire
 		(pts
@@ -4893,6 +4929,26 @@
 			(type solid)
 		)
 		(uuid "a3a45dd1-df7e-46f5-a05f-c8da33bb61b9")
+	)
+	(wire
+		(pts
+			(xy 124.46 73.66) (xy 125.73 73.66)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "a7028880-465b-4411-b785-fa0d8d1d0191")
+	)
+	(wire
+		(pts
+			(xy 190.5 73.66) (xy 187.96 73.66)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "a80b42be-9699-47a4-81ff-f213cf7710fd")
 	)
 	(wire
 		(pts
@@ -5033,6 +5089,16 @@
 			(type solid)
 		)
 		(uuid "c5874056-b0b9-41d9-a6fa-95a04ab5eff3")
+	)
+	(wire
+		(pts
+			(xy 198.12 73.66) (xy 199.39 73.66)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "c6ad5d60-21bb-45f6-99cb-58d983cbb602")
 	)
 	(wire
 		(pts
@@ -5514,16 +5580,6 @@
 		)
 		(uuid "ac6ab4b6-7803-46d4-bbc1-301117fb2a43")
 	)
-	(label "VCC"
-		(at 69.85 101.6 90)
-		(effects
-			(font
-				(size 1.2446 1.2446)
-			)
-			(justify left bottom)
-		)
-		(uuid "b97a0b72-eede-4da1-a094-478acaed5879")
-	)
 	(label "{slash}UP"
 		(at 45.72 115.57 0)
 		(effects
@@ -5759,76 +5815,6 @@
 			(project "gwx-control"
 				(path "/d7c152ec-d084-4382-bed7-0f8851cc7371"
 					(reference "U1")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "gwx-control-eagle-import:LED_ESML0603")
-		(at 111.76 106.68 0)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(uuid "05931cac-aa2f-4e77-bb0a-45c06f9e77e2")
-		(property "Reference" "LED2"
-			(at 115.316 111.252 90)
-			(effects
-				(font
-					(size 1.778 1.5113)
-				)
-				(justify left bottom)
-			)
-		)
-		(property "Value" "LED_ESML0603"
-			(at 117.475 111.252 90)
-			(effects
-				(font
-					(size 1.778 1.5113)
-				)
-				(justify left bottom)
-				(hide yes)
-			)
-		)
-		(property "Footprint" "LED_SMD:LED_0603_1608Metric_Pad1.05x0.95mm_HandSolder"
-			(at 111.76 106.68 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Datasheet" ""
-			(at 111.76 106.68 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Description" ""
-			(at 111.76 106.68 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(pin "A"
-			(uuid "279526d8-10d6-406e-9b05-81db4de71859")
-		)
-		(pin "C"
-			(uuid "7fdd9d3f-f329-458f-8a53-3bf708fb45c1")
-		)
-		(instances
-			(project "gwx-control"
-				(path "/d7c152ec-d084-4382-bed7-0f8851cc7371"
-					(reference "LED2")
 					(unit 1)
 				)
 			)
@@ -6166,7 +6152,7 @@
 				(justify left bottom)
 			)
 		)
-		(property "Footprint" "gwx-control:C0603K"
+		(property "Footprint" "Capacitor_SMD:C_0603_1608Metric"
 			(at 73.66 55.88 0)
 			(effects
 				(font
@@ -6414,7 +6400,7 @@
 				(justify left bottom)
 			)
 		)
-		(property "Footprint" "gwx-control:R0603"
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric_Pad0.98x0.95mm_HandSolder"
 			(at 132.08 137.16 0)
 			(effects
 				(font
@@ -6483,7 +6469,7 @@
 				(justify left bottom)
 			)
 		)
-		(property "Footprint" "gwx-control:R0603"
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric_Pad0.98x0.95mm_HandSolder"
 			(at 101.6 60.96 0)
 			(effects
 				(font
@@ -6552,7 +6538,7 @@
 				(justify left bottom)
 			)
 		)
-		(property "Footprint" "gwx-control:C0603K"
+		(property "Footprint" "Capacitor_SMD:C_0603_1608Metric"
 			(at 73.66 71.12 0)
 			(effects
 				(font
@@ -6664,6 +6650,85 @@
 		)
 	)
 	(symbol
+		(lib_id "Device:LED")
+		(at 259.08 114.3 90)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "2da7ac28-693f-4b5e-ab48-3325396fd3cb")
+		(property "Reference" "D6"
+			(at 262.89 114.6174 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(property "Value" "LED_ESML0603"
+			(at 262.89 117.1574 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(property "Footprint" "LED_SMD:LED_0603_1608Metric_Pad1.05x0.95mm_HandSolder"
+			(at 259.08 114.3 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 259.08 114.3 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Light emitting diode"
+			(at 259.08 114.3 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Sim.Pins" "1=K 2=A"
+			(at 259.08 114.3 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "a55262c0-232a-4b51-a19e-bc37666e809e")
+		)
+		(pin "2"
+			(uuid "426dbe93-ebc2-4eca-ab67-4291ce72754a")
+		)
+		(instances
+			(project "gwx-control"
+				(path "/d7c152ec-d084-4382-bed7-0f8851cc7371"
+					(reference "D6")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
 		(lib_id "gwx-control-eagle-import:GND")
 		(at 43.18 123.19 0)
 		(unit 1)
@@ -6756,7 +6821,7 @@
 				(justify left bottom)
 			)
 		)
-		(property "Footprint" "gwx-control:C0603K"
+		(property "Footprint" "Capacitor_SMD:C_0603_1608Metric"
 			(at 97.79 171.45 0)
 			(effects
 				(font
@@ -6827,7 +6892,7 @@
 				(hide yes)
 			)
 		)
-		(property "Footprint" "gwx-control:R0603"
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric_Pad0.98x0.95mm_HandSolder"
 			(at 185.42 63.5 0)
 			(effects
 				(font
@@ -7202,6 +7267,75 @@
 		)
 	)
 	(symbol
+		(lib_id "gwx-control-eagle-import:CPOL-EUE5-6")
+		(at 193.04 66.04 90)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "519a7437-a5c0-47d3-b802-aa2d12b34f40")
+		(property "Reference" "C4"
+			(at 192.5574 64.897 0)
+			(effects
+				(font
+					(size 1.778 1.5113)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Value" "47µ"
+			(at 197.6374 64.897 0)
+			(effects
+				(font
+					(size 1.778 1.5113)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Footprint" "Capacitor_Tantalum_SMD:CP_EIA-6032-28_Kemet-C_HandSolder"
+			(at 193.04 66.04 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" ""
+			(at 193.04 66.04 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" ""
+			(at 193.04 66.04 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "+"
+			(uuid "ba3bebd7-64df-4aaf-8154-82a53eb1942b")
+		)
+		(pin "-"
+			(uuid "fdf3d9c0-62d5-4a6f-8682-2dc821fc2858")
+		)
+		(instances
+			(project "gwx-control"
+				(path "/d7c152ec-d084-4382-bed7-0f8851cc7371"
+					(reference "C4")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
 		(lib_id "gwx-control-eagle-import:VCC")
 		(at 259.08 91.44 0)
 		(unit 1)
@@ -7262,6 +7396,75 @@
 			(project "gwx-control"
 				(path "/d7c152ec-d084-4382-bed7-0f8851cc7371"
 					(reference "#P+012")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "gwx-control-eagle-import:CPOL-EUE5-6")
+		(at 119.38 73.66 90)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "56a130fb-4c15-42f4-a87b-cee13adba7ba")
+		(property "Reference" "C8"
+			(at 118.8974 72.517 0)
+			(effects
+				(font
+					(size 1.778 1.5113)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Value" "47µ"
+			(at 123.9774 72.517 0)
+			(effects
+				(font
+					(size 1.778 1.5113)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Footprint" "Capacitor_THT:CP_Radial_D8.0mm_P5.00mm"
+			(at 119.38 73.66 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" ""
+			(at 119.38 73.66 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" ""
+			(at 119.38 73.66 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "+"
+			(uuid "d8954b6c-cbfe-460b-8115-4ea32d70665d")
+		)
+		(pin "-"
+			(uuid "6aa8286f-653e-4865-8868-7492054c7626")
+		)
+		(instances
+			(project "gwx-control"
+				(path "/d7c152ec-d084-4382-bed7-0f8851cc7371"
+					(reference "C8")
 					(unit 1)
 				)
 			)
@@ -7505,76 +7708,6 @@
 			(project "gwx-control"
 				(path "/d7c152ec-d084-4382-bed7-0f8851cc7371"
 					(reference "#GND7")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "gwx-control-eagle-import:LED_ESML0603")
-		(at 259.08 113.03 0)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(uuid "5e492008-bff2-4bb7-b3a6-faa1e356c443")
-		(property "Reference" "LED5"
-			(at 262.636 117.602 90)
-			(effects
-				(font
-					(size 1.778 1.5113)
-				)
-				(justify left bottom)
-			)
-		)
-		(property "Value" "LED_ESML0603"
-			(at 264.795 117.602 90)
-			(effects
-				(font
-					(size 1.778 1.5113)
-				)
-				(justify left bottom)
-				(hide yes)
-			)
-		)
-		(property "Footprint" "LED_SMD:LED_0603_1608Metric_Pad1.05x0.95mm_HandSolder"
-			(at 259.08 113.03 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Datasheet" ""
-			(at 259.08 113.03 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Description" ""
-			(at 259.08 113.03 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(pin "A"
-			(uuid "5c61000b-e765-4241-8691-a804b201a17a")
-		)
-		(pin "C"
-			(uuid "bf24f42d-19ac-47e2-8a4b-4e157afc8775")
-		)
-		(instances
-			(project "gwx-control"
-				(path "/d7c152ec-d084-4382-bed7-0f8851cc7371"
-					(reference "LED5")
 					(unit 1)
 				)
 			)
@@ -7861,6 +7994,85 @@
 		)
 	)
 	(symbol
+		(lib_id "Device:LED")
+		(at 86.36 102.87 90)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "7ab5f116-481c-4a24-9b61-6264afe887f4")
+		(property "Reference" "D7"
+			(at 90.17 103.1874 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(property "Value" "LED_ESML0603"
+			(at 90.17 105.7274 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(property "Footprint" "LED_SMD:LED_0603_1608Metric_Pad1.05x0.95mm_HandSolder"
+			(at 86.36 102.87 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 86.36 102.87 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Light emitting diode"
+			(at 86.36 102.87 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Sim.Pins" "1=K 2=A"
+			(at 86.36 102.87 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "08aae460-1ff5-4006-9bfc-fc101e734324")
+		)
+		(pin "2"
+			(uuid "0e56bcd5-5bc8-43f2-83c4-9bfc3dbf2363")
+		)
+		(instances
+			(project "gwx-control"
+				(path "/d7c152ec-d084-4382-bed7-0f8851cc7371"
+					(reference "D7")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
 		(lib_id "gwx-control-eagle-import:GND")
 		(at 123.19 193.04 0)
 		(unit 1)
@@ -8022,7 +8234,7 @@
 				(justify left bottom)
 			)
 		)
-		(property "Footprint" "gwx-control:E5-6"
+		(property "Footprint" "Capacitor_Tantalum_SMD:CP_EIA-6032-28_Kemet-C_HandSolder"
 			(at 119.38 66.04 0)
 			(effects
 				(font
@@ -8091,7 +8303,7 @@
 				(justify left bottom)
 			)
 		)
-		(property "Footprint" "gwx-control:SOT23-BEC"
+		(property "Footprint" "Package_TO_SOT_SMD:TSOT-23"
 			(at 144.78 137.16 0)
 			(effects
 				(font
@@ -8163,7 +8375,7 @@
 				(justify left bottom)
 			)
 		)
-		(property "Footprint" "gwx-control:C0603K"
+		(property "Footprint" "Capacitor_SMD:C_0603_1608Metric"
 			(at 143.51 172.72 0)
 			(effects
 				(font
@@ -8540,7 +8752,7 @@
 				(justify left bottom)
 			)
 		)
-		(property "Footprint" "gwx-control:R0603"
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric_Pad0.98x0.95mm_HandSolder"
 			(at 132.08 132.08 0)
 			(effects
 				(font
@@ -8913,76 +9125,6 @@
 		)
 	)
 	(symbol
-		(lib_id "gwx-control-eagle-import:LED_ESML0603")
-		(at 237.49 113.03 0)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(uuid "9ddd3bd6-e2ca-48dc-87a4-b3cc6561e176")
-		(property "Reference" "LED3"
-			(at 241.046 117.602 90)
-			(effects
-				(font
-					(size 1.778 1.5113)
-				)
-				(justify left bottom)
-			)
-		)
-		(property "Value" "LED_ESML0603"
-			(at 243.205 117.602 90)
-			(effects
-				(font
-					(size 1.778 1.5113)
-				)
-				(justify left bottom)
-				(hide yes)
-			)
-		)
-		(property "Footprint" "LED_SMD:LED_0603_1608Metric_Pad1.05x0.95mm_HandSolder"
-			(at 237.49 113.03 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Datasheet" ""
-			(at 237.49 113.03 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Description" ""
-			(at 237.49 113.03 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(pin "A"
-			(uuid "f4797fcf-eed2-4727-97d1-c5c413fcef16")
-		)
-		(pin "C"
-			(uuid "6226d525-8b32-4f22-a7dc-98163052ad26")
-		)
-		(instances
-			(project "gwx-control"
-				(path "/d7c152ec-d084-4382-bed7-0f8851cc7371"
-					(reference "LED3")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
 		(lib_id "gwx-control-eagle-import:resistor_R-EU_R0603")
 		(at 106.68 88.9 90)
 		(unit 1)
@@ -9009,7 +9151,7 @@
 				(justify left bottom)
 			)
 		)
-		(property "Footprint" "gwx-control:R0603"
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric_Pad0.98x0.95mm_HandSolder"
 			(at 106.68 88.9 0)
 			(effects
 				(font
@@ -9052,35 +9194,35 @@
 		)
 	)
 	(symbol
-		(lib_id "gwx-control-eagle-import:LED_ESML0603")
-		(at 248.92 113.03 0)
+		(lib_id "Device:LED")
+		(at 237.49 114.3 90)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "ad050bf9-9660-45e0-b031-05a0a0ba927c")
-		(property "Reference" "LED4"
-			(at 252.476 117.602 90)
+		(fields_autoplaced yes)
+		(uuid "ab340681-e859-4bb4-896e-b9d567849eef")
+		(property "Reference" "D4"
+			(at 241.3 114.6174 90)
 			(effects
 				(font
-					(size 1.778 1.5113)
+					(size 1.27 1.27)
 				)
-				(justify left bottom)
+				(justify right)
 			)
 		)
 		(property "Value" "LED_ESML0603"
-			(at 254.635 117.602 90)
+			(at 241.3 117.1574 90)
 			(effects
 				(font
-					(size 1.778 1.5113)
+					(size 1.27 1.27)
 				)
-				(justify left bottom)
-				(hide yes)
+				(justify right)
 			)
 		)
 		(property "Footprint" "LED_SMD:LED_0603_1608Metric_Pad1.05x0.95mm_HandSolder"
-			(at 248.92 113.03 0)
+			(at 237.49 114.3 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -9088,8 +9230,8 @@
 				(hide yes)
 			)
 		)
-		(property "Datasheet" ""
-			(at 248.92 113.03 0)
+		(property "Datasheet" "~"
+			(at 237.49 114.3 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -9097,8 +9239,8 @@
 				(hide yes)
 			)
 		)
-		(property "Description" ""
-			(at 248.92 113.03 0)
+		(property "Description" "Light emitting diode"
+			(at 237.49 114.3 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -9106,16 +9248,25 @@
 				(hide yes)
 			)
 		)
-		(pin "A"
-			(uuid "398ee6fd-84e6-4757-b1e7-3389468f3995")
+		(property "Sim.Pins" "1=K 2=A"
+			(at 237.49 114.3 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
 		)
-		(pin "C"
-			(uuid "22c3c8cc-f5c7-4128-a361-67b8850d3831")
+		(pin "1"
+			(uuid "ef09d29a-6952-4530-87d2-12e290e5a3af")
+		)
+		(pin "2"
+			(uuid "bc110e66-8a5d-489b-97c0-f661941bff02")
 		)
 		(instances
 			(project "gwx-control"
 				(path "/d7c152ec-d084-4382-bed7-0f8851cc7371"
-					(reference "LED4")
+					(reference "D4")
 					(unit 1)
 				)
 			)
@@ -9481,7 +9632,7 @@
 				(justify left bottom)
 			)
 		)
-		(property "Footprint" "gwx-control:C0603K"
+		(property "Footprint" "Capacitor_SMD:C_0603_1608Metric"
 			(at 107.95 171.45 0)
 			(effects
 				(font
@@ -9682,7 +9833,7 @@
 				(justify left bottom)
 			)
 		)
-		(property "Footprint" "gwx-control:SOT23"
+		(property "Footprint" "Package_TO_SOT_SMD:TSOT-23"
 			(at 147.32 147.32 0)
 			(effects
 				(font
@@ -9992,7 +10143,7 @@
 				(justify left bottom)
 			)
 		)
-		(property "Footprint" "gwx-control:SOT23"
+		(property "Footprint" "Package_TO_SOT_SMD:TSOT-23"
 			(at 81.28 63.5 0)
 			(effects
 				(font
@@ -10064,7 +10215,7 @@
 				(justify left bottom)
 			)
 		)
-		(property "Footprint" "gwx-control:SOT23-BEC"
+		(property "Footprint" "Package_TO_SOT_SMD:TSOT-23"
 			(at 144.78 127 0)
 			(effects
 				(font
@@ -10104,6 +10255,85 @@
 			(project "gwx-control"
 				(path "/d7c152ec-d084-4382-bed7-0f8851cc7371"
 					(reference "T1")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:LED")
+		(at 111.76 107.95 90)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "d88cd9e5-486b-481a-9476-65484152d75c")
+		(property "Reference" "D8"
+			(at 115.57 108.2674 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(property "Value" "LED_ESML0603"
+			(at 115.57 110.8074 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(property "Footprint" "LED_SMD:LED_0603_1608Metric_Pad1.05x0.95mm_HandSolder"
+			(at 111.76 107.95 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 111.76 107.95 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Light emitting diode"
+			(at 111.76 107.95 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Sim.Pins" "1=K 2=A"
+			(at 111.76 107.95 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "c869f644-23b8-48da-bc1e-2fd8a5133dc6")
+		)
+		(pin "2"
+			(uuid "1d8978cc-b0a1-4fdf-ad9e-9f4f7fdb04c7")
+		)
+		(instances
+			(project "gwx-control"
+				(path "/d7c152ec-d084-4382-bed7-0f8851cc7371"
+					(reference "D8")
 					(unit 1)
 				)
 			)
@@ -10205,7 +10435,7 @@
 				(justify left bottom)
 			)
 		)
-		(property "Footprint" "gwx-control:R0603"
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric_Pad0.98x0.95mm_HandSolder"
 			(at 111.76 88.9 0)
 			(effects
 				(font
@@ -10426,36 +10656,35 @@
 		)
 	)
 	(symbol
-		(lib_id "gwx-control-eagle-import:CPOL-EUE5-6")
-		(at 193.04 66.04 90)
-		(mirror x)
+		(lib_id "Device:LED")
+		(at 248.92 114.3 90)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "e4c98035-a370-4d6e-abff-5ed21a6c7cf8")
-		(property "Reference" "C4"
-			(at 192.5574 67.183 0)
+		(fields_autoplaced yes)
+		(uuid "ebb7165b-0089-411c-a97a-b787e14d6a1a")
+		(property "Reference" "D5"
+			(at 252.73 114.6174 90)
 			(effects
 				(font
-					(size 1.778 1.5113)
+					(size 1.27 1.27)
 				)
-				(justify left bottom)
+				(justify right)
 			)
 		)
-		(property "Value" "CPOL-EUE5-6"
-			(at 197.6374 67.183 0)
+		(property "Value" "LED_ESML0603"
+			(at 252.73 117.1574 90)
 			(effects
 				(font
-					(size 1.778 1.5113)
+					(size 1.27 1.27)
 				)
-				(justify left bottom)
-				(hide yes)
+				(justify right)
 			)
 		)
-		(property "Footprint" "gwx-control:E5-6"
-			(at 193.04 66.04 0)
+		(property "Footprint" "LED_SMD:LED_0603_1608Metric_Pad1.05x0.95mm_HandSolder"
+			(at 248.92 114.3 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -10463,8 +10692,8 @@
 				(hide yes)
 			)
 		)
-		(property "Datasheet" ""
-			(at 193.04 66.04 0)
+		(property "Datasheet" "~"
+			(at 248.92 114.3 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -10472,8 +10701,8 @@
 				(hide yes)
 			)
 		)
-		(property "Description" ""
-			(at 193.04 66.04 0)
+		(property "Description" "Light emitting diode"
+			(at 248.92 114.3 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -10481,16 +10710,25 @@
 				(hide yes)
 			)
 		)
-		(pin "+"
-			(uuid "8a6246ae-9598-4322-bea0-b8618106bfde")
+		(property "Sim.Pins" "1=K 2=A"
+			(at 248.92 114.3 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
 		)
-		(pin "-"
-			(uuid "4289501b-6c9b-40c2-8733-55026aca7bf7")
+		(pin "1"
+			(uuid "3a866bcd-d4bf-4f9b-b25f-cc3123fb6f24")
+		)
+		(pin "2"
+			(uuid "7f192414-6f34-45e7-be61-1e7fc02d228a")
 		)
 		(instances
 			(project "gwx-control"
 				(path "/d7c152ec-d084-4382-bed7-0f8851cc7371"
-					(reference "C4")
+					(reference "D5")
 					(unit 1)
 				)
 			)
@@ -10523,7 +10761,7 @@
 				(justify left bottom)
 			)
 		)
-		(property "Footprint" "gwx-control:R0603"
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric_Pad0.98x0.95mm_HandSolder"
 			(at 86.36 50.8 0)
 			(effects
 				(font
@@ -10658,7 +10896,7 @@
 				(justify left bottom)
 			)
 		)
-		(property "Footprint" "gwx-control:R0603"
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric_Pad0.98x0.95mm_HandSolder"
 			(at 88.9 71.12 0)
 			(effects
 				(font
@@ -10727,7 +10965,7 @@
 				(justify left bottom)
 			)
 		)
-		(property "Footprint" "gwx-control:R0603"
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric_Pad0.98x0.95mm_HandSolder"
 			(at 111.76 63.5 0)
 			(effects
 				(font
@@ -10764,76 +11002,6 @@
 			(project "gwx-control"
 				(path "/d7c152ec-d084-4382-bed7-0f8851cc7371"
 					(reference "R5")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "gwx-control-eagle-import:LED_ESML0603")
-		(at 86.36 101.6 0)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(uuid "f538ab97-2446-4de4-ad8c-ad27756d8f40")
-		(property "Reference" "LED1"
-			(at 89.916 106.172 90)
-			(effects
-				(font
-					(size 1.778 1.5113)
-				)
-				(justify left bottom)
-			)
-		)
-		(property "Value" "LED_ESML0603"
-			(at 92.075 106.172 90)
-			(effects
-				(font
-					(size 1.778 1.5113)
-				)
-				(justify left bottom)
-				(hide yes)
-			)
-		)
-		(property "Footprint" "LED_SMD:LED_0603_1608Metric_Pad1.05x0.95mm_HandSolder"
-			(at 86.36 101.6 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Datasheet" ""
-			(at 86.36 101.6 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Description" ""
-			(at 86.36 101.6 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(pin "A"
-			(uuid "b56b7ff7-34e3-4a4c-9172-bb71688724b3")
-		)
-		(pin "C"
-			(uuid "1b049332-fea7-4357-9ba1-de3c8f9d8d39")
-		)
-		(instances
-			(project "gwx-control"
-				(path "/d7c152ec-d084-4382-bed7-0f8851cc7371"
-					(reference "LED1")
 					(unit 1)
 				)
 			)
