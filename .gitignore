@@ -178,3 +178,4 @@ cython_debug/
 /Software/*/*.cfg
 /Software/server-services/*.cfg
 /Software/*/*.tmp
+*/*/*-backups/*
