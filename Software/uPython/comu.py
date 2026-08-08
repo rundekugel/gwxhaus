@@ -18,10 +18,13 @@ class globs:
     # ths = ""
 
 def bytessplit(data, splitchar):
-    for i in range(len(data)):
-        if data[i]==ord(splitchar):  # datas[n] become int
-            break
-    return data[:i],data[i+1:]
+    if 0:
+        for i in range(len(data)):
+            if data[i]==ord(splitchar):  # datas[n] become int
+                break
+        return data[:i],data[i+1:]
+    data = bytes(data) # for the case, data is a list
+    return data.split(splitchar)
 
 def addTx(data):
     data = str(data)
@@ -51,7 +54,7 @@ def init(portnum=None, baudrate=None):
     if baudrate in (300,600,1200,2400,4800,9600,19200,57600,115200,230400):
         globs.baud = baudrate
     if portnum is not None:
-        globs.portnum = portnum
+        globs.uartport = portnum
     globs.uart = UART(globs.uartport, globs.baud, bits=8, parity=None, stop=1,
         timeout=globs.timeout_ms, txbuf=1024)
     # globs.uart.irq(UART.RX_ANY, handler=irq_handler)

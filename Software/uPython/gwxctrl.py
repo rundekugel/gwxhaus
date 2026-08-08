@@ -25,11 +25,14 @@ import time
 import json
 import os
 # this is for a simulator:
-if not "ESP" in os.uname().machine:
+
+simulator_active = 1
+if simulator_active:
     import sys
     sys.path.append("upyemu")
 
-import machine, esp32
+import machine
+# import esp32
 from machine import Pin, RTC, deepsleep, WDT
 # from ucryptolib import aes
 # from os import urandom
@@ -40,7 +43,8 @@ from binascii import hexlify
 import windsensor
 import HYT221 
 import comu
-import docrypt
+#import docrypt
+docrypt = None
 
 try:
     import revisionfile
@@ -64,42 +68,32 @@ USE_END_SWITCHES = 0
 DIRECTION_SWITCH_DELAY_MS = 1000 # if direction switches, motorpower must be securely off
 POWER_SWITCH_DELAY_MS = 200
 
-# pinning for esp32-lite
-PIN_WIND = 13   # Pin(35, Pin.IN, pull=Pin.PULL_UP)    # pin35 is also ADC1_7
-PIN_SCL1 = 5
-PIN_SDA1 = 4
-PIN_SCL2 = 2
-PIN_SDA2 = 15
-PIN_LED1 = Pin(22, Pin.OUT)  # on bigger boards it's pin2
+# pinning
+from hwspec import *
+PIN_LED1 = Pin(PIN_NUM_LED1, Pin.OUT)  
 
-PIN_WATER1 = Pin(27, Pin.OUT)
-PIN_WATER2 = Pin(33, Pin.OUT)
-PIN_WATER3 = Pin(32, Pin.OUT)
-PIN_WATER4 = Pin(18, Pin.OUT)
+PIN_MOTOR1 = Pin(PIN_NUM_MOTOR1, Pin.OUT)   # hi=on
+PIN_MOTOR1D = Pin(PIN_NUM_MOTOR1D, Pin.OUT)  # hi=up
+PIN_MOTOR2 = Pin(PIN_NUM_MOTOR2, Pin.OUT)   # hi=on
+PIN_MOTOR2D = Pin(PIN_NUM_MOTOR2D, Pin.OUT)  # hi=up
 
-PIN_MOTOR1 = Pin(25, Pin.OUT)   # hi=on
-PIN_MOTOR1D = Pin(26, Pin.OUT)  # hi=up
-PIN_MOTOR2 = Pin(12, Pin.OUT)   # hi=on
-PIN_MOTOR2D = Pin(14, Pin.OUT)  # hi=up
+n = 0
+WATER_PINS = [None]*len(PINS_NUM_WATER)
+for dn in PINS_NUM_WATER:
+    WATER_PINS[n] = Pin(dn, Pin.OUT)
 
-PIN_END1UP = Pin(34, Pin.IN)
-PIN_END1DOWN = Pin(23, Pin.IN, pull=Pin.PULL_UP)
-PIN_END2UP = Pin(35, Pin.IN)    # pin35 can only be input
-PIN_END2DOWN = Pin(19, Pin.IN, pull=Pin.PULL_UP)
+n = 0
+END_PINS = [None]*len(PINS_NUM_END)
+for p in PINS_NUM_END:
+    END_PINS[n] = Pin(p, Pin.IN, pull=Pin.PULL_UP)
 
-DOSE1 = Pin(18, Pin.OUT)
-DOSE2 = Pin(18, Pin.OUT)
-DOSE3 = Pin(18, Pin.OUT)
-DOSE4 = Pin(18, Pin.OUT)
-DOSEN = [DOSE1, DOSE2, DOSE3, DOSE4]
+n = 0
+DOSEN = [None]*len(DOSEN_NUM)
+for dn in DOSEN_NUM:
+    DOSEN[n] = Pin(dn, Pin.OUT)
 
-ADC_BATT = machine.ADC(39)      # VN
-PINNUM_POWER = 36   # needed for wakeup
-ADC_POWER = machine.ADC(PINNUM_POWER)     # VP
-# pins 32+33 are xtal32
-# 22,21: scl/sda esp8266?
-# esp32: scl/sda: 25/26 ; 18/19
-
+ADC_BATT = machine.ADC(PIN_ADC_BATT)    # VN
+ADC_POWER = machine.ADC(PINNUM_POWER)   # needed for wakeup
 
 class globs:
     """global variables"""
@@ -217,7 +211,7 @@ def setWater(num, onOff=None):
         num = int(str(num).replace("'","")[-1])
     if not isinstance(onOff,int):
         onOff = int(str(onOff).replace("'","")[-1])
-    p=[PIN_WATER1, PIN_WATER2, PIN_WATER3, PIN_WATER4][num-1]
+    p=WATER_PINS[num-1]
     p.value(onOff)
 
 def setDose(num, onOff=None):
@@ -254,7 +248,7 @@ def getWater(num, lang=""):
      lang: if 'de' then return german texts
      retval: 0/Zu, d/zu, u/Auf
     """
-    p=[PIN_WATER1, PIN_WATER2, PIN_WATER3, PIN_WATER4][num-1]
+    p=WATER_PINS[num-1]
     v=p.value()
     if lang == "de":
         return ["Zu", "Auf"][v]
@@ -405,11 +399,12 @@ def init():
     comu.globs.verbosity = globs.verbosity
     ADC_BATT.atten(machine.ADC.ATTN_11DB)    # set to 3.3V range
     ADC_POWER.atten(machine.ADC.ATTN_11DB)
-    esp32.wake_on_ext0(pin=PINNUM_POWER, level=esp32.WAKEUP_ANY_HIGH)
+    # esp32.wake_on_ext0(pin=PINNUM_POWER, level=esp32.WAKEUP_ANY_HIGH)
 
     ak = globs.cfg.get("ak")  # this key used for updates over the air, or critical config-values
-    if ak:
-        docrypt.init(ak = ak)
+    if docrypt:
+        if ak:
+            docrypt.init(ak = ak)
 
     comu.init(2, globs.cfg.get("baudrate"))
     rc = machine.reset_cause()
@@ -459,10 +454,8 @@ def init():
     globs.inited = True
 
 def pinsReset():
-    PIN_WATER1.value(0)
-    PIN_WATER2.value(0)
-    PIN_WATER3.value(0)
-    PIN_WATER4.value(0)
+    for p in WATER_PINS:
+        p.value(0)
     for d in DOSEN:
         d.value(0)
     PIN_MOTOR1.value(0)
@@ -604,11 +597,12 @@ def parseMsg():
         if "manually" in cmd:
             globs.manually_timeend = time.time() + int(val)
         if "am:" in cmd[:3]:
-                encrypted = cmd[3:]
-                m = docrypt.parse(encrypted)
-                if globs.verbosity:
-                    print(m)
-                comu.addTx(m)
+                if docrypt:
+                    encrypted = cmd[3:]
+                    m = docrypt.parse(encrypted)
+                    if globs.verbosity:
+                        print(m)
+                    comu.addTx(m)
         if "modcfgs" in cmd:
             if not val: val=""
             globs.modcfg = val
@@ -824,7 +818,7 @@ def checkWindowPosition():
     timedelta = time.time() - globs.checkWindowPosition_lastTime
     globs.checkWindowPosition_lastTime = time.time()
 
-    PIN_END_DOWN = (PIN_END1DOWN, PIN_END2DOWN)
+    PIN_END_DOWN = (END_PINS[0,0], END_PINS[1,0])
     # PIN_END_UP = (PIN_END1UP, PIN_END2UP)
     for housenum in (1,2):
         try:
@@ -911,7 +905,7 @@ def main():
         while end >0:
             if globs.rx:
                 break
-            if not "ESP" in os.uname().machine: # this is for the emulator
+            if simulator_active: # this is for the emulator
                 PIN_LED1.doGuiupdate()  # this updates all pins
             time.sleep(.5)
             end -= .5
@@ -922,7 +916,7 @@ def main():
         checkTemp(2)
         checkTimer()
 
-        if not "ESP" in os.uname().machine:  # this is for the emulator
+        if simulator_active:  # this is for the emulator
             PIN_LED1.doGuiupdate()  # this updates all pins
 
         for todo in globs.todos:
@@ -937,10 +931,10 @@ def main():
 
         checkWindowPosition()
         doMotors()
-        if not "ESP" in os.uname().machine:  # this is for the emulator
+        if simulator_active:  # this is for the emulator
             PIN_LED1.doGuiupdate()  # this updates all pins
         checkWind()
-        if not "ESP" in os.uname().machine:  # this is for the emulator
+        if simulator_active:  # this is for the emulator
             PIN_LED1.doGuiupdate()  # this updates all pins
 
 
