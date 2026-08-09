@@ -739,8 +739,19 @@ def parseMsg():
             else:
                 comu.addTx("deleted: "+str(val))
         if "ws" in cmd:
+            if val=="override!":
+                globs.ws.testremotecontrol = 0
+            if val in ("-1","reset"):
+                globs.ws.testremotecontrol = None
             if globs.ws.testremotecontrol is not None:
                 globs.ws.testremotecontrol = float(val)
+        if "th" in cmd:
+            if val=="override!":
+                globs.hy1.testremotecontrol=(0,41,21)
+                globs.hy2.testremotecontrol=(0,42,23)
+            if val in ("-1","reset"):
+                globs.ws.testremotecontrol = None
+
         if "version" in cmd:
             comu.addTx("Version: "+str(__version__))
                 
@@ -888,25 +899,24 @@ def checkWind():
     if storm is over, wait some time, for really end of storm.
     """
     # for test: globs.ws.testremotecontrol=0
-
+        
     speed = globs.ws.getValue()
     if speed is None:
         print("Warning! No windspeed")
+
     try:
         if speed > globs.cfg["wind"]["max"]:
                 globs.sturm = globs.sturmdelay_on
         if globs.sturm >= globs.sturmdelay_on:
             if globs.verbosity:
                 print("Wind > max! Offene Fenster werden etwas abgesenkt.")
+            winmax = int(globs.cfg["wind"].get("winmax", 10))
+
             for n in (0,1):
-                if globs.window_virtual_open[n] > globs.windowpos_map[n].get('h',0):
-                    om = globs.cfg["wind"]["openmax"] 
-                    if om is not None:
-                        newval = int(om)
-                    else:
-                        newval = globs.windowpos_map[n].get('h',0)
-                    if globs.window_pos_dest[n] > newval:
-                        globs.window_pos_dest[n] = newval
+                d= globs.window_pos_dest[n] # destination active?
+                if not d: d= globs.window_virtual_open[n]
+                if d > winmax:
+                    globs.window_pos_dest[n] = winmax
                     doMotors()   # fast! no time to wait for next automatic cycle
         if speed > globs.cfg.get("sturm",10):
             globs.sturm += globs.sturmdelay_on
@@ -1029,6 +1039,8 @@ def main():
         d=globs.manually_timeend - time.time()
         if d<0:d=0
         comu.addTx(f"mn:{d}");
+        if globs.ws.testremotecontrol is not None:
+            comu.addTx("wsman:1;");
         if globs.verbosity:
             print(comu.globs.tx)
         comu.proc()
