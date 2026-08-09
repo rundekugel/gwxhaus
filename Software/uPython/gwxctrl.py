@@ -56,7 +56,7 @@ except:
 
 __revision__ = revisionfile.revision
 __buildnumber__ = revisionfile.buildnumber
-__version__ = "0.5.4-" + __revision__ + "-Build:" + str(revisionfile.buildnumber)
+__version__ = "0.6.0-" + __revision__ + "-Build:" + str(revisionfile.buildnumber)
 
 # ALLOWED_UART_VARS_W = ("loop_sleep","verbosity")
 SECRET_GLOBS = ("ak", "watertables")   # don't display this value to public
@@ -68,6 +68,14 @@ MOTOR_END_DELAY = 2  # delay motor switch off, if pos0 reached
 USE_END_SWITCHES = 0
 DIRECTION_SWITCH_DELAY_MS = 1000 # if direction switches, motorpower must be securely off
 POWER_SWITCH_DELAY_MS = 200
+
+#check for valid hwspec
+for v in ("PIN_LED1","PIN_BUTTON1","PIN_NUM_MOTOR1B",
+          "PIN_NUM_MOTOR2B","PINS_NUM_WATER","PINS_NUM_END"):
+    if globals().get(v)  is None:
+        # if variable is not initialized, we init it here.
+        # print(f"Warning: {v} not initialized!")
+        globals()[v]=None
 
 # pinning
 from hwspec import *
@@ -86,25 +94,36 @@ if PIN_NUM_MOTOR2B:
 else:
     PIN_NUM_MOTOR2B = None
 
-n = 0
-WATER_PINS = [None]*len(PINS_NUM_WATER)
-for p in PINS_NUM_WATER:
-    WATER_PINS[n] = Pin(p, Pin.OUT)
-    n+=1
+if PINS_NUM_WATER:
+    n = 0
+    WATER_PINS = [None]*len(PINS_NUM_WATER)
+    for p in PINS_NUM_WATER:
+        WATER_PINS[n] = Pin(p, Pin.OUT)
+        n+=1
+else:
+    WATER_PINS = []
 
-n = 0
-END_PINS_UP = [None]*len(PINS_NUM_END)
-END_PINS_DOWN = [None]*len(PINS_NUM_END)
-for p in PINS_NUM_END:
-    END_PINS_UP[n] = Pin(p[0], Pin.IN, pull=Pin.PULL_UP)
-    END_PINS_DOWN[n] = Pin(p[1], Pin.IN, pull=Pin.PULL_UP)
-    n+=1
+if PINS_NUM_END:
+    n = 0
+    END_PINS_UP = [None]*len(PINS_NUM_END)
+    END_PINS_DOWN = [None]*len(PINS_NUM_END)
+    for p in PINS_NUM_END:
+        END_PINS_UP[n] = Pin(p[0], Pin.IN, pull=Pin.PULL_UP)
+        END_PINS_DOWN[n] = Pin(p[1], Pin.IN, pull=Pin.PULL_UP)
+        n+=1
+else:
+    END_PINS_DOWN = []
+    END_PINS_UP = []
+    USE_END_SWITCHES = False
 
-n = 0
-DOSEN = [None]*len(DOSEN_NUM)
-for p in DOSEN_NUM:
-    DOSEN[n] = Pin(p, Pin.OUT)
-    n+=1
+if DOSEN_NUM:
+    DOSEN = [None]*len(DOSEN_NUM)
+    n = 0
+    for p in DOSEN_NUM:
+        DOSEN[n] = Pin(p, Pin.OUT)
+        n+=1
+else:
+    DOSEN = ()
 
 if PIN_ADC_BATT:
     ADC_BATT = machine.ADC(PIN_ADC_BATT)    # VN
@@ -145,7 +164,7 @@ class globs:
     checkWindowPosition_lastTime = 0
     window_virtual_open = [0,0] # value in percent
     # window_virtual_open2 = 0
-    watertables = [180*b"\0"]*4
+    watertables = [180*b"\0"] * len(WATER_PINS)
     test_activated = False  # for debug don't change here, but in config-file!
     window_pos_dest = [None,None]
     windowpos_map = [{"d":0, "u":100, "h":50,"s":None},{"d":0, "u":100, "h":50,"s":None}]
@@ -291,6 +310,11 @@ def getWater(num, lang=""):
      lang: if 'de' then return german texts
      retval: 0/Zu, d/zu, u/Auf
     """
+    size = len(WATER_PINS)
+    if (num <1) or (size < num):
+        if globs.verbosity:
+            print("illegal index:"+str(num))
+        return -1    
     p=WATER_PINS[num-1]
     v=p.value()
     if lang == "de":
@@ -298,6 +322,11 @@ def getWater(num, lang=""):
     return v
 
 def getDose(num, lang=""):
+    size = len(DOSEN)
+    if (num <1) or (size < num):
+        if globs.verbosity:
+            print("illegal index:"+str(num))
+        return -1
     p=DOSEN[num-1]
     v=p.value()
     if lang == "de":
@@ -575,16 +604,26 @@ def parseMsg():
         if "wasser" in cmd:
             num = cmd[-1:]
             direction = val
+            if not WATER_PINS:
+                return
             if direction == "?":
-                comu.addTx(f"W1:{getWater(1)}, W2:{getWater(2)}, W3:{getWater(3)}, W4:{getWater(4)}")
+                water = ""
+                for n in len(WATER_PINS):
+                    water += f"W{n+1}:{getWater(n+1, 'de')}; "
+                comu.addTx(water)
             else:
                 setWater(num, direction)
             return
         if "dose" in cmd:
             num = cmd[-1:]
             direction = val
+            if not DOSEN:
+                    return
             if direction == "?":
-                comu.addTx(f"D1:{getDose(1)}, D2:{getDose(2)}, D3:{getDose(3)}, D4:{getDose(4)}")
+                dosen = ""
+                for n in range(len(DOSEN)):
+                    dosen += f"D{n+1}:{getDose(n+1, 'de')}; "
+                comu.addTx(dosen)
             else:
                 setDose(num, direction)
             return
@@ -808,7 +847,8 @@ def checkTimer():
     minute = d[4]*60 + d[5]
     bitmask = 1<<(minute%8)
     mi = int(minute/8)
-    for wt in range(1,5):
+
+    for wt in range(1,len(WATER_PINS)+1):
         try:
             byte = globs.watertables[wt-1][mi]
             m = (byte & bitmask)
