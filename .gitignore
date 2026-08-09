@@ -182,3 +182,4 @@ cython_debug/
 *.kicad_prl
 
 *.mpy
+/Software/server-services/credentials.dat

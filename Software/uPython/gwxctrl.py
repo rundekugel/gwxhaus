@@ -77,6 +77,14 @@ PIN_MOTOR1 = Pin(PIN_NUM_MOTOR1, Pin.OUT)   # hi=on
 PIN_MOTOR1D = Pin(PIN_NUM_MOTOR1D, Pin.OUT)  # hi=up
 PIN_MOTOR2 = Pin(PIN_NUM_MOTOR2, Pin.OUT)   # hi=on
 PIN_MOTOR2D = Pin(PIN_NUM_MOTOR2D, Pin.OUT)  # hi=up
+if PIN_NUM_MOTOR1B:
+    PIN_MOTOR1B = Pin(PIN_NUM_MOTOR1B, Pin.OUT)   # hi=on
+else:
+    PIN_NUM_MOTOR1B = None
+if PIN_NUM_MOTOR2B:
+    PIN_MOTOR2B = Pin(PIN_NUM_MOTOR2B, Pin.OUT)   # hi=on
+else:
+    PIN_NUM_MOTOR2B = None
 
 n = 0
 WATER_PINS = [None]*len(PINS_NUM_WATER)
@@ -192,7 +200,9 @@ def doMotors():
 def setMotor(num, direction):
     """
     set the pins to control the motors
+    num: 1=haus1; 2=haus2
     direction: u=up; d=down; s=stop; 0=stop
+    future versions can have optional the 2 motors A/B seperately controlled
     """
     if globs.verbosity:
         print("m:", num, direction)
@@ -205,7 +215,8 @@ def setMotor(num, direction):
         print("Warning: wrong values:", num, direction)
         return
     pd = [PIN_MOTOR1D, PIN_MOTOR2D][num-1]
-    pm = [PIN_MOTOR1, PIN_MOTOR2][num-1]
+    pm = [PIN_MOTOR1, PIN_MOTOR2][num-1]    # Motor A
+    pmb = [PIN_NUM_MOTOR1B,PIN_NUM_MOTOR1B][num-1] # Motor B
     old,new = pd.value(), sw2[1]
     if old != new:   
         # direction changed, wait for motor to stop
@@ -213,25 +224,45 @@ def setMotor(num, direction):
         time.sleep_ms(DIRECTION_SWITCH_DELAY_MS)
         pd.value(sw2[1])     # [1] =direction 0/1=down/up
     time.sleep_ms(POWER_SWITCH_DELAY_MS)
-    pm.value(sw2[0])     # motor on/off
+    pm.value(sw2[0])     # motor A on/off
+    if pmb:   # Motor B
+        pmb.value(sw2[0])
 
 def setWater(num, onOff=None):
-    """set the pins to control the water valves. onOff = 0|1"""
+    """
+    set the pins to control the water valves. 
+    num=<number of water valve 1..n>
+    onOff = 0|1
+    """
     if globs.verbosity:
         print("w:",num,onOff)
     if not isinstance(num,int):
         num = int(str(num).replace("'","")[-1])
+    size = len(WATER_PINS)
+    if (num <1) or (size < num):
+        if globs.verbosity:
+            print("illegal index:"+str(num))
+        return
     if not isinstance(onOff,int):
         onOff = int(str(onOff).replace("'","")[-1])
     p=WATER_PINS[num-1]
     p.value(onOff)
 
 def setDose(num, onOff=None):
-    """set the pins to control general purpose output. onOff = 0|1"""
+    """
+    set the pins to control general purpose output. 
+    num=<number of output 1..n>
+    onOff = 0|1
+    """    
     if globs.verbosity:
         print("d:",num,onOff)
     if not isinstance(num,int):
         num = int(str(num).replace("'","")[-1])
+    size = len(DOSEN)
+    if (num <1) or (size < num):
+        if globs.verbosity:
+            print("illegal index:"+str(num))
+        return
     if not isinstance(onOff,int):
         onOff = int(str(onOff).replace("'","")[-1])
     p=DOSEN[num-1]
