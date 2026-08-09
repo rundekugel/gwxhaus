@@ -7745,16 +7745,6 @@
 	)
 	(wire
 		(pts
-			(xy 114.3 90.17) (xy 116.84 90.17)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "68f3f490-01bc-4431-ab22-2f7b886969b2")
-	)
-	(wire
-		(pts
 			(xy 237.49 138.43) (xy 255.27 138.43)
 		)
 		(stroke
@@ -8102,6 +8092,16 @@
 			(type default)
 		)
 		(uuid "876c5d48-a640-4d3d-b189-f00ae2d9d17d")
+	)
+	(wire
+		(pts
+			(xy 68.58 80.01) (xy 64.77 80.01)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "87b69a5b-077d-4e8d-8dc8-64841642dc6d")
 	)
 	(wire
 		(pts
@@ -9365,13 +9365,13 @@
 	)
 	(wire
 		(pts
-			(xy 114.3 92.71) (xy 118.11 92.71)
+			(xy 68.58 77.47) (xy 66.04 77.47)
 		)
 		(stroke
 			(width 0)
 			(type default)
 		)
-		(uuid "e9106d4a-ad22-470e-a6ca-90c6385a21d0")
+		(uuid "e96d90a0-7f79-4e93-ad86-c19e7055c975")
 	)
 	(bus
 		(pts
@@ -9643,6 +9643,16 @@
 		)
 		(uuid "10705d44-dbfd-438c-bfa8-9801efb6c6ac")
 	)
+	(label "W1"
+		(at 67.31 80.01 180)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right bottom)
+		)
+		(uuid "112a54bc-2723-4ce3-b386-d63f0411fcfa")
+	)
 	(label "SCL1"
 		(at 63.5 35.56 90)
 		(effects
@@ -9913,16 +9923,6 @@
 		)
 		(uuid "4f187b6a-e0b9-4908-b9d5-371d126d02af")
 	)
-	(label "W1"
-		(at 115.57 92.71 0)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left bottom)
-		)
-		(uuid "4f332770-375a-471f-8e65-0e4c4787493b")
-	)
 	(label "{slash}M1up"
 		(at 171.45 57.15 0)
 		(effects
@@ -10052,16 +10052,6 @@
 			(justify left bottom)
 		)
 		(uuid "72f53270-ba8a-43b8-8e0a-402c8bfe8cdb")
-	)
-	(label "W2"
-		(at 115.57 90.17 0)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left bottom)
-		)
-		(uuid "74e377ba-b52d-4cd9-8e06-ea22d1c92ac7")
 	)
 	(label "{slash}M1up"
 		(at 162.56 78.74 0)
@@ -10242,6 +10232,16 @@
 			(justify left bottom)
 		)
 		(uuid "8fb29f10-38e7-441f-b747-d5c6f5002361")
+	)
+	(label "W2"
+		(at 67.31 77.47 180)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right bottom)
+		)
+		(uuid "97070699-c4f9-441f-ba3e-fd1f466f4c97")
 	)
 	(label "M3+"
 		(at 250.19 48.26 0)
