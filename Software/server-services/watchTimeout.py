@@ -101,8 +101,8 @@ class Delayer:
         devicename = globs.topics_translator.get(self.topic)
         if not devicename:
             devicename = self.topic
-        #since = time.time() -self.startTime
-        #since = "%d min. %d sec." % (since//60, since % 60)
+        since = time.time() -self.startTime
+        since = "%d min. %d sec." % (since//60, since % 60)
         since = self.startTimeH
         return devicename + " " + str(self.lwl) +" seit: "+str(since)
 

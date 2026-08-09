@@ -44,17 +44,22 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
         if globs.verbosity:
             print(self.data)
         value=""
+        user=None
         p= self.data.split(";")[0]  # don't send stuff after the semicolon
         p= p.split("=",1)
         p0= p[0]
         if len(p)>1:
             # todo: check value for validity
             value = "=" +p[1]
+        
+        for m in self.data.split(";"):
+            p= p.split("=",1)
+            if p[0] == "u:": user = p[1]
+        
         topic = globs.config["global"]["topic"]
         # check whitelist
         if p0 in ("w1","w2","w3","w4","m1","m2","manually","globs?","globs","cfg","cfg?","rtc",
-                  "wasser1","wasser2","motor1","motor2","d1","d2","n1","n2","n3","n4",
-                  "version"):
+                  "wasser1","wasser2","motor1","motor2","d1","d2","n1","n2","n3","n4"):
             # remove this, if fw updated
             if p0 == "w1": p0 = "wasser1"
             if p0 == "w2": p0 = "wasser2"
@@ -76,7 +81,12 @@ class MyTCPHandler(socketserver.BaseRequestHandler):
         else:
             mqtttx(globs.config["debug"]["user"], globs.config["debug"]["pw"],
                    globs.config["debug"]["topic"], p0 + value)
-
+        if user in globs.admins:
+            # allow special stuff
+            if p0 in ("windsensordia","windmax1","windmax2","h1tmax","h1tmin","h2tmax","h2tmin"):
+                mqtttx(globs.config["global"]["user"], globs.config["global"]["pw"],
+                   topic, p0 + value)
+        
 def mqtttx(user, pwd, topic, msg, sleep=0.1):
         try:
             cmd = "mosquitto_pub -h mq.qc9.de -p 18883 --tls-use-os-certs -u " + \
@@ -122,12 +132,19 @@ def main():
             globs.set(key, config["global"][key])
         except:
             pass
+            
     for name in config.sections():
         try:
             c=config[name]
             # filename,user,pw,topic,sleep = c["file"],c["user"],c["pw"],c["topic"],c.getfloat("interval",1)
         except Exception as e:
             print("Error: "+str(e))
+            
+    try:
+        globs.admins = config["global"]["admins"].split(",")
+    except Exception as e:
+        print("Error: "+str(e))
+        
     try:     
         while globs.doit:
             time.sleep(1)
@@ -139,6 +156,7 @@ def main():
         globs.doit=0
         print("e:"+str(e))
         time.sleep(1)
+        
     print("end.")
 
 if __name__ == "__main__":

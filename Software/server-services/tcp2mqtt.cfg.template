@@ -7,9 +7,12 @@ pw=secretsecret
 [global]
 user=g1
 topic=sensor2/cmnd/sserialsend
+admins=user1,user2
 
 [debug]
 user=g1
 topic=test/dbg/stx
+
+
 
 #eof

@@ -126,6 +126,8 @@ def main():
 
     if len(av)>1:
       for p in av[1:]:
+        if not p:
+           continue
         if p[0] != "-":
           continue
         if "=" in p:
