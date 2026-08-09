@@ -370,8 +370,10 @@ def updateConfigFile(addcfg, filename="gwxctrl.cfg"):
         comu.addTx("empty cfg!")
         return False
     cfg.update(addcfg)
-    with open(filename, "w") as f:
+    tmpname = filename + ".tmp"
+    with open(tmpname, "w") as f:
         json.dump(cfg, f)
+    os.rename(tmpname, filename)
     return True
 
 def deleteFromConfigFile(key, filename="gwxctrl.cfg"):
@@ -386,8 +388,10 @@ def deleteFromConfigFile(key, filename="gwxctrl.cfg"):
         return 1
     dictLower(cfg)
     cfg.pop(key.lower())
-    with open(filename,"w") as f:
+    tmpname = filename + ".tmp"
+    with open(tmpname,"w") as f:
         json.dump(cfg,f)
+    os.rename(tmpname, filename)
     return 0
 
 def init():
