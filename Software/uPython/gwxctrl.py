@@ -24,9 +24,10 @@ explanation for config parameter 'mot_openpersec1' and 'mot_openpersec2' for hau
 import time
 import json
 import os
+import gc
 # this is for a simulator:
 
-simulator_active = 1
+simulator_active = 0
 if simulator_active:
     import sys
     sys.path.append("upyemu")
@@ -55,7 +56,7 @@ except:
 
 __revision__ = revisionfile.revision
 __buildnumber__ = revisionfile.buildnumber
-__version__ = "0.5.3-" + __revision__ + "-Build:" + str(revisionfile.buildnumber)
+__version__ = "0.5.4-" + __revision__ + "-Build:" + str(revisionfile.buildnumber)
 
 # ALLOWED_UART_VARS_W = ("loop_sleep","verbosity")
 SECRET_GLOBS = ("ak", "watertables")   # don't display this value to public
@@ -79,21 +80,32 @@ PIN_MOTOR2D = Pin(PIN_NUM_MOTOR2D, Pin.OUT)  # hi=up
 
 n = 0
 WATER_PINS = [None]*len(PINS_NUM_WATER)
-for dn in PINS_NUM_WATER:
-    WATER_PINS[n] = Pin(dn, Pin.OUT)
+for p in PINS_NUM_WATER:
+    WATER_PINS[n] = Pin(p, Pin.OUT)
+    n+=1
 
 n = 0
-END_PINS = [None]*len(PINS_NUM_END)
+END_PINS_UP = [None]*len(PINS_NUM_END)
+END_PINS_DOWN = [None]*len(PINS_NUM_END)
 for p in PINS_NUM_END:
-    END_PINS[n] = Pin(p, Pin.IN, pull=Pin.PULL_UP)
+    END_PINS_UP[n] = Pin(p[0], Pin.IN, pull=Pin.PULL_UP)
+    END_PINS_DOWN[n] = Pin(p[1], Pin.IN, pull=Pin.PULL_UP)
+    n+=1
 
 n = 0
 DOSEN = [None]*len(DOSEN_NUM)
-for dn in DOSEN_NUM:
-    DOSEN[n] = Pin(dn, Pin.OUT)
+for p in DOSEN_NUM:
+    DOSEN[n] = Pin(p, Pin.OUT)
+    n+=1
 
-ADC_BATT = machine.ADC(PIN_ADC_BATT)    # VN
-ADC_POWER = machine.ADC(PINNUM_POWER)   # needed for wakeup
+if PIN_ADC_BATT:
+    ADC_BATT = machine.ADC(PIN_ADC_BATT)    # VN
+else: 
+    ADC_BATT = None
+if PINNUM_POWER:    
+    ADC_POWER = machine.ADC(PINNUM_POWER)   # needed for wakeup
+else:
+    ADC_POWER = None
 
 class globs:
     """global variables"""
@@ -307,6 +319,7 @@ def readConfig(filename="gwxctrl.cfg"):
         print(msg)
         comu.addTx(msg)
     try:
+        gc.collect();
         with open(filename,"r") as f:
             cfg = json.load(f)
         if not cfg:
@@ -314,6 +327,7 @@ def readConfig(filename="gwxctrl.cfg"):
             print(msg)
             comu.addTx(msg)
             return
+        gc.collect();
         dictLower(cfg)
         globs.cfg.update(cfg)
         msg = "Einstellungen geladen"
@@ -326,6 +340,7 @@ def readConfig(filename="gwxctrl.cfg"):
                 globs.verbosity = int(globs.verbosity)
             except:
                 globs.verbosity = 0
+        gc.collect();
         if globs.verbosity:
             msg += str(pubconfig(cfg))
             print(msg)
@@ -377,7 +392,18 @@ def deleteFromConfigFile(key, filename="gwxctrl.cfg"):
 
 def init():
     print("GwxControl version:" + str(__version__))
-    # globs.checkWindowPosition_lastTime = time.time()
+    print("HW-Spec:"+HW_SPEC)
+    
+    if PIN_BUTTON1:
+        btn = Pin(PIN_BUTTON1, Pin.IN, pull=Pin.PULL_UP)
+        time.sleep(.01)
+        r = btn.value()
+        btn = Pin(PIN_BUTTON1, Pin.OUT)
+        btn.value(0)
+        if r == 0:
+            print("Btn1-exit!")
+            return 1
+
     readConfig(globs.cfgfile)
     diameter=globs.cfg.get("windsensordia",None)
     if diameter is not None:
@@ -397,8 +423,10 @@ def init():
 
     comu.globs.callbackRx = servCB
     comu.globs.verbosity = globs.verbosity
-    ADC_BATT.atten(machine.ADC.ATTN_11DB)    # set to 3.3V range
-    ADC_POWER.atten(machine.ADC.ATTN_11DB)
+    if ADC_BATT:
+        ADC_BATT.atten(machine.ADC.ATTN_11DB)    # set to 3.3V range
+    if ADC_POWER:
+        ADC_POWER.atten(machine.ADC.ATTN_11DB)
     # esp32.wake_on_ext0(pin=PINNUM_POWER, level=esp32.WAKEUP_ANY_HIGH)
 
     ak = globs.cfg.get("ak")  # this key used for updates over the air, or critical config-values
@@ -406,7 +434,7 @@ def init():
         if ak:
             docrypt.init(ak = ak)
 
-    comu.init(2, globs.cfg.get("baudrate"))
+    comu.init(UART_NUM, globs.cfg.get("baudrate"))
     rc = machine.reset_cause()
     comu.addTx("resetcause:"+str(rc))
     if globs.verbosity:
@@ -444,10 +472,10 @@ def init():
     if globs.cfg.get("test_activated"):
         globs.hy1.testremotecontrol=(0,41,21)
         globs.hy2.testremotecontrol=(0,42,22)
-        PIN_END1UP.on()  # for simulator only
-        PIN_END1DOWN.on()
-        PIN_END2UP.on()
-        PIN_END2DOWN.on()
+        #PIN_END1UP.on()  # for simulator only
+        #PIN_END1DOWN.on()
+        #PIN_END2UP.on()
+        #PIN_END2DOWN.on()
 
     if globs.verbosity:
         print("init done.")
@@ -551,6 +579,7 @@ def parseMsg():
             comu.addTx(str(pubconfig(g)))
         if "cfg?" in msg:
             comu.addTx(str(pubconfig(globs.cfg)))
+            comu.addTx("HW-Spec:"+HW_SPEC)
         if "verbosity" in cmd:
             globs.verbosity = int(val)
             comu.globs.verbosity = int(val)
@@ -573,12 +602,18 @@ def parseMsg():
                 print(f"deepsleep {globs.deepsleep_ms} sec.")
             return
         if "bat?" in cmd:
-            m = f"Battery: {ADC_BATT.read_uv()*2/1e6} V."
+            if ADC_BATT:
+                m = f"Battery: {ADC_BATT.read_uv()*2/1e6} V."
+            else:
+                m = "No battery-measure."
             comu.addTx(m)
             if globs.verbosity:
                 print(m)
         if "power?" in cmd:
-            m = f"Power: {ADC_POWER.read_uv()*2/1e6} V."
+            if ADC_POWER:
+                m = f"Power: {ADC_POWER.read_uv()*2/1e6} V."
+            else:
+                m = "No power measure."
             comu.addTx(m)
             if globs.verbosity:
                 print(m)
@@ -752,18 +787,24 @@ def checkTimer():
 def getBatVolt(rounded=2):
     """return battery voltage"""
     v, n = 0, 10
-    for i in range(n):
-       v += ADC_BATT.read_uv()*2/1e6
-    return round(v / n, rounded)
-
+    if ADC_BATT:
+        for i in range(n):
+            v += ADC_BATT.read_uv()*2/1e6
+        return round(v / n, rounded)
+    else:
+        return -11
+    
 def getVCCVolt(rounded=2):
     """return power input voltage"""
     v, n = 0, 10
     if globs.cfg.get("test_activated",0):
         return 5.67
-    for i in range(n):
-       v += ADC_POWER.read_uv()*2/1e6
-    return round(v / n, rounded)
+    if ADC_POWER:
+        for i in range(n):
+            v += ADC_POWER.read_uv()*2/1e6
+        return round(v / n, rounded)
+    else:
+        return -11
 
 def checkWind():
     """
@@ -818,7 +859,7 @@ def checkWindowPosition():
     timedelta = time.time() - globs.checkWindowPosition_lastTime
     globs.checkWindowPosition_lastTime = time.time()
 
-    PIN_END_DOWN = (END_PINS[0,0], END_PINS[1,0])
+    #PINS_END_DOWN = (END_PINS_DOWN[0], END_PINS_DOWN[1])
     # PIN_END_UP = (PIN_END1UP, PIN_END2UP)
     for housenum in (1,2):
         try:
@@ -826,7 +867,7 @@ def checkWindowPosition():
             if getMotor(housenum) == "d":
                 globs.window_virtual_open[housenum-1] -= step
                 if USE_END_SWITCHES:
-                    if PIN_END_DOWN[housenum-1].value() :
+                    if END_PINS_DOWN[housenum-1].value() :
                         globs.window_virtual_open[housenum-1] = 0
             if getMotor(housenum) in "u":
                 globs.window_virtual_open[housenum-1] += step
@@ -855,7 +896,8 @@ def main():
     speed = -1
     if not globs.inited:
         # wdt.feed()
-        init()
+        if init():
+            return 1
         a=10
         while a:
             a-=1
@@ -864,8 +906,10 @@ def main():
             if globs.rx:
                 parseMsg() 
     if globs.wdttime <30:
-        globs.wdttime = 30    
-    globs.wdt=WDT(timeout=int(globs.wdttime*1000))
+        globs.wdttime = 30
+    elif globs.wdttime >32:      # IWDG hardware max is ~32.76s
+        globs.wdttime = 32
+    globs.wdt=WDT(timeout=int(globs.wdttime)*1000)
        
     while globs.dorun:     # do forever
         globs.wdt.feed()
@@ -879,15 +923,27 @@ def main():
             if globs.verbosity:
                 print("eWs:"+str(e))
         ths ="sp:"+str(speed)+ "; " 
+        if globs.verbosity > 4:
+            print("Read TH-Sensors...")
         ths += getTH(globs.hy1,1) +"; "+ getTH(globs.hy2,2)
+        if globs.verbosity > 4:
+            print("...Done.")        
         comu.addTx(ths)
         if globs.verbosity:
             # print(ths)
             pass
         motors = "M1:"+getMotor(1, 'de')+"; M2:"+getMotor(2, 'de')
         motors += ";F1:"+str(round(globs.window_virtual_open[0]))+"; F2:"+str(round(globs.window_virtual_open[1]))
-        water = f"W1:{getWater(1, 'de')}; W2:{getWater(2, 'de')}; W3:{getWater(3, 'de')}; W4:{getWater(4, 'de')}"
-        dosen = f"D1:{getDose(1, 'de')}; D2:{getDose(2, 'de')}; D3:{getDose(3, 'de')}; D4:{getDose(4, 'de')}"
+        water = ""
+        n=1
+        for w in WATER_PINS:
+            water += f"W{n}:{getWater(n, 'de')}; "
+            n+=1
+        dosen = ""
+        n=1
+        for d in DOSEN:
+            dosen += f"D{n}:{getDose(n, 'de')}; "
+            n+=1
         # fenster = "Fenster: ?\r\n"  # todo. need 8 gpios first.
         comu.addTx(motors)
         comu.addTx(water)

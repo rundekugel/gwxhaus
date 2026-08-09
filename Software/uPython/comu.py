@@ -24,7 +24,7 @@ def bytessplit(data, splitchar):
                 break
         return data[:i],data[i+1:]
     data = bytes(data) # for the case, data is a list
-    return data.split(splitchar)
+    return data.split(splitchar,1)
 
 def addTx(data):
     data = str(data)
@@ -56,7 +56,7 @@ def init(portnum=None, baudrate=None):
     if portnum is not None:
         globs.uartport = portnum
     globs.uart = UART(globs.uartport, globs.baud, bits=8, parity=None, stop=1,
-        timeout=globs.timeout_ms, txbuf=1024)
+        timeout=globs.timeout_ms)
     # globs.uart.irq(UART.RX_ANY, handler=irq_handler)
     globs.dorun = 1
 

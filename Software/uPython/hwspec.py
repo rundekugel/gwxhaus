@@ -1,34 +1,40 @@
 # Hardware specific pin configuration for blackpill 
+HW_SPEC = "HW BluePill Spec 0.1"
 
-PIN_WIND = "PA13"   # Pin(35, Pin.IN, pull=Pin.PULL_UP)    # pin35 is also ADC1_7
-PIN_SCL1 = "PA5"
-PIN_SDA1 = "PA4"
-PIN_SCL2 = "PA2"
-PIN_SDA2 = "PA15"
-PIN_NUM_LED1 = "PA13"
+PIN_WIND = "PB14" 
+PIN_SCL1 = "PB6"
+PIN_SDA1 = "PB7"
+PIN_SCL2 = "PB8"
+PIN_SDA2 = "PB9"
+PIN_NUM_LED1 = "PC13"
 
-PINS_NUM_WATER = ("PA4", "PA4", "PA4", "PA4")
+PINS_NUM_WATER = ("PB13", "PB12", "PB2", "PB10")
 
-PIN_NUM_MOTOR1 = "PA6"   # hi=on
-PIN_NUM_MOTOR1D = "PA7"  # hi=up
-PIN_NUM_MOTOR2 = "PA8"   # hi=on
-PIN_NUM_MOTOR2D = "PA9"  # hi=up
+PIN_NUM_MOTOR1 = "PA7"   # hi=on
+PIN_NUM_MOTOR1B = "PA5"   # hi=on
+PIN_NUM_MOTOR1D = "PA6"  # hi=up
+PIN_NUM_MOTOR2 = "PA4"   # hi=on
+PIN_NUM_MOTOR2B = "PA2"   # hi=on
+PIN_NUM_MOTOR2D = "PA3"  # hi=up
 
-# Endswitches (UP,DOWN) 
+# Endswitches (UP,DOWN) - low active
 PINS_NUM_END = (
-    ("PA10","PA11"),    #1A
-    ("PA12","PA13"),    #1B
-    ("PA14","PA15"),    #2A
-    ("PA16","PA17")     #2B
+    ("PB15","PA8"),    #1A
+    ("PA11","PA12"),   #1B
+    ("PA15","PB3"),    #2A
+    ("PB4", "PB5")     #2B
 )
 
-DOSEN_NUM = ("PA18","PA18")
+DOSEN_NUM = ("PA1","PA0")
 
-PIN_ADC_BATT = "PA14"
-PINNUM_POWER = "PA14"   # needed for wakeup
+PIN_ADC_BATT = None # "PB0"
+PINNUM_POWER = None # "PB1"   # needed for wakeup
 
+PIN_BUTTON1 = "PA0"
+
+UART_NUM = 1
 
     # VP
-# pins 32+33 are xtal32
-# 22,21: scl/sda esp8266?
-# esp32: scl/sda: 25/26 ; 18/19
+# pins PC14/15 are xtal32
+
+# eof
