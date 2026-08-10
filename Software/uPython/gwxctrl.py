@@ -42,8 +42,9 @@ from binascii import hexlify
 
 # local libs:
 import windsensor
-import HYT221 
+import HYT221
 import comu
+import watertable
 #import docrypt
 docrypt = None
 
