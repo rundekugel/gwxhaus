@@ -164,7 +164,7 @@ class globs:
     checkWindowPosition_lastTime = 0
     window_virtual_open = [0,0] # value in percent
     # window_virtual_open2 = 0
-    watertables = [180*b"\0"] * len(WATER_PINS)
+    watertables = [180*b"\0"] * len(WATER_PINS) #create some empty tables
     test_activated = False  # for debug don't change here, but in config-file!
     window_pos_dest = [None,None]
     windowpos_map = [{"d":0, "u":100, "h":50,"s":None},{"d":0, "u":100, "h":50,"s":None}]
@@ -751,6 +751,31 @@ def parseMsg():
                 globs.hy2.testremotecontrol=(0,42,23)
             if val in ("-1","reset"):
                 globs.ws.testremotecontrol = None
+        
+        if "wt" in cmd: # set watertable
+            do_get = 0
+            if cmd[-1]=="?":
+                do_get = 1
+                cmd= cmd[:-1]
+            num = int(cmd[-1])-1
+            if (num <0 ) or (num >= len(globs.watertables)):
+                return
+            if do_get:
+                comu.addTx(globs.watertables[num])
+            else:
+                if len(val)<2:
+                    return
+                pos, data = val[0], val[1:]
+                # todo: unescape data here
+                # "\n" is to be escaped
+                size = len(globs.watertables[num])
+                if pos >= size:
+                    return
+                data = data[:size -pos]
+                # copy new data to watertable
+                for i in range(len(data))
+                    globs.watertables[num][pos+i] = data[i]
+                    
 
         if "version" in cmd:
             comu.addTx("Version: "+str(__version__))
@@ -971,6 +996,11 @@ def formTime(text):
     if len(h)<2:
         text="0"+text
     return text
+
+def packWatertable(data8bit):
+    # watertable is arranged in  12 * 5min per hour
+    for h in range(24):
+        pass
 
 def main():
     """
