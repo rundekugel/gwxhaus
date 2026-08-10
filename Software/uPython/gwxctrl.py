@@ -164,7 +164,7 @@ class globs:
     checkWindowPosition_lastTime = 0
     window_virtual_open = [0,0] # value in percent
     # window_virtual_open2 = 0
-    watertables = [180*b"\0"] * len(WATER_PINS) #create some empty tables
+    watertables = watertable.watertables(len(WATER_PINS))
     test_activated = False  # for debug don't change here, but in config-file!
     window_pos_dest = [None,None]
     windowpos_map = [{"d":0, "u":100, "h":50,"s":None},{"d":0, "u":100, "h":50,"s":None}]
@@ -522,12 +522,9 @@ def init():
         # if voltage is back, clear deepsleep
         if getVCCVolt() >4:
             globs.deepsleep_ms = 0
-    for i in range(1,5):
-        try:
-          with open(f"watertimetable{i}.dat","rb") as f:
-            globs.watertables[i-1] = f.read()
-        except Exception as e:
-            print(f"error wt{i}: "+str(e))
+    for i in range(1,len(WATER_PINS)+1):
+        if globs.watertables.readFromFile(i-1) is None:
+            print(f"error wt{i}: could not read watertimetable{i}.dat")
 
     globs.lasttime = getTime()
     
@@ -758,24 +755,25 @@ def parseMsg():
                 do_get = 1
                 cmd= cmd[:-1]
             num = int(cmd[-1])-1
-            if (num <0 ) or (num >= len(globs.watertables)):
+            if (num <0 ) or (num >= globs.watertables.number_of_tables):
                 return
             if do_get:
-                comu.addTx(globs.watertables[num])
+                comu.addTx(globs.watertables.packData(num))
             else:
                 if len(val)<2:
                     return
-                pos, data = val[0], val[1:]
+                pos, data = ord(val[0])-0x20, val[1:]
                 # todo: unescape data here
                 # "\n" is to be escaped
-                size = len(globs.watertables[num])
-                if pos >= size:
+                size = watertable.BYTES_PER_TABLE
+                if pos <0 or pos >= size:
                     return
                 data = data[:size -pos]
-                # copy new data to watertable
-                for i in range(len(data))
-                    globs.watertables[num][pos+i] = data[i]
-                    
+                # merge new data into the packed table text, then unpack
+                text = list(globs.watertables.packData(num))
+                for i in range(len(data)):
+                    text[pos+i] = data[i]
+                globs.watertables.unpackData(num, "".join(text))
 
         if "version" in cmd:
             comu.addTx("Version: "+str(__version__))
@@ -880,18 +878,12 @@ def checkTimer():
             if zEnd <= getTime():
                 globs.rx.append(t + off)
     d = RTC().datetime()
-    minute = d[4]*60 + d[5]
-    bitmask = 1<<(minute%8)
-    mi = int(minute/8)
+    hour, minute = d[4], d[5]
 
     for wt in range(1,len(WATER_PINS)+1):
         try:
-            byte = globs.watertables[wt-1][mi]
-            m = (byte & bitmask)
-            if m:
-                setWater(wt, 1)
-            else:
-                setWater(wt, 0)
+            on = globs.watertables.getData(wt-1, hour, minute)
+            setWater(wt, 1 if on else 0)
         except Exception as e:
             print(f"err in checkTimer.watertable{wt}: "+str(e))
             
@@ -996,11 +988,6 @@ def formTime(text):
     if len(h)<2:
         text="0"+text
     return text
-
-def packWatertable(data8bit):
-    # watertable is arranged in  12 * 5min per hour
-    for h in range(24):
-        pass
 
 def main():
     """

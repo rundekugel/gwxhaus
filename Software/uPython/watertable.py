@@ -34,7 +34,7 @@ class watertables:
 
     def __init__(self, number_of_tables=2) -> None:
           # init with zero
-          self.tables = [[0]*BYTES_PER_TABLE] * number_of_tables
+          self.tables = [[0]*BYTES_PER_TABLE for _ in range(number_of_tables)]
           self.number_of_tables = number_of_tables
 
     def setData(self, id, hour, minute, onOff):
@@ -48,7 +48,7 @@ class watertables:
         if minute>=30:
             pos+=1
             minute-=30
-        minute /= 6
+        minute /= 5
         if onOff:
             self.tables[id][pos] |= (1<<int(minute))
         else:
@@ -68,7 +68,7 @@ class watertables:
             pos +=1
             minute -= 30
         bitshift = int(minute/5)
-        b = self.watertables[id][pos]
+        b = self.tables[id][pos]
         r = b & (1<<bitshift)
         return r >0
 
@@ -109,7 +109,7 @@ class watertables:
             text = self.packData(id)
             if text is None:
                 return None
-            with open(FILENAME_TEMPLATE.replace("{n}", str(id)),"w") as f:
+            with open(FILENAME_TEMPLATE.replace("{n}", str(id+1)),"w") as f:
                 f.write(text)
             return 0
         except:
@@ -119,7 +119,7 @@ class watertables:
         if id <0 or id >= self.number_of_tables:
             return None
         try:
-            with open(FILENAME_TEMPLATE.replace("{n}", str(id)),"r") as f:
+            with open(FILENAME_TEMPLATE.replace("{n}", str(id+1)),"r") as f:
                 data = f.read()
         except:
             return None
