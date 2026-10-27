@@ -3,18 +3,7 @@
 this code is intended to run on a esp32light with 2x13 pins
 
 used pins:
-pins 12,14,25,26,27,33 are all output and go to a buffer ic
-pins 4,5 are for i2c1
-pins 2.15 are for i2c2
-pins 16,17 are for UART to wifi-esp32
-pins 18,19,23 are for future usage (water-valves / heating / general purpose usage)
-pin 13 windsensor
-pin 22 on board led, used for heartbeat
-pin 39 is used to measure battery voltage
-pin 36 is used to measure power supply
-
-unused:
-pin 0,34,35
+see hwspec.py
 
 explanation for config parameter 'mot_openpersec1' and 'mot_openpersec2' for haus1/haus2 
  the value is, how far the window opens in one second. value in percent.
@@ -44,6 +33,7 @@ from binascii import hexlify
 import windsensor
 import HYT221
 import comu
+watertable = None
 import watertable
 #import docrypt
 docrypt = None
@@ -165,7 +155,10 @@ class globs:
     checkWindowPosition_lastTime = 0
     window_virtual_open = [0,0] # value in percent
     # window_virtual_open2 = 0
-    watertables = watertable.watertables(len(WATER_PINS))
+    if watertable:
+        watertables = watertable.watertables(len(WATER_PINS))
+    else:
+        watertables = None
     test_activated = False  # for debug don't change here, but in config-file!
     window_pos_dest = [None,None]
     windowpos_map = [{"d":0, "u":100, "h":50,"s":None},{"d":0, "u":100, "h":50,"s":None}]
@@ -524,8 +517,9 @@ def init():
         if getVCCVolt() >4:
             globs.deepsleep_ms = 0
     for i in range(1,len(WATER_PINS)+1):
-        if globs.watertables.readFromFile(i-1) is None:
-            print(f"error wt{i}: could not read watertimetable{i}.dat")
+        if watertable:
+          if globs.watertables.readFromFile(i-1) is None:
+              print(f"error wt{i}: could not read watertimetable{i}.dat")
 
     globs.lasttime = getTime()
     
@@ -750,7 +744,8 @@ def parseMsg():
             if val in ("-1","reset"):
                 globs.ws.testremotecontrol = None
         
-        if "wt" in cmd: # set watertable
+        if watertable:
+          if "wt" in cmd: # set watertable
             do_get = 0
             if cmd[-1]=="?":
                 do_get = 1
@@ -881,7 +876,8 @@ def checkTimer():
     d = RTC().datetime()
     hour, minute = d[4], d[5]
 
-    for wt in range(1,len(WATER_PINS)+1):
+    if watertable:
+      for wt in range(1,len(WATER_PINS)+1):
         try:
             on = globs.watertables.getData(wt-1, hour, minute)
             setWater(wt, 1 if on else 0)
@@ -995,10 +991,8 @@ def main():
     the main loop starts the watchdog and calls all used functions
     """
     globs.wdt=None
-    # wdt=WDT(timeout=globs.wdttime*1000)
     speed = -1
     if not globs.inited:
-        # wdt.feed()
         if init():
             return 1
         a=10
@@ -1012,10 +1006,12 @@ def main():
         globs.wdttime = 30
     elif globs.wdttime >32:      # IWDG hardware max is ~32.76s
         globs.wdttime = 32
-    globs.wdt=WDT(timeout=int(globs.wdttime)*1000)
+    if WDT_ENABLED:
+        globs.wdt=WDT(timeout=int(globs.wdttime)*1000)
        
     while globs.dorun:     # do forever
-        globs.wdt.feed()
+        if WDT_ENABLED:
+            globs.wdt.feed()
         loopstart = time.time()
         toggleLed()     # heartbeat
         try:
