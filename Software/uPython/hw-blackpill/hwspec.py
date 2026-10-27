@@ -1,6 +1,14 @@
 # Hardware specific pin configuration for blackpill 
 HW_SPEC = "HW BluePill Spec 0.1"
 
+# --- Info ---
+# PA11/12 are USB D-/+
+# PA10 ID (optional)
+# PA9 USB Sense (optional)
+# -------------
+
+# USART PA2/3
+
 PIN_WIND = "PB14" 
 PIN_SCL1 = "PB6"
 PIN_SDA1 = "PB7"
@@ -24,6 +32,7 @@ PINS_NUM_END = (
     ("PA15","PB3"),    #2A
     ("PB4", "PB5")     #2B
 )
+
 
 DOSEN_NUM = ("PA1","PA0")
 
